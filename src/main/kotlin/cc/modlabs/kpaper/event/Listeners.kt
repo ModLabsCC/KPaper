@@ -2,10 +2,16 @@
 
 import cc.modlabs.kpaper.main.PluginInstance
 import cc.modlabs.kpaper.extensions.pluginManager
+import org.bukkit.block.Block
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockEvent
+import org.bukkit.event.entity.EntityEvent
+import org.bukkit.event.player.PlayerEvent
 
 /**
  * Shortcut for unregistering all events in this listener.
@@ -69,10 +75,31 @@ inline fun <reified T : Event> listen(
     ignoreCancelled: Boolean = false,
     register: Boolean = true,
     crossinline onEvent: (event: T) -> Unit,
-): cc.modlabs.kpaper.event.SingleListener<T> {
-    val listener = object : cc.modlabs.kpaper.event.SingleListener<T>(priority, ignoreCancelled) {
+): SingleListener<T> {
+    val listener = object : SingleListener<T>(priority, ignoreCancelled) {
         override fun onEvent(event: T) = onEvent.invoke(event)
     }
     if (register) listener.register()
     return listener
+}
+
+inline fun <reified T : PlayerEvent> Player.on(priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = false, register: Boolean = true, crossinline onEvent: (event: T) -> Unit) {
+    listen<T>(priority, ignoreCancelled, register) { event ->
+        if (event.player != this@on) return@listen
+        onEvent.invoke(event)
+    }
+}
+
+inline fun <reified T : BlockEvent> Block.on(priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = false, register: Boolean = true, crossinline onEvent: (event: T) -> Unit) {
+    listen<T>(priority, ignoreCancelled, register) { event ->
+        if (event.block != this@on) return@listen
+        onEvent.invoke(event)
+    }
+}
+
+inline fun <reified T : EntityEvent> Entity.on(priority: EventPriority = EventPriority.NORMAL, ignoreCancelled: Boolean = false, register: Boolean = true, crossinline onEvent: (event: T) -> Unit) {
+    listen<T>(priority, ignoreCancelled, register) { event ->
+        if (event.entity != this@on) return@listen
+        onEvent.invoke(event)
+    }
 }
