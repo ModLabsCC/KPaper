@@ -39,11 +39,6 @@ abstract class KPlugin : JavaPlugin() {
 
     final override fun onEnable() {
         startup()
-
-        // only register the commands if the plugin has not disabled itself
-        if (this.isEnabled) {
-            TODO()
-        }
     }
 
     final override fun onDisable() {
