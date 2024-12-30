@@ -45,4 +45,4 @@ bin/
 .DS_Store
 
 .idea/*
-.kotlin
+.kotlin/*
