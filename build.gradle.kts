@@ -9,7 +9,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "cc.modlabs.kpaper"
+group = "cc.modlabs"
 
 version = Calendar.getInstance(TimeZone.getTimeZone("UTC")).run {
     "${get(Calendar.YEAR)}.${get(Calendar.MONTH) + 1}.${get(Calendar.DAY_OF_MONTH)}"
