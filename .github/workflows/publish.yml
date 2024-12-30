@@ -30,7 +30,7 @@ jobs:
 
       - name: Set CalVer version
         id: calver
-        run: echo "VERSION=$(date -u +'%Y.%m.%d')" >> $GITHUB_ENV
+        run: echo "VERSION=$(date -u +'%Y.%m.%d.%H%M')" >> $GITHUB_ENV
 
       - name: Create GitHub Release
         uses: elgohr/Github-Release-Action@v5

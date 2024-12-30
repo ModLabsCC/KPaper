@@ -12,7 +12,7 @@ plugins {
 group = "cc.modlabs"
 
 version = Calendar.getInstance(TimeZone.getTimeZone("UTC")).run {
-    "${get(Calendar.YEAR)}.${get(Calendar.MONTH) + 1}.${get(Calendar.DAY_OF_MONTH)}"
+    "${get(Calendar.YEAR)}.${get(Calendar.MONTH) + 1}.${get(Calendar.DAY_OF_MONTH)}.${get(Calendar.HOUR_OF_DAY)}${get(Calendar.MINUTE)}"
 }
 
 repositories {
