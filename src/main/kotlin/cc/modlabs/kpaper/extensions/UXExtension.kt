@@ -227,7 +227,13 @@ class Beat(private val sounds: List<SoundEffect>) {
     }
 }
 
-class SoundEffect(private val sound: Sound, private val pitch: Float, private val volume: Float) {
+data class SoundEffect(
+    val sound: Sound,
+    val volume: Float = 0.4f,
+    val pitch: Float = 1f
+) {
+
+    constructor(sound: String, volume: Float = 0.4f, pitch: Float = 1f) : this(Sound.valueOf(sound), volume, pitch)
     fun play(player: Player) {
         player.playSound(player.location, sound, volume, pitch)
     }
