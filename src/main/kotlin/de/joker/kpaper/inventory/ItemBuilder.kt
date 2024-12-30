@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.inventory
+﻿package de.joker.kpaper.inventory
 
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property

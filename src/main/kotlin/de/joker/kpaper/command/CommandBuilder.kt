@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.command
+﻿package de.joker.kpaper.command
 
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack

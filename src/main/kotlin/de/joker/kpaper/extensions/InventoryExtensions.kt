@@ -1,10 +1,15 @@
-﻿package de.joker.kpaper.main.extensions
+﻿package de.joker.kpaper.extensions
 
+import de.joker.kpaper.consts.NAMESPACE_GUI_IDENTIFIER
+import de.joker.kpaper.inventory.toItemBuilder
 import dev.fruxz.stacked.text
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 
 
 /**
@@ -67,4 +72,35 @@ fun ItemStack.lore(lore: String): ItemStack = meta<ItemMeta> {
 }
 fun ItemStack.lore(lore: List<String>): ItemStack = meta<ItemMeta> {
     this.lore(lore.map { text(it) })
+}
+
+fun openWithIdentifier(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+
+    if (identifier != null) inv.identify(identifier, *identifiers)
+    player.openInventory(inv)
+}
+
+fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+    this.setItem(0, this.getItem(0)?.toItemBuilder {
+        addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
+        identifiers.forEach { map ->
+            map?.forEach { (key, value) ->
+                addPersistentData(key, value)
+            }
+        }
+    }?.build() ?: Material.LIGHT_GRAY_STAINED_GLASS_PANE.toItemBuilder {
+        addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
+        identifiers.forEach { map ->
+            map?.forEach { (key, value) ->
+                addPersistentData(key, value)
+            }
+        }
+    }.build())
+}
+
+fun Inventory.isIdentifiedAs(identifier: String): Boolean {
+    return this.getItem(0)?.itemMeta?.persistentDataContainer?.get(
+        NAMESPACE_GUI_IDENTIFIER,
+        PersistentDataType.STRING
+    ) == identifier
 }

@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.extensions
+﻿package de.joker.kpaper.extensions
 
 import org.bukkit.*
 import org.bukkit.block.Block

@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.extensions
+﻿package de.joker.kpaper.extensions
 
 import dev.fruxz.ascend.tool.time.TimeUnit
 import dev.fruxz.ascend.tool.time.clock.TimeDisplay

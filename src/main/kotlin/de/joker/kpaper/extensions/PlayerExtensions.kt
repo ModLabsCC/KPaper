@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.extensions
+﻿package de.joker.kpaper.extensions
 
 import com.mojang.brigadier.context.CommandContext
 import dev.fruxz.stacked.text

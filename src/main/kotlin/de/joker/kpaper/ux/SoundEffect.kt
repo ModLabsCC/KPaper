@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.ux
+﻿package de.joker.kpaper.ux
 
 import org.bukkit.Sound
 

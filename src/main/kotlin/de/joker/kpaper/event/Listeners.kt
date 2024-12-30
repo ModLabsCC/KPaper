@@ -1,7 +1,7 @@
-﻿package de.joker.kpaper.main.event
+﻿package de.joker.kpaper.event
 
 import de.joker.kpaper.main.PluginInstance
-import de.joker.kpaper.main.extensions.pluginManager
+import de.joker.kpaper.extensions.pluginManager
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.HandlerList

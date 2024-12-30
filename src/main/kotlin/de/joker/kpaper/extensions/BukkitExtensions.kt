@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.extensions
+﻿package de.joker.kpaper.extensions
 
 import de.joker.kpaper.main.PluginInstance
 import dev.fruxz.stacked.text

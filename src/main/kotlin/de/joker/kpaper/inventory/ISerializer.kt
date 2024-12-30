@@ -1,4 +1,4 @@
-﻿package de.joker.kpaper.main.inventory
+﻿package de.joker.kpaper.inventory
 
 import org.bukkit.inventory.Inventory
 import java.io.IOException
