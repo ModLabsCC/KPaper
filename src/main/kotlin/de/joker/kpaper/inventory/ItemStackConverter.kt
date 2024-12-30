@@ -68,10 +68,6 @@ object ItemStackConverter {
     /**
      *
      * A method to serialize an [ItemStack] to Base64 String.
-     *
-     *
-     *
-     *
      * Based off of [.toBase64].
      *
      * @param item to turn into a Base64 String.
