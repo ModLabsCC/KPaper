@@ -1,21 +1,26 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 plugins {
     kotlin("jvm") version "2.0.21"
     id("io.papermc.paperweight.userdev") version "2.0.0-SNAPSHOT"
     kotlin("plugin.serialization") version "2.1.0"
+    id("maven-publish")
 }
 
-group = "de.joker.kpaper"
-version = "1.0-SNAPSHOT"
+group = "cc.modlabs.kpaper"
+
+version = Calendar.getInstance(TimeZone.getTimeZone("UTC")).run {
+    "${get(Calendar.YEAR)}.${get(Calendar.MONTH) + 1}.${get(Calendar.DAY_OF_MONTH)}"
+}
 
 repositories {
     mavenCentral()
     maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
 }
 
-val minecraftVersion = "1.21.4"
+val minecraftVersion: String by project
 
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
@@ -28,6 +33,41 @@ dependencies {
 paperweight {
     reobfArtifactConfiguration = io.papermc.paperweight.userdev
         .ReobfArtifactConfiguration.MOJANG_PRODUCTION
+}
+
+tasks.register<Jar>("sourcesJar") {
+    description = "Generates the sources jar for this project."
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "ModLabs"
+            url = uri("https://nexus.modlabs.cc/repository/maven-public/")
+            credentials {
+                username = System.getenv("NEXUS_USER")
+                password = System.getenv("NEXUS_PASS")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+
+            artifact(tasks.named("jar").get()) {
+                classifier = null
+            }
+
+            artifact(tasks.named("sourcesJar"))
+
+            pom {
+                name.set("KPaper")
+                description.set("A utility library designed to simplify plugin development with Paper and Kotlin.")
+            }
+        }
+    }
 }
 
 tasks {
