@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    implementation("cc.modlabs:kpaper:$version") // Replace with the desired version
+    implementation("cc.modlabs.kpaper:KPaper:$version") // Replace with the desired version
 }
 ```
 
