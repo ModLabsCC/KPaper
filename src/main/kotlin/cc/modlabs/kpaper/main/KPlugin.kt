@@ -2,14 +2,10 @@
 
 import org.bukkit.plugin.java.JavaPlugin
 
-val PluginMainInstance: KPlugin get() = PluginInstance
-
 /**
  * The main plugin instance. Less complicated name for internal usage.
  */
-@PublishedApi
-internal lateinit var PluginInstance: KPlugin
-    private set
+lateinit var PluginInstance: KPlugin
 
 
 abstract class KPlugin : JavaPlugin() {
