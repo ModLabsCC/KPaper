@@ -4,16 +4,13 @@ KPaper is a utility library designed to simplify plugin development with [Paper]
 
 ## Installation
 
-You can add KPaper to your project using the Maven repository hosted by ModLabs.
-
-### Gradle
 ```kotlin
 repositories {
     maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
 }
 
 dependencies {
-    implementation("cc.modlabs.kpaper:KPaper:$version") // Replace with the desired version
+    implementation("cc.modlabs.kpaper:KPaper:$version")
 }
 ```
 
@@ -35,7 +32,7 @@ class MyPlugin : KPlugin() {
 }
 ```
 
-Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on the [GitHub repository](https://github.com/de-joker/kpaper) (replace with actual URL if available).
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on the [GitHub repository](https://github.com/ModLabsCC/KPaper).
 
 ## Acknowledgments
 
