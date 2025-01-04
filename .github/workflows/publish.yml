@@ -24,7 +24,7 @@ jobs:
 
       - name: Set CalVer version
         id: calver
-        run: echo "VERSION=$(date -u +'%Y.%m.%d.%H%M')" >> $GITHUB_ENV
+        run: echo "VERSION=$(date -u +'%Y.%-m.%-d.%H%M')" >> $GITHUB_ENV
 
       - name: Publish package
         run: ./gradlew publish
