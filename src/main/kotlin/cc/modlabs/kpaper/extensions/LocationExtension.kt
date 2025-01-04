@@ -124,3 +124,15 @@ fun Location.inWorld(worlds: String) = this.clone().apply { this.world = Bukkit.
 fun Location.toNorth(): Location {
     return this.apply { this.yaw = 180.0f; this.pitch = 0f }
 }
+
+fun Location.toSaveAbleString(): String {
+    return "${world.name};$x;$y;$z"
+}
+
+fun Location.toSaveAbleBlockString(): String {
+    return "${world.name};${blockX};${blockY};${blockZ}"
+}
+
+fun Location.toSaveAbleDirectionalString(): String {
+    return "${world.name};$x;$y;$z;$yaw;$pitch"
+}
