@@ -39,3 +39,16 @@ fun Player.sendOpenSound() = playSound(location, "minecraft:block.note_block.chi
 fun Player.maxOutHealth() {
     health = getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
 }
+
+
+fun UUID.toOfflinePlayer(): OfflinePlayer {
+    return Bukkit.getOfflinePlayer(this)
+}
+
+fun String.toOfflinePlayer(): OfflinePlayer {
+    return Bukkit.getOfflinePlayer(this)
+}
+
+fun String.toOfflinePlayerIfCached(): OfflinePlayer? {
+    return Bukkit.getOfflinePlayerIfCached(this)
+}

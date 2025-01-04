@@ -5,6 +5,8 @@ import dev.fruxz.ascend.tool.time.clock.TimeDisplay
 import kotlin.time.Duration
 import dev.fruxz.ascend.tool.time.calendar.Calendar
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.util.*
 
 fun <T> Iterable<T>.sumOf(selector: (T) -> Duration): Duration {
@@ -30,3 +32,17 @@ fun calendarFromDateString(dateFormat: String): Calendar {
 fun Calendar.formatToDay(locale: Locale): String {
     return SimpleDateFormat.getDateInstance(Calendar.FormatStyle.FULL.ordinal, locale).format(javaDate)
 }
+
+fun isWeekend(): Boolean {
+    val now = LocalDateTime.now()
+    val dayOfWeek = now.dayOfWeek
+    val hour = now.hour
+
+    return when (dayOfWeek) {
+        DayOfWeek.FRIDAY -> hour >= 18
+        DayOfWeek.SATURDAY -> true
+        DayOfWeek.SUNDAY -> hour < 22
+        else -> false
+    }
+}
+
