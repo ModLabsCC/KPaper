@@ -52,7 +52,7 @@ abstract class SingleListener<T : Event>(
  * @param priority the priority when multiple listeners handle this event
  * @param ignoreCancelled if manual cancellation should be ignored
  */
-inline fun <reified T : Event> cc.modlabs.kpaper.event.SingleListener<T>.register() {
+inline fun <reified T : Event> SingleListener<T>.register() {
     pluginManager.registerEvent(
         T::class.java,
         this,

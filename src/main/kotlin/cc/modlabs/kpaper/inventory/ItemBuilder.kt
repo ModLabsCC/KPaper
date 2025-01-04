@@ -3,6 +3,7 @@
 package cc.modlabs.kpaper.inventory
 
 import cc.modlabs.kpaper.coroutines.taskRunLater
+import cc.modlabs.kpaper.inventory._internal.ItemClickListener
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import dev.fruxz.stacked.text
@@ -15,6 +16,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.OfflinePlayer
 import org.bukkit.craftbukkit.inventory.components.CraftCustomModelDataComponent
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -544,6 +546,19 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         if (condition) {
             itemStack.type = material
         }
+        return this
+    }
+
+    /**
+     * Sets the click event for the item.
+     *
+     * @param onClick the function to be called when the item is clicked.
+     *        The function receives an InventoryClickEvent parameter.
+     *
+     * @return the updated ItemBuilder object.
+     */
+    fun onClick(onClick: (InventoryClickEvent) -> Unit): ItemBuilder {
+        ItemClickListener.registerItemClickEvent(itemStack, onClick)
         return this
     }
 

@@ -1,8 +1,8 @@
 package cc.modlabs.kpaper.event
 
-interface EventHandler {
-    fun load() {}
+abstract class EventHandler {
+    abstract fun load()
 
-    fun unload() {}
+    abstract fun unload()
 
 }

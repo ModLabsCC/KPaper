@@ -1,5 +1,6 @@
 ﻿package cc.modlabs.kpaper.main
 
+import cc.modlabs.kpaper.inventory._internal.ItemClickListener
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -34,10 +35,14 @@ abstract class KPlugin : JavaPlugin() {
     }
 
     final override fun onEnable() {
+        ItemClickListener.load()
+
         startup()
     }
 
     final override fun onDisable() {
+        ItemClickListener.unload()
+
         shutdown()
     }
 }
