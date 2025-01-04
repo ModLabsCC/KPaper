@@ -163,20 +163,13 @@ fun Inventory.setItem(range: IntProgression, item: ItemStack) {
     range.forEach { this.setItem(it, item) }
 }
 
-fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmpty(inv, PLACEHOLDER_GRAY)
+fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, spacer: ItemStack = PLACEHOLDER_GRAY, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+    fillEmptyInventory(inv, spacer)
     if (identifier != null) inv.identify(identifier, *identifiers)
     player.openInventory(inv)
 }
 
-
-fun fillEmptyAndOpenInventoryWithCustomSpacer(player: Player, inv: Inventory, spacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmpty(inv, spacer)
-    if (identifier != null) inv.identify(identifier, *identifiers)
-    player.openInventory(inv)
-}
-
-fun fillEmpty(inventory: Inventory, customSpacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+fun fillEmptyInventory(inventory: Inventory, customSpacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
     for (i in 0 until inventory.size) {
         if (inventory.getItem(i) == null || inventory.getItem(i)!!.type == Material.AIR) {
             inventory.setItem(i, customSpacer)
@@ -186,7 +179,7 @@ fun fillEmpty(inventory: Inventory, customSpacer: ItemStack, identifier: String?
 }
 
 fun Inventory.fillEmpty(filler: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmpty(this, filler, identifier, *identifiers)
+    fillEmptyInventory(this, filler, identifier, *identifiers)
 }
 
 fun Inventory.arrangeItemsAround(newItem: ItemStack) {
