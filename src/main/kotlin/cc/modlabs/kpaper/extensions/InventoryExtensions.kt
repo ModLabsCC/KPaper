@@ -163,6 +163,12 @@ fun Inventory.setItem(range: IntProgression, item: ItemStack) {
     range.forEach { this.setItem(it, item) }
 }
 
+fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+    fillEmptyInventory(inv, PLACEHOLDER_GRAY)
+    if (identifier != null) inv.identify(identifier, *identifiers)
+    player.openInventory(inv)
+}
+
 fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, spacer: ItemStack = PLACEHOLDER_GRAY, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
     fillEmptyInventory(inv, spacer)
     if (identifier != null) inv.identify(identifier, *identifiers)
