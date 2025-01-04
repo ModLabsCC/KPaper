@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.extensions
 
+import cc.modlabs.kpaper.utils.Base64
 import kotlin.math.abs
 
 
