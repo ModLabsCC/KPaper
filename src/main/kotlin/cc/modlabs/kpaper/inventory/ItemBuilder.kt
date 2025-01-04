@@ -1,5 +1,8 @@
-﻿package cc.modlabs.kpaper.inventory
+﻿@file:Suppress("unused")
 
+package cc.modlabs.kpaper.inventory
+
+import cc.modlabs.kpaper.coroutines.taskRunLater
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import dev.fruxz.stacked.text
@@ -18,9 +21,9 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
-import org.jetbrains.annotations.ApiStatus
 import java.lang.reflect.Field
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -338,7 +341,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      */
     fun lore(vararg lores: String): ItemBuilder {
         val meta = itemStack.itemMeta
-        var lore = listOf<Component>()
+        val lore = mutableListOf<Component>()
 
         lores.forEach {
             val lines = it.split("\n")
@@ -435,27 +438,15 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
 
     /**
      * Sets the equippable state of the item in the specified slot.
-     * This method is not yet supported in PaperMC 1.21.1.
      */
-    @ApiStatus.Internal
-    fun setEquippable(slot: EquipmentSlot, equippable: Boolean): ItemBuilder {
+    fun setEquippable(slot: EquipmentSlot): ItemBuilder {
         val meta = itemStack.itemMeta
 
-        TODO("Waiting for 1.21.2+ support")
+        val equippable = meta.equippable
 
-        itemStack.itemMeta = meta
-        return this
-    }
+        equippable.slot = slot
 
-    /**
-     * Sets the consumable state of the item.
-     * This method is not yet supported in PaperMC 1.21.1.
-     */
-    @ApiStatus.Internal
-    fun setConsumable(consumable: Boolean): ItemBuilder {
-        val meta = itemStack.itemMeta
-
-        TODO("Waiting for 1.21.2+ support")
+        meta.setEquippable(equippable)
 
         itemStack.itemMeta = meta
         return this
@@ -594,7 +585,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         )
 
         fun fromItemStack(itemStack: ItemStack): ItemBuilder {
-            var mat =
+            val mat =
                 if (invalidMaterials.contains(itemStack.type)) Material.GRASS_BLOCK else itemStack.type
             val builder = ItemBuilder(mat)
             builder.itemStack = itemStack
@@ -610,7 +601,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
  * @return The resulting ItemBuilder.
  */
 fun Material.toItemBuilder(dsl: ItemBuilder.() -> Unit = {}): ItemBuilder {
-    var mat = if (ItemBuilder.invalidMaterials.contains(this)) Material.GRASS_BLOCK else this
+    val mat = if (ItemBuilder.invalidMaterials.contains(this)) Material.GRASS_BLOCK else this
     return ItemBuilder(mat).apply(dsl)
 }
 
@@ -621,9 +612,21 @@ fun Material.toItemBuilder(dsl: ItemBuilder.() -> Unit = {}): ItemBuilder {
  * @return the converted ItemBuilder.
  */
 fun ItemStack.toItemBuilder(dsl: ItemBuilder.() -> Unit = {}): ItemBuilder {
-    var mat = if (ItemBuilder.invalidMaterials.contains(this.type)) Material.GRASS_BLOCK else this.type
+    val mat = if (ItemBuilder.invalidMaterials.contains(this.type)) Material.GRASS_BLOCK else this.type
     val builder = ItemBuilder(mat)
     builder.itemStack = this
     builder.dsl()
     return builder
+}
+
+fun ItemStack.changeNameForTime(name: String, time: Long, unit: TimeUnit = TimeUnit.SECONDS, afterTask: () -> Unit = {}) {
+    val oldName = this.itemMeta.displayName()
+    val meta = this.itemMeta
+    meta.displayName(text(name))
+    this.itemMeta = meta
+    taskRunLater(unit.toSeconds(time) * 20L) {
+        meta.displayName(oldName)
+        this.itemMeta = meta
+        afterTask()
+    }
 }

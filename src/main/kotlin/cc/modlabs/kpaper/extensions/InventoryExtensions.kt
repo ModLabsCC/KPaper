@@ -4,6 +4,7 @@ import cc.modlabs.kpaper.consts.NAMESPACE_GUI_IDENTIFIER
 import cc.modlabs.kpaper.consts.NAMESPACE_ITEM_IDENTIFIER
 import cc.modlabs.kpaper.inventory.ItemBuilder
 import cc.modlabs.kpaper.inventory.toItemBuilder
+import dev.fruxz.ascend.extension.isNull
 import dev.fruxz.stacked.text
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -163,26 +164,120 @@ fun Inventory.setItem(range: IntProgression, item: ItemStack) {
 }
 
 fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmpty(inv)
+    fillEmpty(inv, PLACEHOLDER_GRAY)
     if (identifier != null) inv.identify(identifier, *identifiers)
     player.openInventory(inv)
 }
 
-fun Inventory.fillEmpty(filler: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    for (i in 0 until this.size) {
-        if (this.getItem(i) == null || this.getItem(i)!!.type == Material.AIR) {
-            this.setItem(i, filler)
-        }
-    }
-    if (identifier != null) this.identify(identifier, *identifiers)
+
+fun fillEmptyAndOpenInventoryWithCustomSpacer(player: Player, inv: Inventory, spacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+    fillEmpty(inv, spacer)
+    if (identifier != null) inv.identify(identifier, *identifiers)
+    player.openInventory(inv)
 }
 
-fun fillEmpty(inventory: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    val item = PLACEHOLDER_GRAY
+fun fillEmpty(inventory: Inventory, customSpacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
     for (i in 0 until inventory.size) {
         if (inventory.getItem(i) == null || inventory.getItem(i)!!.type == Material.AIR) {
-            inventory.setItem(i, item)
+            inventory.setItem(i, customSpacer)
         }
     }
     if (identifier != null) inventory.identify(identifier, *identifiers)
+}
+
+fun Inventory.fillEmpty(filler: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+    fillEmpty(this, filler, identifier, *identifiers)
+}
+
+fun Inventory.arrangeItemsAround(newItem: ItemStack) {
+    val centerSlot = this.getMiddleSlot()
+    val slots = arrayOf(centerSlot - 9, centerSlot - 1, centerSlot + 1, centerSlot + 9)
+
+    for (slot in slots) {
+        // Check if the slot is within the inventory bounds
+        if (slot in this.contents.indices) {
+            // Check if the slot is already occupied
+            if (this.getItem(slot) == null || this.getItem(slot)!!.type == Material.AIR || this.getItem(slot)!!.hasKey("spacer")) {
+                this.setItem(slot, newItem)
+                break
+            }
+        }
+    }
+}
+
+fun Inventory.swapItems(firstSlot: Int, secondSlot: Int, newItem: ItemStack) {
+    // Swap the two items
+    val tempItem = this.getItem(firstSlot)
+    this.setItem(firstSlot, this.getItem(secondSlot))
+    this.setItem(secondSlot, tempItem)
+
+    // Place the new item in the empty slot
+    if (this.getItem(firstSlot).isNull) {
+        this.setItem(firstSlot, newItem)
+    } else if (this.getItem(secondSlot).isNull) {
+        this.setItem(secondSlot, newItem)
+    }
+}
+
+fun Inventory.getEmptySlot(): Int {
+    for (i in 0 until this.size) {
+        if (this.getItem(i) == null || this.getItem(i)!!.type == Material.AIR) {
+            return i
+        }
+    }
+    return -1
+}
+
+fun Inventory.setItemInMiddle(item: ItemStack) {
+    val roundedMiddle = this.size / 2
+    val middle = if (roundedMiddle % 2 == 0) roundedMiddle else roundedMiddle
+    this.setItem(middle, item)
+}
+
+fun Inventory.getMiddleSlot(): Int {
+    val roundedMiddle = this.size / 2
+    return if (roundedMiddle % 2 == 0) roundedMiddle else roundedMiddle
+}
+
+fun Inventory.setLeftUpperCorner(item: ItemStack) {
+    this.setItem(0, item)
+}
+
+fun Inventory.setRightUpperCorner(item: ItemStack) {
+    this.setItem(8, item)
+}
+
+fun Inventory.setMiddleLeft(item: ItemStack) {
+    val rows = this.size / 9
+    val middle = if (rows % 2 == 0) rows / 2 - 1 else rows / 2
+    this.setItem(middle * 9, item)
+}
+
+fun Inventory.setMiddleRight(item: ItemStack) {
+    val rows = this.size / 9
+    val middle = if (rows % 2 == 0) rows / 2 - 1 else rows / 2
+    this.setItem(middle * 9 + 8, item)
+}
+
+fun Inventory.setUpperMiddle(item: ItemStack) {
+    this.setItem(4, item)
+}
+
+fun Inventory.setLowerMiddle(item: ItemStack) {
+    this.setItem(this.size - 5, item)
+}
+
+fun Inventory.setLeftLowerCorner(item: ItemStack) {
+    this.setItem(this.size - 9, item)
+}
+
+fun Inventory.setRightLowerCorner(item: ItemStack) {
+    this.setItem(this.size - 1, item)
+}
+
+fun ItemStack.hasKey(namespacedKey: String): Boolean {
+    return this.itemMeta?.persistentDataContainer?.has(
+        pluginKey(namespacedKey),
+        PersistentDataType.STRING
+    ) ?: false
 }

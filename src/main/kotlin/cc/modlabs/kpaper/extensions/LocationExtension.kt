@@ -92,3 +92,35 @@ fun loc2Str(location: Location): String {
     loc += location.pitch
     return loc
 }
+
+
+fun Location.asSafeLocation(): Location {
+    // Now we test if the location (2 blocks high) is occupied and if so, we move up until we find a free spot
+    var location = this.clone()
+    while ((location.block.type.isSolid || location.clone().add(0.0, 1.0, 0.0).block.type.isSolid)) {
+        location = location.add(0.0, 1.0, 0.0)
+    }
+    return location
+}
+
+fun Location.asSafeLocationOrNull(): Location? {
+    // Now we test if the location (2 blocks high) is occupied and if so, we move up until we find a free spot
+    var location = this.clone()
+    while ((location.block.type.isSolid || location.clone().add(0.0, 1.0, 0.0).block.type.isSolid)) {
+        location = location.add(0.0, 1.0, 0.0)
+    }
+    if(location.y > 319) return null
+    return location
+}
+
+fun Location.isInRadius(middle: Location, radius: Int): Boolean {
+    return this.x in middle.x - radius..middle.x + radius && this.z in middle.z - radius..middle.z + radius
+}
+
+fun Location.inWorld(world: World) = this.clone().apply { this.world = world }
+
+fun Location.inWorld(worlds: String) = this.clone().apply { this.world = Bukkit.getWorld(worlds.lowercase()) }
+
+fun Location.toNorth(): Location {
+    return this.apply { this.yaw = 180.0f; this.pitch = 0f }
+}
