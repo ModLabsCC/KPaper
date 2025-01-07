@@ -2,6 +2,7 @@
 
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.Commands
 
 interface CommandBuilder {
 
@@ -12,5 +13,13 @@ interface CommandBuilder {
 
     val description: String
         get() = ""
+
+    fun handleRegister(commands: Commands)  {
+        commands.register(
+            register(),
+            description,
+            aliases
+        )
+    }
 
 }
