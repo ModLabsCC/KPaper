@@ -19,6 +19,11 @@ class InventoryBuilder(
         return this
     }
 
+    fun setItem(slot: Int, item: ItemStack): InventoryBuilder {
+        items[slot] = InventoryItem(item)
+        return this
+    }
+
     fun build(): Inventory {
         val inventory = Bukkit.createInventory(null, size, title)
         items.forEach { (slot, item) ->
@@ -36,5 +41,5 @@ class InventoryBuilder(
 
 class InventoryItem(
     val itemStack: ItemStack,
-    val onClick: (InventoryClickEvent) -> Unit
+    val onClick: (InventoryClickEvent) -> Unit = {}
 )

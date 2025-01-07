@@ -3,6 +3,7 @@
 import com.mojang.brigadier.context.CommandContext
 import dev.fruxz.stacked.text
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.Sound
@@ -51,4 +52,20 @@ fun String.toOfflinePlayer(): OfflinePlayer {
 
 fun String.toOfflinePlayerIfCached(): OfflinePlayer? {
     return Bukkit.getOfflinePlayerIfCached(this)
+}
+
+fun CommandSender.sendMessagePlain(message: String) {
+    sendMessage(text(message))
+}
+
+fun CommandSender.sendMessagePlain(message: Component) {
+    sendMessage(message)
+}
+
+fun Collection<Player>.sendMessagePlain(message: String) {
+    forEach { it.sendMessagePlain(message) }
+}
+
+fun Collection<Player>.sendMessagePlain(message: Component) {
+    forEach { it.sendMessagePlain(message) }
 }
