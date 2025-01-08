@@ -63,3 +63,5 @@ fun timer(period: Long = 1, name: String = "", block: () -> Unit): BukkitTask {
         override fun run() = timeLimit(period, name, block)
     }.runTaskTimer(PluginInstance, 0, period)
 }
+
+fun taskRunTimer(period: Long = 1, name: String = "", block: () -> Unit) = timer(period, name, block)
