@@ -28,6 +28,7 @@ dependencies {
     api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
     api("dev.fruxz:ascend:2024.2.2") // TODO: Own implementation
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
 
 paperweight {

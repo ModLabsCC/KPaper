@@ -4,6 +4,10 @@ package cc.modlabs.kpaper.inventory
 
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.SkinTexture
+import com.destroystokyo.paper.profile.ProfileProperty
+import com.google.gson.Gson
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import dev.fruxz.stacked.text
@@ -24,6 +28,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
 import java.lang.reflect.Field
+import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -292,6 +297,57 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         } catch (e1: IllegalAccessException) {
             e1.printStackTrace()
         }
+        return this
+    }
+
+    /**
+     * Retrieves the skin texture of a player from MineSkin API based on the provided MineSkin UUID.
+     *
+     * @param mineSkinUUID The MineSkin UUID of the player.
+     * @return An ItemBuilder object representing the player's skin texture.
+     */
+    fun textureFromMineSkin(mineSkinUUID: String): ItemBuilder {
+        if (textureCache.containsKey(mineSkinUUID)) {
+            return textureFromSkinTexture(textureCache[mineSkinUUID]!!)
+        }
+
+        val target = URL("https://api.mineskin.org/get/uuid/$mineSkinUUID")
+        val connection = target.openConnection()
+        connection.setRequestProperty("User-Agent", "KPaper/1.0")
+        val inputStream = connection.getInputStream()
+        val scanner = Scanner(inputStream)
+        val response = StringBuilder()
+        while (scanner.hasNextLine()) {
+            response.append(scanner.nextLine())
+        }
+        scanner.close()
+        val json = response.toString()
+        val mineSkinResponse = Gson().fromJson(json, MineSkinResponse::class.java)
+        val skinTexture = SkinTexture.fromMineSkinResponse(mineSkinResponse)
+
+        textureCache[mineSkinUUID] = skinTexture
+
+        return textureFromSkinTexture(skinTexture)
+    }
+
+    /**
+     * Generates an ItemBuilder with a custom texture based on the provided SkinTexture.
+     *
+     * @param skinTexture The SkinTexture object containing the UUID, name, and texture information.
+     * @return An ItemBuilder instance with the custom texture applied.
+     */
+    private fun textureFromSkinTexture(skinTexture: SkinTexture): ItemBuilder {
+        val skinProfile = Bukkit.createProfile(skinTexture.uuid, skinTexture.name)
+        skinProfile.setProperty(
+            ProfileProperty(
+                "textures",
+                skinTexture.texture.value,
+                skinTexture.texture.signature
+            )
+        )
+        val skullMeta = itemStack.itemMeta as SkullMeta
+        skullMeta.playerProfile = skinProfile
+        itemStack.itemMeta = skullMeta
         return this
     }
 
@@ -590,8 +646,9 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * It provides utility methods for creating `ItemBuilder` instances from `ItemStack` objects.
      */
     companion object {
+            val textureCache = mutableMapOf<String, SkinTexture>()
 
-        val invalidMaterials = arrayListOf(
+            val invalidMaterials = arrayListOf(
             Material.AIR,
             Material.CAVE_AIR,
             Material.VOID_AIR,
