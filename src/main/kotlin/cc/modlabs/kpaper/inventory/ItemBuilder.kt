@@ -179,7 +179,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param glinting true if the item should have a glint effect, false otherwise
      * @return the updated ItemBuilder instance
      */
-    fun setGlinting(glinting: Boolean): ItemBuilder {
+    fun glinting(glinting: Boolean): ItemBuilder {
         meta<ItemMeta> {
             this.setEnchantmentGlintOverride(glinting)
         }
@@ -200,7 +200,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
-    fun setCustomModelDataComponents(
+    fun customModelDataComponents(
         floats: List<Float> = listOf(),
         flags: List<Boolean> = listOf(),
         strings: List<String> = listOf(),
@@ -209,20 +209,6 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         val meta = itemStack.itemMeta
         meta.setCustomModelDataComponent(CraftCustomModelDataComponent(CustomModelData(floats, flags, strings, colors)))
         itemStack.itemMeta = meta
-        return this
-    }
-
-    /**
-     * Sets the owner of the player skull.
-     *
-     * @param uuid The UUID of the player to set as the owner.
-     * @return The updated ItemBuilder object.
-     */
-    fun setOwner(uuid: UUID): ItemBuilder {
-        if (itemStack.type != Material.PLAYER_HEAD) return this
-        val skullMeta = itemStack.itemMeta as SkullMeta
-        skullMeta.owningPlayer = Bukkit.getOfflinePlayer(uuid)
-        itemStack.itemMeta = skullMeta
         return this
     }
 
@@ -490,7 +476,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param glinting true if the item should have a glint effect, false otherwise
      * @return the updated ItemBuilder instance
      */
-    fun setGlinting(glinting: Boolean, force: Boolean = false): ItemBuilder {
+    fun glinting(glinting: Boolean, force: Boolean = false): ItemBuilder {
         meta<ItemMeta> {
             if (!force) {
                 this.setEnchantmentGlintOverride(if (glinting) true else null)
@@ -504,7 +490,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     /**
      * Sets the equippable state of the item in the specified slot.
      */
-    fun setEquippable(slot: EquipmentSlot): ItemBuilder {
+    fun equippable(slot: EquipmentSlot): ItemBuilder {
         val meta = itemStack.itemMeta
 
         val equippable = meta.equippable
