@@ -31,6 +31,7 @@ import java.lang.reflect.Field
 import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.text.take
 
 
 /**
@@ -276,14 +277,20 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     fun texture(texture: String): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
         val url = "https://textures.minecraft.net/texture/$texture"
-        val profile = GameProfile(UUID.randomUUID(), "head${texture.take(6)}")
         val encodedData =
             Base64.getEncoder()
                 .encode(
                     String.format("{textures:{SKIN:{url:\"%s\"}}}", url)
                         .toByteArray()
                 )
-        profile.properties.put("textures", Property("textures", String(encodedData)))
+
+        return textureFromBase64(String(encodedData))
+    }
+
+    fun textureFromBase64(base64: String): ItemBuilder {
+        if (itemStack.type != Material.PLAYER_HEAD) return this
+        val profile = GameProfile(UUID.randomUUID(), "head${base64.take(6)}")
+        profile.properties.put("textures", Property("textures", base64))
         try {
             val skullMeta = itemStack.itemMeta as SkullMeta
             val profileField: Field = skullMeta.javaClass.getDeclaredField("profile")
