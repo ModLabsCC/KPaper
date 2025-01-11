@@ -1,4 +1,4 @@
-﻿@file:Suppress("unused")
+﻿@file:Suppress("unused", "EXPERIMENTAL_API_USAGE")
 
 package cc.modlabs.kpaper.inventory
 
@@ -11,9 +11,7 @@ import cc.modlabs.kpaper.inventory.mineskin.SkinTexture
 import cc.modlabs.kpaper.inventory.mineskin.Textures
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
-import com.google.gson.JsonObject
-import com.mojang.authlib.GameProfile
-import com.mojang.authlib.properties.Property
+import dev.fruxz.ascend.extension.forceCastOrNull
 import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
@@ -31,7 +29,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
-import java.lang.reflect.Field
 import java.net.URL
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -79,7 +76,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @return The updated ItemBuilder instance.
      */
     fun <T : ItemMeta> meta(dsl: T.() -> Unit): ItemBuilder {
-        val meta = itemStack.itemMeta as T // TODO <- forceCastOrNull() please! :)
+        val meta = itemStack.itemMeta.forceCastOrNull<T>() ?: return this
         dsl.invoke(meta)
         itemStack.itemMeta = meta
         return this
