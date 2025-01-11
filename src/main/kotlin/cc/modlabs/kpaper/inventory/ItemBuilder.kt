@@ -250,8 +250,14 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     fun owner(uuid: UUID): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
         val skullMeta = itemStack.itemMeta as SkullMeta
-        skullMeta.owningPlayer = Bukkit.getOfflinePlayer(uuid)
+        val offlinePlayer = Bukkit.getOfflinePlayer(uuid)
+        skullMeta.owningPlayer = offlinePlayer
         itemStack.itemMeta = skullMeta
+
+        offlinePlayer.playerProfile.update().thenApply { profile ->
+            skullMeta.playerProfile = profile
+            itemStack.itemMeta = skullMeta
+        }
         return this
     }
 
