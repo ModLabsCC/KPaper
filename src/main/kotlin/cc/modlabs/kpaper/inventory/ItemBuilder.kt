@@ -5,9 +5,11 @@ package cc.modlabs.kpaper.inventory
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.MinecraftSkin
 import cc.modlabs.kpaper.inventory.mineskin.SkinTexture
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import dev.fruxz.stacked.text
@@ -260,23 +262,17 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param texture The name of the texture.
      * @return The ItemBuilder object with the texture set.
      */
-    fun texture(texture: String): ItemBuilder {
+    fun texture(texture: String, isUrl: Boolean = false): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
-        val url = "https://textures.minecraft.net/texture/$texture"
-        val encodedData =
-            Base64.getEncoder()
-                .encode(
-                    String.format("{textures:{SKIN:{url:\"%s\"}}}", url)
-                        .toByteArray()
-                )
 
-        return textureFromBase64(String(encodedData))
-    }
+        val skin = if (isUrl) {
+            texture
+        } else {
+            "https://textures.minecraft.net/texture/$texture"
+        }
+        val profile = Bukkit.getServer().createProfile(UUID.randomUUID())
 
-    fun textureFromBase64(base64: String): ItemBuilder {
-        if (itemStack.type != Material.PLAYER_HEAD) return this
-        val profile = GameProfile(UUID.randomUUID(), "head${base64.take(6)}")
-        profile.properties.put("textures", Property("textures", base64))
+        profile.textures.skin = URL(skin)
         try {
             val skullMeta = itemStack.itemMeta as SkullMeta
             val profileField: Field = skullMeta.javaClass.getDeclaredField("profile")
@@ -291,6 +287,19 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
             e1.printStackTrace()
         }
         return this
+    }
+
+    fun textureFromBase64(base64: String): ItemBuilder {
+        if (itemStack.type != Material.PLAYER_HEAD) return this
+
+        // decode base64 string to byte array
+        val decodedBytes = Base64.getDecoder().decode(base64)
+
+        val gson = Gson()
+
+        val minecraftSkin = gson.fromJson(String(decodedBytes), MinecraftSkin::class.java)
+
+        return texture(minecraftSkin.textures.SKIN.url, true)
     }
 
     /**
