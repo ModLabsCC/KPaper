@@ -6,7 +6,9 @@ import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
 import cc.modlabs.kpaper.inventory.mineskin.MinecraftSkin
+import cc.modlabs.kpaper.inventory.mineskin.SKIN
 import cc.modlabs.kpaper.inventory.mineskin.SkinTexture
+import cc.modlabs.kpaper.inventory.mineskin.Textures
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -265,41 +267,31 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     fun texture(texture: String, isUrl: Boolean = false): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
 
-        val skin = if (isUrl) {
+        val skinUrl = if (isUrl) {
             texture
         } else {
             "https://textures.minecraft.net/texture/$texture"
         }
-        val profile = Bukkit.getServer().createProfile(UUID.randomUUID())
 
-        profile.textures.skin = URL(skin)
-        try {
-            val skullMeta = itemStack.itemMeta as SkullMeta
-            val profileField: Field = skullMeta.javaClass.getDeclaredField("profile")
-            profileField.isAccessible = true
-            profileField.set(skullMeta, profile)
-            itemStack.setItemMeta(skullMeta)
-        } catch (e1: NoSuchFieldException) {
-            e1.printStackTrace()
-        } catch (e1: IllegalArgumentException) {
-            e1.printStackTrace()
-        } catch (e1: IllegalAccessException) {
-            e1.printStackTrace()
-        }
-        return this
+        val textureObject = MinecraftSkin(Textures(SKIN(skinUrl)))
+
+        val gson = Gson()
+        val base64 = Base64.getEncoder().encodeToString(gson.toJson(textureObject).toByteArray())
+
+        return textureFromBase64(base64)
     }
 
     fun textureFromBase64(base64: String): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
 
-        // decode base64 string to byte array
-        val decodedBytes = Base64.getDecoder().decode(base64)
+        val uuid = UUID.randomUUID()
+        val profile = Bukkit.getServer().createProfile(uuid, "head${uuid.toString().take(8)}")
 
-        val gson = Gson()
+        profile.setProperty(ProfileProperty("textures", base64))
 
-        val minecraftSkin = gson.fromJson(String(decodedBytes), MinecraftSkin::class.java)
-
-        return texture(minecraftSkin.textures.SKIN.url, true)
+        return meta<SkullMeta> {
+            this.playerProfile = profile
+        }
     }
 
     /**
