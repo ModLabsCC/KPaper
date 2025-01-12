@@ -10,9 +10,11 @@ import org.bukkit.inventory.ItemStack
 
 class InventoryBuilder(
     private val size: Int,
-    private val title: Component
+    private val title: Component,
+    private val owner: Player? = null,
+    private var items: MutableMap<Int, InventoryItem> = mutableMapOf()
 ) {
-    private val items = mutableMapOf<Int, InventoryItem>()
+    val inventory = Bukkit.createInventory(owner, size, title)
 
     fun setItem(slot: Int, item: InventoryItem): InventoryBuilder {
         items[slot] = item
@@ -25,7 +27,6 @@ class InventoryBuilder(
     }
 
     fun build(): Inventory {
-        val inventory = Bukkit.createInventory(null, size, title)
         items.forEach { (slot, item) ->
             inventory.setItem(slot, item.itemStack)
         }
@@ -33,9 +34,9 @@ class InventoryBuilder(
     }
 
     fun open(player: Player) {
-        val inventory = build()
-        player.openInventory(inventory)
-        ItemClickListener.registerInventory(player, inventory, items)
+        val registerableInvetory = build()
+        player.openInventory(registerableInvetory)
+        ItemClickListener.registerInventory(player, registerableInvetory, items)
     }
 }
 
