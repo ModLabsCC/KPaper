@@ -47,7 +47,11 @@ fun UUID.toOfflinePlayer(): OfflinePlayer {
 }
 
 fun String.toOfflinePlayer(): OfflinePlayer {
-    return Bukkit.getOfflinePlayer(this)
+    return try {
+        UUID.fromString(this).toOfflinePlayer()
+    } catch (e: IllegalArgumentException) {
+        Bukkit.getOfflinePlayer(this)
+    }
 }
 
 fun String.toOfflinePlayerIfCached(): OfflinePlayer? {
