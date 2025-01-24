@@ -4,11 +4,14 @@ import com.mojang.brigadier.context.CommandContext
 import dev.fruxz.stacked.text
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import net.kyori.adventure.text.Component
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.server.network.ServerGamePacketListenerImpl
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
 import org.bukkit.command.CommandSender
+import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -73,3 +76,10 @@ fun Collection<Player>.sendMessagePlain(message: String) {
 fun Collection<Player>.sendMessagePlain(message: Component) {
     forEach { it.sendMessagePlain(message) }
 }
+
+
+val Player.connection: ServerGamePacketListenerImpl
+    get() {
+        val serverPlayer = (player as CraftPlayer).handle as ServerPlayer
+        return serverPlayer.connection
+    }

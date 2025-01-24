@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.locks.ReadWriteLock
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
-class TranslationCache(
+class TranslationManager(
     private val source: TranslationSource
 ) {
 
