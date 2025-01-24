@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.translation
 
+import cc.modlabs.kpaper.extensions.getInternalLogger
 import cc.modlabs.kpaper.extensions.getLogger
 import cc.modlabs.kpaper.translation.interfaces.TranslationSource
 import cc.modlabs.kpaper.utils.TempStorage
@@ -56,7 +57,7 @@ class TranslationManager(
     }
 
     suspend fun loadTranslations(callback: ((Map<String, Int>) -> Unit)? = null) {
-        getLogger().info("Retrieving all translations from backend")
+        getInternalLogger().info("Retrieving all translations from backend")
         val all = source.getLanguages()
 
         cache = emptyMap()
@@ -100,7 +101,7 @@ class TranslationManager(
                 ?: cache[fallbackLanguage]?.find { it.messageKey == messageKey }
 
             if (message == null) {
-                getLogger().info("No translation found for $languageCode:$messageKey")
+                getInternalLogger().info("No translation found for $languageCode:$messageKey")
                 if (languageCode != fallbackLanguage) return null
                 notFoundTranslations.add(
                     messageKey + "||" + placeholders.toList()

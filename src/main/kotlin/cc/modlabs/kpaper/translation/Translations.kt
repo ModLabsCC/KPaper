@@ -1,6 +1,7 @@
 package cc.modlabs.kpaper.translation
 
 import cc.modlabs.kpaper.translation.interfaces.TranslationHook
+import cc.modlabs.kpaper.translation.interfaces.TranslationSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -9,12 +10,6 @@ object Translations {
 
     lateinit var manager: TranslationManager
     private val translationHooks = arrayListOf<TranslationHook>()
-
-    private fun loadTranslations(callback: ((Map<String, Int>) -> Unit)? = null) {
-        CoroutineScope(Dispatchers.Default).launch {
-            manager.loadTranslations(callback)
-        }
-    }
 
     fun registerTranslationHook(hook: TranslationHook) {
         translationHooks.add(hook)
@@ -32,11 +27,13 @@ object Translations {
         return translation
     }
 
-    val translations = manager
+    val translations get() = manager
 
-    fun load(translationManager: TranslationManager, callback: ((Map<String, Int>) -> Unit)? = null) {
-        manager = translationManager
+    fun load(source: TranslationSource, callback: ((Map<String, Int>) -> Unit)? = null) {
+        manager = TranslationManager(source)
 
-        loadTranslations(callback)
+        CoroutineScope(Dispatchers.Default).launch {
+            manager.loadTranslations(callback)
+        }
     }
 }

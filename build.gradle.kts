@@ -21,6 +21,8 @@ repositories {
 }
 
 val minecraftVersion: String by project
+val koTestVersion = "6.0.0.M1"
+val mockkVersion = "1.13.16"
 
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
@@ -29,6 +31,9 @@ dependencies {
     api("dev.fruxz:ascend:2024.2.2") // TODO: Own implementation
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
+    testImplementation("io.mockk:mockk:${mockkVersion}")
 }
 
 paperweight {
@@ -41,6 +46,10 @@ tasks.register<Jar>("sourcesJar") {
     group = JavaBasePlugin.DOCUMENTATION_GROUP
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
 
 publishing {
