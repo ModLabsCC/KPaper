@@ -34,9 +34,9 @@ object Translations {
 
     val translations = manager
 
-    fun load(translationManager: TranslationManager) {
+    fun load(translationManager: TranslationManager, callback: ((Map<String, Int>) -> Unit)? = null) {
         manager = translationManager
 
-        loadTranslations()
+        loadTranslations(callback)
     }
 }
