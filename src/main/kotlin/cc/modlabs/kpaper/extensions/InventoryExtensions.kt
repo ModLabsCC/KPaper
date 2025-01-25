@@ -163,21 +163,19 @@ fun Inventory.setItem(range: IntProgression, item: ItemStack) {
     range.forEach { this.setItem(it, item) }
 }
 
-fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmptyInventory(inv, PLACEHOLDER_GRAY)
-    if (identifier != null) inv.identify(identifier, *identifiers)
+fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), excludeSlots: List<Int> = emptyList()) {
+    fillEmptyInventory(inv, PLACEHOLDER_GRAY, identifier, *identifiers, excludeSlots = excludeSlots)
     player.openInventory(inv)
 }
 
-fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, spacer: ItemStack = PLACEHOLDER_GRAY, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-    fillEmptyInventory(inv, spacer)
-    if (identifier != null) inv.identify(identifier, *identifiers)
+fun fillEmptyAndOpenInventory(player: Player, inv: Inventory, spacer: ItemStack = PLACEHOLDER_GRAY, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), excludeSlots: List<Int> = emptyList()) {
+    fillEmptyInventory(inv, spacer, identifier, *identifiers, excludeSlots = excludeSlots)
     player.openInventory(inv)
 }
 
-fun fillEmptyInventory(inventory: Inventory, customSpacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+fun fillEmptyInventory(inventory: Inventory, customSpacer: ItemStack, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), excludeSlots: List<Int> = emptyList()) {
     for (i in 0 until inventory.size) {
-        if (inventory.getItem(i) == null || inventory.getItem(i)!!.type == Material.AIR) {
+        if ((inventory.getItem(i) == null || inventory.getItem(i)!!.type == Material.AIR) && i !in excludeSlots) {
             inventory.setItem(i, customSpacer)
         }
     }
