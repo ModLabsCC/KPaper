@@ -36,6 +36,7 @@ dependencies {
 
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
+    testImplementation("com.google.code.gson:gson:2.11.0")
 }
 
 paperweight {

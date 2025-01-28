@@ -1,28 +1,32 @@
 package cc.modlabs.kpaper.utils
 
 import com.google.gson.Gson
-import java.net.URL
+import java.net.URI
 
 class MojangAPI {
     private val gson = Gson()
 
-    fun getUUID(name: String): String {
-        val baseUrl = "https://api.mojang.com/users/profiles/minecraft/$name"
-        val response = URL(baseUrl).readText()
-        val uuidResponse = gson.fromJson(response, MojangUUIDResponse::class.java)
-        return uuidResponse.id.replace("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})".toRegex(), "$1-$2-$3-$4-$5")
-    }
+    fun getUser(user: String): MclSuccessResponse? {
+        val url = "https://mcl.flawcra.cc/$user"
+        val response = URI.create(url).toURL().readText()
 
-    fun getUsername(uuid: String): String {
-        // http request to mojang api to get username
-        val responseUrl = "https://sessionserver.mojang.com/session/minecraft/profile/$uuid"
-        val response = URL(responseUrl).readText()
-        val skinResponse = gson.fromJson(response, SkinResponse::class.java)
-        return skinResponse.name
+        val errorResponse = gson.fromJson(response, MclErrorResponse::class.java)
+        if (errorResponse.error != null) {
+            return null
+        }
+
+        return gson.fromJson(response, MclSuccessResponse::class.java)
     }
 }
 
-data class SkinResponse(val id: String, val name: String, val properties: List<MojangProperty>)
-data class MojangProperty(val name: String, val value: String)
+data class MclErrorResponse(
+    val code: String? = null,
+    val error: String? = null
+)
 
-data class MojangUUIDResponse(val name: String, val id: String)
+data class MclSuccessResponse(
+    val username: String,
+    val id: String,      // already hyphenated
+    val avatar: String,
+    val skin_texture: String,
+)
