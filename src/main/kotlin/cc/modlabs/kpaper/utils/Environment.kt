@@ -19,4 +19,11 @@ object Environment {
         return dotEnv[key] ?: env[key]
     }
 
+    fun getBoolean(key: String): Boolean {
+        return getEnv(key)?.toBoolean() ?: false
+    }
+
+    fun getInt(key: String): Int? {
+        return getEnv(key)?.toIntOrNull()
+    }
 }
