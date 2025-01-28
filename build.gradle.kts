@@ -29,6 +29,8 @@ dependencies {
 
     api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
     api("dev.fruxz:ascend:2024.2.2") // TODO: Own implementation
+    api("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 

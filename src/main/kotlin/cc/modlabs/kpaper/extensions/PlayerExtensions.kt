@@ -10,6 +10,7 @@ import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.Sound
 import org.bukkit.attribute.Attribute
+import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
@@ -44,6 +45,11 @@ fun Player.maxOutHealth() {
     health = getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
 }
 
+val Player.standingOn: Block
+    get() = world.getBlockAt(location.blockX, location.blockY - 1, location.blockZ)
+
+val String.asPlayer: Player?
+    get() = Bukkit.getPlayer(this)
 
 fun UUID.toOfflinePlayer(): OfflinePlayer {
     return Bukkit.getOfflinePlayer(this)
@@ -75,6 +81,11 @@ fun Collection<Player>.sendMessagePlain(message: String) {
 
 fun Collection<Player>.sendMessagePlain(message: Component) {
     forEach { it.sendMessagePlain(message) }
+}
+
+
+fun Player.send(message: String) {
+    this.sendMessage(text(message))
 }
 
 

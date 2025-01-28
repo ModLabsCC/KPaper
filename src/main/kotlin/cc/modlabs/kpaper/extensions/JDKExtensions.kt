@@ -47,3 +47,31 @@ val OptionalInt.to3DigitsReversed: String
 fun Int.toFixedString(digits: Int = 3): String {
     return this.toString().padStart(digits, '0')
 }
+
+fun String.titlecase(): String {
+    return this.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercaseChar() } }
+}
+
+
+fun <K> Map<K, Double>.chooseByProbability(): K? {
+    val sum = this.values.sum()
+    var random = Math.random() * sum
+    for ((key, value) in this) {
+        random -= value
+        if (random <= 0) {
+            return key
+        }
+    }
+    return null
+}
+
+fun <K> Map<K, Double>.chooseByProbability(amount: Int): List<K> {
+    val result = mutableListOf<K>()
+    for (i in 0 until amount) {
+        val chosen = this.chooseByProbability()
+        if (chosen != null) {
+            result.add(chosen)
+        }
+    }
+    return result
+}
