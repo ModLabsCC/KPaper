@@ -1,5 +1,6 @@
 ﻿package cc.modlabs.kpaper.main
 
+import cc.modlabs.kpaper.event.CustomEventListener
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -10,7 +11,6 @@ lateinit var PluginInstance: KPlugin
 
 
 abstract class KPlugin : JavaPlugin() {
-
     /**
      * Called when the plugin was loaded
      */
@@ -36,12 +36,14 @@ abstract class KPlugin : JavaPlugin() {
 
     final override fun onEnable() {
         ItemClickListener.load()
+        CustomEventListener.load()
 
         startup()
     }
 
     final override fun onDisable() {
         ItemClickListener.unload()
+        CustomEventListener.unload()
 
         shutdown()
     }
