@@ -1,23 +1,20 @@
-package cc.modlabs.kpaper.utils
+package cc.modlabs.kpaper.utils.config
 
-import cc.modlabs.kpaper.main.PluginInstance
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 import java.io.IOException
 
-
 /**
  * Represents a configuration file for storing settings in YAML format.
  *
- * This class extends [YamlConfiguration] and provides additional functionality for handling file operations and
+ * This class extends [org.bukkit.configuration.file.YamlConfiguration] and provides additional functionality for handling file operations and
  * loading/saving configuration data.
  *
  * @property fileName The name of the configuration file.
  */
-class FileConfig(fileName: String) : YamlConfiguration() {
+abstract class FileConfig(var path: String) : YamlConfiguration() {
     private var seperator: String?
-    private val path: String
     fun saveConfig() {
         try {
             save(path)
@@ -31,7 +28,7 @@ class FileConfig(fileName: String) : YamlConfiguration() {
         if (seperator == null) {
             seperator = "/"
         }
-        path = "plugins${seperator}${PluginInstance.dataFolder.name}$seperator$fileName"
+        path = path.replace("/", seperator.toString())
         val file = File(path)
         try {
             if (!file.exists()) {
