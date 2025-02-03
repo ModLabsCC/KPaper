@@ -11,7 +11,6 @@ class LocalDateAdapter : JsonSerializer<LocalDate>, JsonDeserializer<LocalDate> 
         typeOfSrc: Type?,
         context: JsonSerializationContext?
     ): JsonElement {
-        // If you don't want null to appear at all, you can handle it differently
         return if (src == null) JsonNull.INSTANCE else JsonPrimitive(src.toString())
     }
 
