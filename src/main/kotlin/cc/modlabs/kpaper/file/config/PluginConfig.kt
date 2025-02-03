@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.utils.config
+package cc.modlabs.kpaper.file.config
 
 import cc.modlabs.kpaper.main.PluginInstance
 

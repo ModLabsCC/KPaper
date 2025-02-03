@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.utils.config
+package cc.modlabs.kpaper.file.config
 
 import org.bukkit.configuration.InvalidConfigurationException
 import org.bukkit.configuration.file.YamlConfiguration

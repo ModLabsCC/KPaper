@@ -1,9 +1,8 @@
 package cc.modlabs.kpaper.translation
 
 import cc.modlabs.kpaper.extensions.getInternalLogger
-import cc.modlabs.kpaper.extensions.getLogger
 import cc.modlabs.kpaper.translation.interfaces.TranslationSource
-import cc.modlabs.kpaper.utils.TempStorage
+import cc.modlabs.kpaper.file.TempStorage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

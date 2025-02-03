@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.utils
+package cc.modlabs.kpaper.file
 
 import java.io.File
 
