@@ -3,6 +3,7 @@
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Particle
+import org.bukkit.Registry
 import org.bukkit.Sound
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
@@ -233,7 +234,7 @@ data class SoundEffect(
     val pitch: Float = 1f
 ) {
 
-    constructor(sound: Sound, volume: Float = 0.4f, pitch: Float = 1f) : this(sound.toString(), volume, pitch)
+    constructor(sound: Sound, volume: Float = 0.4f, pitch: Float = 1f) : this(Registry.SOUNDS.getKey(sound).toString(), volume, pitch)
     fun play(player: Player) {
         player.playSound(player.location, sound, volume, pitch)
     }
