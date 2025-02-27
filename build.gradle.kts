@@ -30,7 +30,7 @@ dependencies {
     api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
     api("dev.fruxz:ascend:2024.2.2") // TODO: Own implementation
 
-    implementation("cc.modlabs:KlassicX:2025.2.27.1757")
+    implementation("cc.modlabs:KlassicX:2025.2.27.1914")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
