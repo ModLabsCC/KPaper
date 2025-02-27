@@ -1,7 +1,6 @@
 package cc.modlabs.kpaper.extensions
 
-import cc.modlabs.klassicx.extensions.code
-import cc.modlabs.klassicx.translation.Translations
+import cc.modlabs.kpaper.translation.Translations
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
@@ -35,6 +34,8 @@ fun CommandSender.translate(messageKey: String, placeholders: Map<String, Any?> 
     return messageKey.toTranslated(this, placeholders)
 }
 
+val Locale.code: String
+    get() = this.language + (if (this.country.isNotEmpty()) "_$country" else "")
 
 fun String.toMinecraftTranslated(vararg args: Any): String {
     return "<lang:$this${
