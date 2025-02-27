@@ -29,10 +29,11 @@ dependencies {
 
     api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
     api("dev.fruxz:ascend:2024.2.2") // TODO: Own implementation
-    api("io.github.cdimascio:dotenv-kotlin:6.4.1")
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("cc.modlabs:KlassicX:2025.2.27.1757")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")

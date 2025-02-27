@@ -5,7 +5,7 @@ import java.io.File
 /**
  * The `TempStorage` class represents a utility for storing temporary files during runtime.
  */
-object TempStorage {
+open class BaseTempStorage(dir: String = ".temp") {
 
     /**
      * Represents a temporary folder used for storing files during runtime.
@@ -18,7 +18,7 @@ object TempStorage {
      * - Saving a temporary file with given name and content:
      * ```kotlin
      * saveTempFile("filename.txt", "Hello, World!")*/
-    private val tempFolder = File(".temp").also { it.mkdirs() }
+    private val tempFolder = File(dir).also { it.mkdirs() }
 
     /**
      * Saves a temporary file with the given name and content.
@@ -146,3 +146,5 @@ object TempStorage {
         }
     }
 }
+
+object TempStorage : BaseTempStorage()
