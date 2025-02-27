@@ -32,14 +32,12 @@ class PlayerArgument : CustomArgumentType<Player, String> {
         context: CommandContext<S>,
         builder: SuggestionsBuilder
     ): CompletableFuture<Suggestions> {
-        val currentArg = context.input.lastOrNull() ?: run {
-            onlinePlayers.forEach {
-                builder.suggest(it.name)
-            }
-            return builder.buildFuture()
-        }
+        val currentArg = context.input.lastOrNull()
 
-        onlinePlayers.filter { player -> player.name.startsWith(currentArg) }.forEach {
+        onlinePlayers.filter { player ->
+            if (currentArg != null) player.name.startsWith(currentArg, ignoreCase = true)
+            else true
+        }.forEach {
             builder.suggest(it.name)
         }
 
