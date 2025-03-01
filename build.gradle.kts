@@ -71,15 +71,32 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
 
-            artifact(tasks.named("jar").get()) {
-                classifier = null
-            }
+            from(components["java"])
 
             artifact(tasks.named("sourcesJar"))
 
             pom {
                 name.set("KPaper")
                 description.set("A utility library designed to simplify plugin development with Paper and Kotlin.")
+                url.set("https://github.com/ModLabsCC/KPaper")
+                licenses {
+                    license {
+                        name.set("GPL-3.0")
+                        url.set("https://github.com/ModLabsCC/KPaper/blob/main/LICENSE")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("ModLabsCC")
+                        name.set("ModLabsCC")
+                        email.set("contact@modlabs.cc")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/ModLabsCC/KPaper.git")
+                    developerConnection.set("scm:git:git@github.com:ModLabsCC/KPaper.git")
+                    url.set("https://github.com/ModLabsCC/KPaper")
+                }
             }
         }
     }
