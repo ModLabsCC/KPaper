@@ -2,8 +2,6 @@ package cc.modlabs.kpaper.scoreboard
 
 import com.google.common.base.Preconditions
 import com.google.common.base.Splitter
-import com.google.common.collect.Lists
-import com.google.common.collect.Maps
 import dev.fruxz.stacked.text
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -22,8 +20,8 @@ class SimpleScoreboard(private var title: String?) {
 
     init {
         this.scoreboard = Bukkit.getScoreboardManager().newScoreboard
-        this.scores = Maps.newLinkedHashMap()
-        this.teams = Lists.newArrayList()
+        this.scores = mutableMapOf()
+        this.teams = mutableListOf()
     }
 
     fun blankLine() {
