@@ -410,6 +410,22 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    // add a new one to the existing lore
+
+    fun addLore(vararg lores: String): ItemBuilder {
+        val meta = itemStack.itemMeta
+        val lore = meta.lore()?.toMutableList() ?: mutableListOf()
+        lores.forEach {
+            val lines = it.split("\n")
+            for (line in lines) {
+                lore += text(line)
+            }
+        }
+        meta.lore(lore.map { Component.text().decoration(TextDecoration.ITALIC, false).append(it).build() })
+        itemStack.itemMeta = meta
+        return this
+    }
+
     /**
      * Adds lore to the item builder if the given condition is true.
      *
