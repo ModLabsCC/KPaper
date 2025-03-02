@@ -10,7 +10,7 @@ import org.jetbrains.annotations.ApiStatus
 
 object PacketInterceptor {
 
-    private val packetCallbacks = mutableMapOf<Int, Pair<Class<out Packet<*>>, (Packet<*>) -> Unit>>()
+    private val packetCallbacks = mutableMapOf<Int, Pair<Class<out Packet<*>>, (Player, Packet<*>) -> Unit>>()
     private var counter = 0
 
     /**
@@ -22,12 +22,12 @@ object PacketInterceptor {
      * @param callback the callback to be called when the packet is received
      * @return the ID of the callback
      */
-    fun <T : Packet<*>> registerPacketCallback(packet: Class<T>, callback: (T) -> Unit): Int {
+    fun <T : Packet<*>> registerPacketCallback(packet: Class<T>, callback: (Player, T) -> Unit): Int {
         val id = counter++
-        packetCallbacks[id] = Pair(packet, callback as (Packet<*>) -> Unit)
+        packetCallbacks[id] = Pair(packet, callback as (Player,Packet<*>) -> Unit)
         return id
     }
-    
+
     /**
      * Unregisters a packet callback.
      *
@@ -44,9 +44,9 @@ object PacketInterceptor {
      * @param packet the packet to handle
      */
     @ApiStatus.Internal
-    internal fun handlePacket(packet: Packet<*>) {
-        packetCallbacks.filter { it.value.first.javaClass == packet.javaClass }.forEach { (id, pair) ->
-            pair.second(packet)
+    internal fun handlePacket(player: Player, packet: Packet<*>) {
+        packetCallbacks.filter { it.value.first.javaClass == packet.javaClass }.forEach { (_, pair) ->
+            pair.second(player, packet)
         }
     }
 }
@@ -60,7 +60,7 @@ fun Player.injectPacketInterceptor() {
     val channelDuplexHandler = object : ChannelDuplexHandler() {
         override fun channelRead(channelHandlerContext: ChannelHandlerContext, packet: Any) {
             if (packet !is Packet<*>) return
-            PacketInterceptor.handlePacket(packet)
+            PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
             super.channelRead(channelHandlerContext, packet)
         }
     }
