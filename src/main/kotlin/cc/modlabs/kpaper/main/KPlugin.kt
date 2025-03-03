@@ -1,7 +1,9 @@
 ﻿package cc.modlabs.kpaper.main
 
 import cc.modlabs.kpaper.event.CustomEventListener
+import cc.modlabs.kpaper.inventory._internal.AnvilListener
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -46,6 +48,7 @@ abstract class KPlugin : JavaPlugin() {
 
     final override fun onEnable() {
         if (isFeatureEnabled(Feature.ITEM_CLICK)) {
+            Bukkit.getPluginManager().registerEvents(AnvilListener, this)
             ItemClickListener.load()
         }
         if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) {
