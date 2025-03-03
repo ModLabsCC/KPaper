@@ -37,7 +37,7 @@ class AnvilGUI {
     var title: String = "Anvil"
     var noCost: Boolean = false
     val slotConfigs: MutableMap<AnvilSlot, SlotConfig> = mutableMapOf()
-    var onComplete: ((player: Player, input: Component?) -> Unit)? = null
+    var onComplete: ((player: Player, input: String) -> Unit)? = null
     var onClose: ((player: Player) -> Unit)? = null
 
     fun slot(slot: AnvilSlot, builder: SlotBuilder.() -> Unit) {
@@ -59,29 +59,12 @@ class SlotBuilder {
 fun Player.openAnvilGUI(builder: AnvilGUI.() -> Unit): InventoryView? {
     val gui = AnvilGUI().apply(builder)
     val inv: Inventory = Bukkit.createInventory(null, InventoryType.ANVIL, text(gui.title))
+
     gui.slotConfigs.forEach { (slot, config) ->
         config.item?.let { inv.setItem(slot.index, it) }
     }
     AnvilListener.registerGUI(this, inv, gui)
     val view = this.openInventory(inv)
-
-    if (gui.noCost) {
-        try {
-            val holder = view?.topInventory?.holder
-            val containerField = holder?.javaClass?.getDeclaredField("container")
-            if (containerField != null) {
-                containerField.isAccessible = true
-            }
-            val container = containerField?.get(holder)
-            val repairCostField = container?.javaClass?.getDeclaredField("repairCost")
-            if (repairCostField != null) {
-                repairCostField.isAccessible = true
-            }
-            repairCostField?.setInt(container, 0)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
     return view
 }

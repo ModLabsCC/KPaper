@@ -2,11 +2,14 @@ package cc.modlabs.kpaper.inventory._internal
 
 import cc.modlabs.kpaper.inventory.AnvilGUI
 import cc.modlabs.kpaper.inventory.AnvilSlot
+import dev.fruxz.stacked.extension.asPlainString
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryType
+import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.inventory.Inventory
 
 object AnvilListener : Listener {
@@ -20,10 +23,11 @@ object AnvilListener : Listener {
         activeGUIs.remove(inventory)
     }
 
-    // Listen for clicks in the anvil GUI
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
-        val pair = activeGUIs[event.inventory] ?: return
+        if (event.inventory.type != InventoryType.ANVIL) return
+        if (!activeGUIs.containsKey(event.inventory)) return
+        val pair = activeGUIs[event.inventory]!!
         val (player, gui) = pair
 
         // Ensure the click comes from the intended player
@@ -33,35 +37,54 @@ object AnvilListener : Listener {
         val clickedSlot = AnvilSlot.entries.find { it.index == event.slot }
         if (clickedSlot != null) {
             val slotConfig = gui.slotConfigs[clickedSlot]
-            // Call the custom onClick handler if one is defined
             slotConfig?.onClick?.invoke(player, event)
-            // For the output slot, if no custom onClick is provided, use the default onComplete callback
             if (clickedSlot == AnvilSlot.OUTPUT && slotConfig?.onClick == null) {
                 val clickedItem = event.currentItem
-                // Typically the "renamed" text is taken from the item's display name
-                val inputText = clickedItem?.displayName()
+
+                val inputText: String = clickedItem?.displayName()?.asPlainString ?: ""
                 gui.onComplete?.invoke(player, inputText)
                 player.closeInventory()
                 unregisterGUI(event.inventory)
                 return
             }
-            // Cancel the event if consumeItem is true (default) to prevent default item transfer
             if (slotConfig?.consumeItem != false) {
                 event.isCancelled = true
             }
         } else {
-            // Cancel clicks outside our defined slots
             event.isCancelled = true
         }
     }
 
-    // Clean up when the anvil inventory is closed
     @EventHandler
     fun onInventoryClose(event: InventoryCloseEvent) {
         if (activeGUIs.containsKey(event.inventory)) {
             val (player, gui) = activeGUIs[event.inventory]!!
             gui.onClose?.invoke(player)
             unregisterGUI(event.inventory)
+        }
+    }
+
+    @EventHandler
+    fun onPrepareAnvil(event: PrepareAnvilEvent) {
+        if (!activeGUIs.containsKey(event.inventory)) return
+
+        val (player, gui) = activeGUIs[event.inventory]!!
+
+        val viewer = event.viewers.firstOrNull()
+        if (viewer !== player) return
+
+        val inv = event.inventory
+
+        val anvilView = event.view
+
+        if (gui.noCost) {
+            anvilView.setRepairCost(0)
+        }
+
+
+        if (inv.getItem(0) != null && inv.getItem(2) == null) {
+            val inputItem = inv.getItem(0)?.clone() ?: return
+            inv.setItem(2, inputItem)
         }
     }
 }
