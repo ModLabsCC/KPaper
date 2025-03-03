@@ -39,7 +39,7 @@ object AnvilListener : Listener {
             if (clickedSlot == AnvilSlot.OUTPUT && slotConfig?.onClick == null) {
                 val clickedItem = event.currentItem
                 // Typically the "renamed" text is taken from the item's display name
-                val inputText = clickedItem?.itemMeta?.displayName()
+                val inputText = clickedItem?.displayName()
                 gui.onComplete?.invoke(player, inputText)
                 player.closeInventory()
                 unregisterGUI(event.inventory)
