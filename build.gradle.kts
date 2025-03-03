@@ -63,6 +63,7 @@ publishing {
                 password = System.getenv("NEXUS_PASS")
             }
         }
+        mavenLocal()
     }
     publications {
         create<MavenPublication>("maven") {

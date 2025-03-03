@@ -1,6 +1,7 @@
 package cc.modlabs.kpaper.packets
 
 import cc.modlabs.kpaper.extensions.connection
+import dev.fruxz.ascend.extension.forceCast
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
@@ -10,7 +11,8 @@ import org.jetbrains.annotations.ApiStatus
 
 object PacketInterceptor {
 
-    private val packetCallbacks = mutableMapOf<Int, Pair<Class<out Packet<*>>, (Player, Packet<*>) -> Unit>>()
+    private val packetCallbacks =
+        mutableMapOf<Int, Pair<Class<out Packet<*>>, (Player, Packet<*>) -> Unit>>()
     private var counter = 0
 
     /**
@@ -18,13 +20,18 @@ object PacketInterceptor {
      * The callback will be called when the given packet is received.
      * Don't forget to inject the packet interceptor into the player before you can receive packets.
      *
-     * @param packet the packet to register the callback for
+     * @param packet the packet class to register the callback for
      * @param callback the callback to be called when the packet is received
      * @return the ID of the callback
      */
-    fun <T : Packet<*>> registerPacketCallback(packet: Class<T>, callback: (Player, T) -> Unit): Int {
+    fun <T : Packet<*>> registerPacketCallback(
+        packet: Class<T>,
+        callback: (Player, T) -> Unit
+    ): Int {
         val id = counter++
-        packetCallbacks[id] = Pair(packet, callback as (Player,Packet<*>) -> Unit)
+        // Wrap the callback to safely cast the packet type when calling the callback
+
+        packetCallbacks[id] = Pair(packet) { player, pkt -> callback(player, pkt.forceCast()) }
         return id
     }
 
@@ -45,8 +52,11 @@ object PacketInterceptor {
      */
     @ApiStatus.Internal
     internal fun handlePacket(player: Player, packet: Packet<*>) {
-        packetCallbacks.filter { it.value.first.javaClass == packet.javaClass }.forEach { (_, pair) ->
-            pair.second(player, packet)
+        packetCallbacks.forEach { (_, pair) ->
+            val (packetClass, callback) = pair
+            if (packetClass.isInstance(packet)) {
+                callback(player, packet)
+            }
         }
     }
 }
@@ -59,8 +69,9 @@ object PacketInterceptor {
 fun Player.injectPacketInterceptor() {
     val channelDuplexHandler = object : ChannelDuplexHandler() {
         override fun channelRead(channelHandlerContext: ChannelHandlerContext, packet: Any) {
-            if (packet !is Packet<*>) return
-            PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
+            if (packet is Packet<*>) {
+                PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
+            }
             super.channelRead(channelHandlerContext, packet)
         }
     }
