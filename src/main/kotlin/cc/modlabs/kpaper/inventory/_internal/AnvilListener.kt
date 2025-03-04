@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.inventory._internal
 
+import cc.modlabs.kpaper.extensions.getLogger
 import cc.modlabs.kpaper.inventory.AnvilGUI
 import cc.modlabs.kpaper.inventory.AnvilSlot
 import dev.fruxz.stacked.extension.asPlainString
@@ -39,9 +40,10 @@ object AnvilListener : Listener {
             val slotConfig = gui.slotConfigs[clickedSlot]
             slotConfig?.onClick?.invoke(player, event)
             if (clickedSlot == AnvilSlot.OUTPUT && slotConfig?.onClick == null) {
-                val clickedItem = event.currentItem
-
-                val inputText: String = clickedItem?.displayName()?.asPlainString ?: ""
+                getLogger().info("Clicked Slot: ${clickedSlot.name}")
+                val clickedItem = event.currentItem ?: throw Exception("Current item is null!")
+                getLogger().info("clicked item: ${clickedItem.type}")
+                val inputText: String = clickedItem.displayName().asPlainString
                 gui.onComplete?.invoke(player, inputText)
                 player.closeInventory()
                 unregisterGUI(event.inventory)
@@ -79,12 +81,11 @@ object AnvilListener : Listener {
 
         if (gui.noCost) {
             anvilView.setRepairCost(0)
-        }
 
-
-        if (inv.getItem(0) != null && inv.getItem(2) == null) {
-            val inputItem = inv.getItem(0)?.clone() ?: return
-            inv.setItem(2, inputItem)
+            if (inv.getItem(0) != null && inv.getItem(2) == null) {
+                val inputItem = inv.getItem(0)?.clone() ?: return
+                inv.setItem(2, inputItem)
+            }
         }
     }
 }
