@@ -41,6 +41,7 @@ object AnvilListener : Listener {
             slotConfig?.onClick?.invoke(player, event)
             if (clickedSlot == AnvilSlot.OUTPUT && slotConfig?.onClick == null) {
                 getLogger().info("Clicked Slot: ${clickedSlot.name}")
+                getLogger().info("Clicked slot int: ${event.slot}")
                 val clickedItem = event.currentItem ?: throw Exception("Current item is null!")
                 getLogger().info("clicked item: ${clickedItem.type}")
                 val inputText: String = clickedItem.displayName().asPlainString
