@@ -1,6 +1,7 @@
 package cc.modlabs.kpaper.packets
 
 import cc.modlabs.kpaper.extensions.connection
+import cc.modlabs.kpaper.extensions.getLogger
 import dev.fruxz.ascend.extension.forceCast
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
@@ -29,8 +30,6 @@ object PacketInterceptor {
         callback: (Player, T) -> Unit
     ): Int {
         val id = counter++
-        // Wrap the callback to safely cast the packet type when calling the callback
-
         packetCallbacks[id] = Pair(packet) { player, pkt -> callback(player, pkt.forceCast()) }
         return id
     }
@@ -55,7 +54,10 @@ object PacketInterceptor {
         packetCallbacks.forEach { (_, pair) ->
             val (packetClass, callback) = pair
             if (packetClass.isInstance(packet)) {
+                getLogger().info("Received a packet of type ${packetClass.simpleName} and found a callback for it.")
                 callback(player, packet)
+            } else {
+                getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but no callback was found.")
             }
         }
     }
@@ -69,10 +71,13 @@ object PacketInterceptor {
 fun Player.injectPacketInterceptor() {
     val channelDuplexHandler = object : ChannelDuplexHandler() {
         override fun channelRead(channelHandlerContext: ChannelHandlerContext, packet: Any) {
-            if (packet is Packet<*>) {
-                PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
-            }
             super.channelRead(channelHandlerContext, packet)
+            if (packet is Packet<*>) {
+                getLogger().info(packet.toString())
+                PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
+            } else {
+                getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but it is not a packet.")
+            }
         }
     }
     var channel: Channel? = null
@@ -90,4 +95,6 @@ fun Player.injectPacketInterceptor() {
     } catch (_: IllegalAccessException) {
     } catch (_: NoSuchFieldException) {
     }
+
+    getLogger().info(channel.toString())
 }

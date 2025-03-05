@@ -2,7 +2,6 @@ package cc.modlabs.kpaper.inventory
 
 import cc.modlabs.kpaper.inventory._internal.AnvilListener
 import dev.fruxz.stacked.text
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent

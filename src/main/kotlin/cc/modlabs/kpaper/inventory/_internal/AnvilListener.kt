@@ -19,7 +19,7 @@ object AnvilListener : Listener {
         activeGUIs[inventory] = player to gui
     }
 
-    fun unregisterGUI(inventory: Inventory) {
+    private fun unregisterGUI(inventory: Inventory) {
         activeGUIs.remove(inventory)
     }
 
@@ -64,6 +64,7 @@ object AnvilListener : Listener {
         }
     }
 
+
     @EventHandler
     fun onPrepareAnvil(event: PrepareAnvilEvent) {
         if (!activeGUIs.containsKey(event.inventory)) return
@@ -78,7 +79,7 @@ object AnvilListener : Listener {
         val anvilView = event.view
 
         if (gui.noCost) {
-            anvilView.setRepairCost(0)
+            anvilView.repairCost = 0
         }
 
 
