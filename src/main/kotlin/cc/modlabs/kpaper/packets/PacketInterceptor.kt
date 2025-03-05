@@ -73,7 +73,7 @@ fun Player.injectPacketInterceptor() {
                 if (packet is Packet<*>) {
                     PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
                 } else {
-                    getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but it is not a packet.")
+                    getLogger().warn("Received a packet of type ${packet.javaClass.simpleName} but it is not a packet.")
                 }
             } catch (e: Exception) {
                 getLogger().warn("An error occurred while handling a packet.")
@@ -86,7 +86,6 @@ fun Player.injectPacketInterceptor() {
         channel = connection.connection.channel
         channel.pipeline().addBefore("packet_handler", name, channelDuplexHandler)
     } catch (e: IllegalArgumentException) {
-        // Bei Plugin-Neuladen, um doppelte Handler-Namen-Ausnahme zu verhindern
         if (channel == null) {
             return
         }
@@ -96,6 +95,4 @@ fun Player.injectPacketInterceptor() {
     } catch (_: IllegalAccessException) {
     } catch (_: NoSuchFieldException) {
     }
-
-    getLogger().info(channel.toString())
 }
