@@ -54,10 +54,7 @@ object PacketInterceptor {
         packetCallbacks.forEach { (_, pair) ->
             val (packetClass, callback) = pair
             if (packetClass.isInstance(packet)) {
-                getLogger().info("Received a packet of type ${packetClass.simpleName} and found a callback for it.")
                 callback(player, packet)
-            } else {
-                getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but no callback was found.")
             }
         }
     }
@@ -72,11 +69,15 @@ fun Player.injectPacketInterceptor() {
     val channelDuplexHandler = object : ChannelDuplexHandler() {
         override fun channelRead(channelHandlerContext: ChannelHandlerContext, packet: Any) {
             super.channelRead(channelHandlerContext, packet)
-            if (packet is Packet<*>) {
-                getLogger().info(packet.toString())
-                PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
-            } else {
-                getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but it is not a packet.")
+            try {
+                if (packet is Packet<*>) {
+                    PacketInterceptor.handlePacket(this@injectPacketInterceptor, packet)
+                } else {
+                    getLogger().info("Received a packet of type ${packet.javaClass.simpleName} but it is not a packet.")
+                }
+            } catch (e: Exception) {
+                getLogger().warn("An error occurred while handling a packet.")
+                e.printStackTrace()
             }
         }
     }
