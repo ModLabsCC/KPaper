@@ -213,6 +213,20 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    fun addCustomString(value: String): ItemBuilder {
+        val meta = itemStack.itemMeta
+        val previous = meta.customModelDataComponent
+        meta.setCustomModelDataComponent(CraftCustomModelDataComponent(CustomModelData(previous.floats, previous.flags, previous.strings + value, previous.colors.map { it.asARGB() })))
+        itemStack.itemMeta = meta
+        return this
+    }
+
+    fun getCustomStrings(): List<String> {
+        val meta = itemStack.itemMeta
+        val customModelDataComponent = meta.customModelDataComponent
+        return customModelDataComponent.strings
+    }
+
     /**
      * Sets the owner of the skull to the given name.
      *

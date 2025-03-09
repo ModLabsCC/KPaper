@@ -155,6 +155,20 @@ fun ItemStack.getKey(namespacedKey: NamespacedKey): String? {
     )
 }
 
+fun ItemStack.addCustomString(value: String): ItemStack {
+    return this.toItemBuilder {
+        addCustomString(value)
+    }.build()
+}
+
+fun ItemStack.getCustomStrings(): List<String> {
+    return this.itemMeta?.customModelDataComponent?.strings ?: emptyList()
+}
+
+fun ItemStack.hasCustomString(value: String): Boolean {
+    return this.getCustomStrings().contains(value)
+}
+
 val PLACEHOLDER_GRAY = ItemBuilder(Material.GRAY_STAINED_GLASS_PANE) {
     display(" ")
 }.build()
