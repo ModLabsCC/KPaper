@@ -15,6 +15,9 @@ import java.io.IOException
  */
 abstract class FileConfig(var path: String) : YamlConfiguration() {
     private var seperator: String?
+
+    val file: File
+
     fun saveConfig() {
         try {
             save(path)
@@ -23,13 +26,17 @@ abstract class FileConfig(var path: String) : YamlConfiguration() {
         }
     }
 
+    fun deleteConfig() {
+        file.delete()
+    }
+
     init {
         seperator = System.getProperty("file.seperator")
         if (seperator == null) {
             seperator = "/"
         }
         path = path.replace("/", seperator.toString())
-        val file = File(path)
+        file = File(path)
         try {
             if (!file.exists()) {
                 file.createNewFile()
