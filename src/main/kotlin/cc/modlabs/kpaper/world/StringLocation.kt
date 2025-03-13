@@ -41,11 +41,11 @@ data class StringLocation(
 fun String.toStringLocation(): StringLocation {
     val split = split(",")
     return StringLocation(
-        split[0].toDoubleOrNull() ?: 0.0,
-        split[1].toDoubleOrNull() ?: 0.0,
-        split[2].toDoubleOrNull() ?: 0.0,
-        split[3].toFloatOrNull() ?: 0.0f,
-        split[4].toFloatOrNull() ?: 0.0f,
+        split.getOrNull(0)?.toDoubleOrNull() ?: 0.0,
+        split.getOrNull(1)?.toDoubleOrNull() ?: 0.0,
+        split.getOrNull(2)?.toDoubleOrNull() ?: 0.0,
+        split.getOrNull(3)?.toFloatOrNull() ?: 0.0f,
+        split.getOrNull(4)?.toFloatOrNull() ?: 0.0f,
         split.getOrNull(5) ?: "world",
     )
 }
