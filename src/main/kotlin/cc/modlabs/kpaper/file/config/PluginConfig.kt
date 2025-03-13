@@ -10,4 +10,4 @@ import cc.modlabs.kpaper.main.PluginInstance
  *
  * @property fileName The name of the configuration file.
  */
-class PluginConfig(fileName: String) : FileConfig("plugins/${PluginInstance.dataFolder.name}/$fileName")
+class PluginConfig(fileName: String) : FileYamlConfig("plugins/${PluginInstance.dataFolder.name}/$fileName")

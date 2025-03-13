@@ -13,7 +13,7 @@ import java.io.IOException
  *
  * @property fileName The name of the configuration file.
  */
-abstract class FileConfig(var path: String) : YamlConfiguration() {
+abstract class FileYamlConfig(var path: String) : YamlConfiguration() {
     private var seperator: String?
 
     val file: File
