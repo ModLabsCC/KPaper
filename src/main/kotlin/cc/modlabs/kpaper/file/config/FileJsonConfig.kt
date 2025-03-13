@@ -35,12 +35,15 @@ abstract class FileJsonConfig(var path: String) {
         path = path.replace("/", separator)
         file = File(path)
         try {
+            if (!file.parentFile.exists()) {
+                file.parentFile.mkdirs()
+            }
             if (!file.exists()) {
                 file.createNewFile()
                 json = JsonObject() // Initialize an empty configuration
             } else {
                 // If file.readJson() returns null, use an empty JsonObject instead.
-                json = file.readJson() ?: JsonObject()
+                json = gson.fromJson(file.readText(Charsets.UTF_8), JsonObject::class.java)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -54,7 +57,7 @@ abstract class FileJsonConfig(var path: String) {
      */
     fun saveConfig() {
         try {
-            file.writeJson(json)
+            file.writeText(gson.toJson(json), Charsets.UTF_8)
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -75,7 +78,7 @@ abstract class FileJsonConfig(var path: String) {
     fun reloadConfig() {
         try {
             if (file.exists()) {
-                json = file.readJson() ?: JsonObject()
+                json = gson.fromJson(file.readText(Charsets.UTF_8), JsonObject::class.java)
             }
         } catch (e: IOException) {
             e.printStackTrace()
