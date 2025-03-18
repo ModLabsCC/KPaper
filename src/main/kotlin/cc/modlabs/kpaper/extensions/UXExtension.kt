@@ -1,5 +1,6 @@
 ﻿package cc.modlabs.kpaper.extensions
 
+import dev.fruxz.ascend.extension.time.inWholeMinecraftTicks
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Particle
@@ -9,6 +10,11 @@ import org.bukkit.block.BlockFace
 import org.bukkit.entity.Player
 import kotlin.math.cos
 import kotlin.math.sin
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
 
 /**
  * Spawns particles at the specified location.
@@ -254,3 +260,19 @@ class MelodyBuilder {
 fun soundOf(sound: Sound, pitch: Float = 1.0f, volume: Float = 1.0f): SoundEffect {
     return SoundEffect(sound, pitch, volume)
 }
+
+fun PotionEffect(type: PotionEffectType, durationTicks: Int, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true) =
+    PotionEffect(
+        type,
+        durationTicks,
+        amplifier,
+        ambient,
+        particles,
+        icon
+    )
+
+fun PotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true) =
+    PotionEffect(type, duration.inWholeMinecraftTicks.toInt(), amplifier, ambient, particles, icon)
+
+fun buildPotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true, builder: PotionEffect.() -> Unit) =
+    PotionEffect(type, duration, amplifier, ambient, particles, icon).apply(builder)

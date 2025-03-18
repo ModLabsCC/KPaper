@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.visuals.impl
 
+import cc.modlabs.kpaper.extensions.actionBar
 import cc.modlabs.kpaper.extensions.timer
 import cc.modlabs.kpaper.visuals.VisualElement
 import cc.modlabs.kpaper.visuals.VisualManager
@@ -26,7 +27,7 @@ object ActionBarVisuals : VisualManager {
             store.renderAll(1.seconds).forEach {
                 buff.setLength(0)
                 it.second.forEach { s -> buff.append(s ?: "").append(' ') }
-                it.first.sendActionBar(text(buff.toString()))
+                it.first.actionBar(buff.toString())
             }
         }
     }

@@ -94,3 +94,7 @@ val Player.connection: ServerGamePacketListenerImpl
         val serverPlayer = (player as CraftPlayer).handle as ServerPlayer
         return serverPlayer.connection
     }
+
+fun Player.actionBar(text: String) {
+    sendActionBar(text(text))
+}
