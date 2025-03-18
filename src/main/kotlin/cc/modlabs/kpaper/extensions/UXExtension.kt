@@ -1,5 +1,6 @@
 ﻿package cc.modlabs.kpaper.extensions
 
+import cc.modlabs.kpaper.visuals.effect.ParticleData
 import dev.fruxz.ascend.extension.time.inWholeMinecraftTicks
 import org.bukkit.Color
 import org.bukkit.Location
@@ -14,6 +15,10 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import com.destroystokyo.paper.ParticleBuilder
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 /**
@@ -222,15 +227,52 @@ fun buildMelody(builder: MelodyBuilder.() -> Unit): Melody {
 }
 
 // Melody and Beat classes
-class Melody(private val beats: List<Beat>) {
-    fun play(player: Player) {
-        beats.forEach { it.play(player) }
+class Melody(
+    private var ticksPerBeat: Long = 10,
+    private var ticksPerSound: Long = 0,
+    var repetitions: Int = 0,
+    private val beats: List<Beat>
+) {
+    var delayPerBeat: Duration
+        get() = ticksPerBeat.takeIf { it > 0 }?.minecraftTicks ?: Duration.ZERO
+        set(value) {
+            ticksPerBeat = value.inWholeMinecraftTicks
+        }
+
+    var delayPerSound: Duration
+        get() = ticksPerSound.takeIf { it > 0 }?.minecraftTicks ?: Duration.ZERO
+        set(value) {
+            ticksPerSound = value.inWholeMinecraftTicks
+        }
+
+    fun play(player: Player) = GlobalScope.launch {
+        repeat(1 + repetitions) {
+            beats.forEach {
+                it.play(player)
+                delay(delayPerSound)
+            }
+            delay(delayPerBeat)
+        }
+    }
+
+    fun play(location: Location) = GlobalScope.launch {
+        repeat(1 + repetitions) {
+            beats.forEach {
+                it.play(location)
+                delay(delayPerSound)
+            }
+            delay(delayPerBeat)
+        }
     }
 }
 
 class Beat(private val sounds: List<SoundEffect>) {
     fun play(player: Player) {
         sounds.forEach { it.play(player) }
+    }
+
+    fun play(location: Location) {
+        sounds.forEach { it.play(location) }
     }
 }
 
@@ -244,16 +286,40 @@ data class SoundEffect(
     fun play(player: Player) {
         player.playSound(player.location, sound, volume, pitch)
     }
+
+    fun play(location: Location) {
+        location.world.playSound(location, sound, volume, pitch)
+    }
 }
 
 class MelodyBuilder {
     private val beats = mutableListOf<Beat>()
+    private var repetitions = 0
+    private var delayPerBeat: Duration = Duration.ZERO
+    private var delayPerSound: Duration = Duration.ZERO
 
     fun beat(vararg sounds: SoundEffect) {
         beats.add(Beat(sounds.toList()))
     }
 
-    fun build(): Melody = Melody(beats)
+    fun repeat(times: Int) {
+        repetitions = times
+    }
+
+    fun delayPerBeat(duration: Duration) {
+        delayPerBeat = duration
+    }
+
+    fun delayPerSound(duration: Duration) {
+        delayPerSound = duration
+    }
+
+    fun build(): Melody = Melody(
+        ticksPerBeat = delayPerBeat.inWholeMinecraftTicks,
+        ticksPerSound = delayPerSound.inWholeMinecraftTicks,
+        repetitions = repetitions,
+        beats = beats.toList()
+    )
 }
 
 // Utility function to create SoundEffect
@@ -276,3 +342,65 @@ fun PotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplif
 
 fun buildPotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true, builder: PotionEffect.() -> Unit) =
     PotionEffect(type, duration, amplifier, ambient, particles, icon).apply(builder)
+
+
+@Throws(IllegalStateException::class)
+fun ParticleBuilder.playParticleEffect(reach: Double = .0) {
+    val location = location()
+    val internalReceivers = receivers()?.toList() ?: location?.world?.players
+
+    if (location != null) {
+        internalReceivers!!
+
+        if (reach > 0) {
+            val participants = location.getNearbyPlayers(reach).filter { internalReceivers.contains(it) }
+            val computedParticleBuilder = receivers(participants)
+
+            computedParticleBuilder.spawn()
+
+        } else
+            spawn()
+
+    } else
+        throw IllegalStateException("'location'[bukkit.Location] of ParticleBuilder cannot be null!")
+}
+
+@Throws(IllegalStateException::class)
+fun ParticleBuilder.playParticleEffect(reach: Number = .0) =
+    playParticleEffect(reach.toDouble())
+
+fun ParticleBuilder.playParticleEffect() =
+    playParticleEffect(.0)
+
+fun ParticleBuilder.offset(offset: Number) = offset(offset.toDouble(), offset.toDouble(), offset.toDouble())
+
+fun ParticleBuilder.offset(offsetX: Number, offsetZ: Number) = offset(offsetX.toDouble(), .0, offsetZ.toDouble())
+
+fun ParticleBuilder.location(loc: Location) = location(loc)
+
+fun particleOf(particle: Particle): ParticleData = ParticleData(particle)
+
+fun buildParticle(particle: Particle, builder: ParticleData.() -> Unit) =
+    ParticleData(particle).apply(builder)
+
+fun ParticleBuilder.copy(
+    particle: Particle = particle(),
+    receivers: List<Player>? = receivers(),
+    source: Player? = source(),
+    location: Location? = location(),
+    count: Int = count(),
+    offsetX: Double = offsetX(),
+    offsetY: Double = offsetY(),
+    offsetZ: Double = offsetZ(),
+    extra: Double = extra(),
+    data: Any? = data(),
+    force: Boolean = force(),
+) = ParticleBuilder(particle)
+    .receivers(receivers)
+    .source(source)
+    .count(count)
+    .offset(offsetX, offsetY, offsetZ)
+    .extra(extra)
+    .data(data)
+    .force(force)
+    .let { if (location != null) it.location(location) else it }
