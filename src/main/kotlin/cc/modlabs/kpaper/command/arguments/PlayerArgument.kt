@@ -32,16 +32,25 @@ class PlayerArgument : CustomArgumentType<Player, String> {
         context: CommandContext<S>,
         builder: SuggestionsBuilder
     ): CompletableFuture<Suggestions> {
-        val currentArg = context.input.lastOrNull()
-
-        onlinePlayers.filter { player ->
-            if (currentArg != null) player.name.startsWith(currentArg, ignoreCase = true)
-            else true
-        }.forEach {
-            builder.suggest(it.name)
+        val currentArg = builder.remaining
+        
+        if (currentArg.isNullOrEmpty() || currentArg.isBlank()) {
+            onlinePlayers.forEach {
+                builder.suggest(it.name)
+            }
+        } else {
+            onlinePlayers.filter { player ->
+                player.name.startsWith(currentArg, ignoreCase = true)
+            }.forEach {
+                builder.suggest(it.name)
+            }
         }
 
         return builder.buildFuture()
+    }
+
+    override fun getExamples(): MutableCollection<String> {
+        return Bukkit.getOnlinePlayers().map { it.name }.toMutableList()
     }
 
 }
