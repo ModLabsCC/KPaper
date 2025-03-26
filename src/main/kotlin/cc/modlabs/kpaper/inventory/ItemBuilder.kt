@@ -26,6 +26,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataType
@@ -657,6 +658,23 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
                 this.itemMeta = itemMeta
             }
         }
+    }
+
+    fun isExact(itemStack: ItemStack, withoutDurability: Boolean = true): Boolean {
+        val itemToCheck = itemStack.clone()
+        val thisItem = this.itemStack.clone()
+        if (withoutDurability && itemStack.itemMeta is Damageable && this.itemStack.itemMeta is Damageable) {
+            val damageableItemMeta = itemToCheck.itemMeta as Damageable
+            val damageableThisItemMeta = thisItem.itemMeta as Damageable
+            if (withoutDurability) {
+                damageableItemMeta.damage = 0
+                damageableThisItemMeta.damage = 0
+            }
+            itemToCheck.itemMeta = damageableItemMeta
+            thisItem.itemMeta = damageableThisItemMeta
+        }
+
+        return itemToCheck == thisItem
     }
 
     /**

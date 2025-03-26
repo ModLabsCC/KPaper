@@ -2,17 +2,22 @@
 
 import cc.modlabs.kpaper.consts.NAMESPACE_GUI_IDENTIFIER
 import cc.modlabs.kpaper.consts.NAMESPACE_ITEM_IDENTIFIER
+import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.ItemBuilder
 import cc.modlabs.kpaper.inventory.toItemBuilder
 import dev.fruxz.ascend.extension.isNull
 import dev.fruxz.stacked.text
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
+import java.util.UUID
 
 
 /**
@@ -291,4 +296,43 @@ fun ItemStack.hasKey(namespacedKey: String): Boolean {
         pluginKey(namespacedKey),
         PersistentDataType.STRING
     ) ?: false
+}
+
+fun Inventory.clone(inventoryHolder: InventoryHolder? = null, shuffeld: Boolean = false): Inventory {
+    val newInventory = Bukkit.createInventory(inventoryHolder, size)
+    newInventory.contents = contents
+
+    if (shuffeld) {
+        newInventory.contents = newInventory.contents.shuffled()
+    }
+
+    return newInventory
+}
+
+private inline fun <reified T> Array<T>.shuffled(): Array<T> {
+    val list = toMutableList()
+    list.shuffle()
+    return list.toTypedArray()
+}
+
+fun Inventory.containsExact(itemStack: ItemStack): Boolean {
+    return contents.any { it?.toItemBuilder()?.isExact(itemStack) == true }
+}
+
+/**
+ * Sets the owner of the item to the specified UUID and schedules a task to remove the owner after a given time.
+ *
+ * @param uuid The UUID of the owner.
+ * @param time The time (in ticks) after which the owner will be removed. If set to 0 or less, no task will be scheduled.
+ * @return The modified item.
+ */
+fun Item.ownedBy(uuid: UUID, time: Long = 20 * 10L): Item {
+    owner = uuid
+    if (time <= 0) return this // No need to schedule a task
+
+    taskRunLater(time) {
+        if (!isValid) return@taskRunLater
+        owner = null
+    }
+    return this
 }
