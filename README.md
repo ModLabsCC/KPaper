@@ -19,8 +19,8 @@ dependencies {
 Here's a basic example of using KPaper in a plugin:
 
 ```kotlin
-import de.joker.kpaper.event.listen
-import de.joker.kpaper.main.KPlugin
+import cc.modlabs.kpaper.event.listen
+import cc.modlabs.kpaper.main.KPlugin
 import org.bukkit.event.player.PlayerJoinEvent
 
 class MyPlugin : KPlugin() {
