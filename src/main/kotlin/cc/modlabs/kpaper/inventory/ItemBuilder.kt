@@ -25,6 +25,7 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
@@ -518,6 +519,19 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
                 return@meta
             }
             this.setEnchantmentGlintOverride(glinting)
+        }
+        return this
+    }
+
+    /**
+     * Sets the rarity of the item.
+     *
+     * @param rarity the rarity to set
+     * @return the ItemBuilder instance
+     */
+    fun rarity(rarity: ItemRarity): ItemBuilder {
+        meta<ItemMeta> {
+            this.setRarity(rarity)
         }
         return this
     }
