@@ -38,6 +38,15 @@ class InventoryBuilder(
         player.openInventory(registerableInvetory)
         ItemClickListener.registerInventory(player, registerableInvetory, items)
     }
+
+    fun fill(item: InventoryItem): InventoryBuilder {
+        for (i in 0 until size) {
+            if (inventory.getItem(i) == null) {
+                inventory.setItem(i, item.itemStack)
+            }
+        }
+        return this
+    }
 }
 
 class InventoryItem(

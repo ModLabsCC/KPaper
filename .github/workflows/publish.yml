@@ -1,6 +1,9 @@
 name: Publish package to Nexus
 on:
-  workflow_dispatch:
+    push:
+        branches:
+          - main
+    workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest

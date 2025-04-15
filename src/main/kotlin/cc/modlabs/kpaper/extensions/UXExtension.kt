@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.destroystokyo.paper.ParticleBuilder
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -245,6 +246,7 @@ class Melody(
             ticksPerSound = value.inWholeMinecraftTicks
         }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun play(player: Player) = GlobalScope.launch {
         repeat(1 + repetitions) {
             beats.forEach {
@@ -255,6 +257,7 @@ class Melody(
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun play(location: Location) = GlobalScope.launch {
         repeat(1 + repetitions) {
             beats.forEach {
