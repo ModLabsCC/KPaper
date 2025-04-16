@@ -90,6 +90,12 @@ fun Player.send(message: String) {
     this.sendMessage(text(message))
 }
 
+fun CommandSender.sendMessageBlock(vararg lines: String) {
+    sendEmtpyLine()
+    lines.forEach { sendMessage(text(it)) }
+    sendEmtpyLine()
+}
+
 fun Player.title(
     title: String? = null,
     subtitle: String? = null,
