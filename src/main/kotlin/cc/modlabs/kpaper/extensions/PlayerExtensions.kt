@@ -1,6 +1,8 @@
 ﻿package cc.modlabs.kpaper.extensions
 
 import com.mojang.brigadier.context.CommandContext
+import dev.fruxz.stacked.extension.Times
+import dev.fruxz.stacked.extension.Title
 import dev.fruxz.stacked.text
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import net.kyori.adventure.text.Component
@@ -86,6 +88,22 @@ fun Collection<Player>.sendMessagePlain(message: Component) {
 
 fun Player.send(message: String) {
     this.sendMessage(text(message))
+}
+
+fun Player.title(
+    title: String? = null,
+    subtitle: String? = null,
+    fadeIn: Int = 20,
+    stay: Int = 60,
+    fadeOut: Int = 20
+) {
+    showTitle(
+        Title(
+            title = text(title ?: " "),
+            subtitle = text(subtitle ?: " "),
+            times = Times(fadeIn.minecraftTicks, stay.minecraftTicks, fadeOut.minecraftTicks)
+        )
+    )
 }
 
 
