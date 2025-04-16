@@ -30,7 +30,7 @@ dependencies {
 
     api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
 
-    api("cc.modlabs:KlassicX:2025.3.1.2009")
+    api("cc.modlabs:KlassicX:2025.4.16.1914")
 
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
