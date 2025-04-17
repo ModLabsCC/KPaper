@@ -58,7 +58,6 @@ fun getInventorySlot(y: Int, x: Int): Int {
     return x + y * 9
 }
 
-
 inline fun item(
     material: Material,
     amount: Int = 1,
@@ -82,13 +81,12 @@ fun ItemStack.lore(lore: List<String>): ItemStack = meta<ItemMeta> {
     this.lore(lore.map { text(it) })
 }
 
-fun openWithIdentifier(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
-
-    if (identifier != null) inv.identify(identifier, *identifiers)
+fun openWithIdentifier(player: Player, inv: Inventory, identifier: String? = null, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), identificationItem: ItemStack = Material.LIGHT_GRAY_STAINED_GLASS_PANE.asQuantity(1)) {
+    if (identifier != null) inv.identify(identifier, *identifiers, identificationItem = identificationItem)
     player.openInventory(inv)
 }
 
-fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey, String>? = arrayOf()) {
+fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), identificationItem: ItemStack = Material.LIGHT_GRAY_STAINED_GLASS_PANE.asQuantity(1)) {
     this.setItem(0, this.getItem(0)?.toItemBuilder {
         addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
         identifiers.forEach { map ->
@@ -96,7 +94,7 @@ fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey
                 addPersistentData(key, value)
             }
         }
-    }?.build() ?: Material.LIGHT_GRAY_STAINED_GLASS_PANE.toItemBuilder {
+    }?.build() ?: identificationItem.toItemBuilder {
         addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
         identifiers.forEach { map ->
             map?.forEach { (key, value) ->
