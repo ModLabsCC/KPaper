@@ -72,6 +72,17 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     }
 
     /**
+    * Sets the amount of the item stack.
+    *
+    * @param amount The amount to set for the item stack.
+    * @return The updated ItemBuilder instance.
+    */
+    fun amount(amount: Int): ItemBuilder {
+        itemStack.amount = amount
+        return this
+    }
+
+    /**
      * Updates the item meta by applying the provided DSL (Domain Specific Language) to it.
      *
      * @param dsl The DSL block to apply to the item meta.
