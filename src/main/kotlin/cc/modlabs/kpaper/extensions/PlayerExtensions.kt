@@ -122,3 +122,7 @@ val Player.connection: ServerGamePacketListenerImpl
 fun Player.actionBar(text: String) {
     sendActionBar(text(text))
 }
+
+fun broadcastActionbar(component: Component) {
+    Bukkit.getOnlinePlayers().forEach { it.sendActionBar(component) }
+}

@@ -15,10 +15,11 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.PlayerInventory
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
+import org.jetbrains.annotations.ApiStatus.Experimental
 import java.util.UUID
-
 
 /**
  * Each gridIndex is a 3x3 grid inside the inventory
@@ -333,4 +334,90 @@ fun Item.ownedBy(uuid: UUID, time: Long = 20 * 10L): Item {
         owner = null
     }
     return this
+}
+
+fun canItemFitInInventory(inventory: Inventory, itemToAdd: ItemStack): Boolean {
+    // Clone the item to avoid modifying the original
+    val itemToCheck = itemToAdd.clone()
+
+    if (itemToCheck.amount <= 0) {
+        return true // Empty stack always fits
+    }
+
+    // First pass: try to stack with existing similar items
+    for (i in 0 until inventory.size) {
+        val slot = inventory.getItem(i)
+
+        // Check if the slot has an item that can be stacked with our item
+        if (slot != null && slot.isSimilar(itemToCheck)) {
+            val maxStackSize = slot.type.maxStackSize
+            val availableSpace = maxStackSize - slot.amount
+
+            if (availableSpace > 0) {
+                itemToCheck.amount -= availableSpace
+
+                if (itemToCheck.amount <= 0) {
+                    return true // Item fits completely
+                }
+            }
+        }
+    }
+
+    // Second pass: check for empty slots
+    var remainingAmount = itemToCheck.amount
+    val maxStackSize = itemToCheck.type.maxStackSize
+
+    for (i in 0 until inventory.size) {
+        val slot = inventory.getItem(i)
+
+        if (slot == null) {
+            // This is an empty slot
+            remainingAmount -= maxStackSize
+
+            if (remainingAmount <= 0) {
+                return true // Item fits completely using empty slots
+            }
+        }
+    }
+
+    return false // Cannot fit the item
+}
+
+/**
+ * Alternative version that simulates adding the item to the inventory by creating a clone,
+ * useful when you need to know exactly how the item will be distributed.
+ *
+ * @param inventory The Bukkit/PaperMC inventory to check
+ * @param itemToAdd The ItemStack that needs to be added to the inventory
+ * @return Boolean indicating whether the item can fit into the inventory
+ */
+@Experimental
+fun canItemFitInInventorySimulated(inventory: PlayerInventory, itemToAdd: ItemStack): Boolean {
+    // Clone the inventory to avoid modifying the original
+    val tempInventory = inventory.holder?.server?.createInventory(null, inventory.size)
+        ?: return false
+
+    // Copy all items to the temporary inventory
+    for (i in 0 until inventory.size) {
+        val item = inventory.getItem(i)
+        if (item != null) {
+            tempInventory.setItem(i, item.clone())
+        }
+    }
+
+    // Try to add the item to the temporary inventory
+    val leftover = tempInventory.addItem(itemToAdd.clone())
+
+    // If there are no leftover items, it means everything fit
+    return leftover.isEmpty()
+}
+
+/**
+ * Extension function for PlayerInventory that checks if an ItemStack can fit
+ *
+ * @param itemToAdd The ItemStack to check
+ * @return Boolean indicating whether the item fits
+ */
+fun PlayerInventory.canFit(itemToAdd: ItemStack): Boolean {
+    return canItemFitInInventory(this, itemToAdd)
 }

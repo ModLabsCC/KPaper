@@ -1,8 +1,5 @@
-package cc.modlabs.kpaper.inventory.mineskin
+package cc.modlabs.kpaper.inventory.mineskin.models.texture
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Texture(
     val signature: String = "",
     val url: String = "",

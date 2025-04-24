@@ -32,6 +32,8 @@ dependencies {
 
     api("cc.modlabs:KlassicX:2025.4.22.1239")
 
+    api("com.squareup.okhttp3:okhttp:4.12.0")
+
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("com.google.code.gson:gson:2.11.0")
