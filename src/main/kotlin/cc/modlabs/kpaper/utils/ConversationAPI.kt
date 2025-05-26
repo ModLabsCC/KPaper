@@ -64,7 +64,7 @@ class ConversationAPI(private val player: Player) {
         private fun createPrompt(index: Int): Prompt {
             return object : StringPrompt() {
                 override fun getPromptText(context: ConversationContext): String {
-                    return questions[index].prompt.toString() // Convert Component to String
+                    return questions[index].prompt.toLegacy()
                 }
 
                 override fun acceptInput(context: ConversationContext, input: String?): Prompt? {
