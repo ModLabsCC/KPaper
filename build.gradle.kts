@@ -5,7 +5,7 @@ import java.util.*
 plugins {
     kotlin("jvm") version "2.0.21"
     `java-library`
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
     kotlin("plugin.serialization") version "2.1.0"
     id("maven-publish")
 }
@@ -28,9 +28,9 @@ val mockkVersion = "1.13.16"
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
 
-    api("dev.fruxz:stacked:2024.1.1") // TODO: Own implementation
+    api("dev.fruxz:stacked:2024.1.1")
 
-    api("cc.modlabs:KlassicX:2025.6.2.1012")
+    api("cc.modlabs:KlassicX:2025.6.21.1902")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
