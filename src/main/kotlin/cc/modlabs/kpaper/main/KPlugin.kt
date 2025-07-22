@@ -1,5 +1,6 @@
 ﻿package cc.modlabs.kpaper.main
 
+import cc.modlabs.kpaper.command.compat.internal.BrigardierSupport
 import cc.modlabs.kpaper.event.CustomEventListener
 import cc.modlabs.kpaper.inventory._internal.AnvilListener
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
@@ -47,6 +48,10 @@ abstract class KPlugin : JavaPlugin() {
     }
 
     final override fun onEnable() {
+        if (this.isEnabled) {
+            BrigardierSupport.registerAll()
+        }
+
         if (isFeatureEnabled(Feature.ITEM_CLICK)) {
             Bukkit.getPluginManager().registerEvents(AnvilListener, this)
             ItemClickListener.load()
