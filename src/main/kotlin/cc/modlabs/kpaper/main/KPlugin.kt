@@ -3,6 +3,7 @@
 import cc.modlabs.kpaper.event.CustomEventListener
 import cc.modlabs.kpaper.inventory._internal.AnvilListener
 import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import cc.modlabs.kpaper.inventory.simple.SimpleGUIListener
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -54,6 +55,7 @@ abstract class KPlugin : JavaPlugin() {
         if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) {
             CustomEventListener.load()
         }
+        Bukkit.getPluginManager().registerEvents(SimpleGUIListener(), this)
 
         startup()
     }
