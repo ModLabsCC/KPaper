@@ -344,7 +344,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param skinTexture The SkinTexture object containing the UUID, name, and texture information.
      * @return An ItemBuilder instance with the custom texture applied.
      */
-    private fun textureFromSkinTexture(skinTexture: MineSkinResponse): ItemBuilder {
+    fun textureFromSkinTexture(skinTexture: MineSkinResponse): ItemBuilder {
         val skinProfile = Bukkit.createProfile(UUID.randomUUID(), skinTexture.name)
         skinProfile.setProperty(
             ProfileProperty(
@@ -367,7 +367,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param name A name for that skin
      * @return An ItemBuilder instance with the custom texture applied.
      */
-    private fun textureFromTextureData(texture: String, signature: String, name: String = "SkinRandom"): ItemBuilder {
+    fun textureFromTextureData(texture: String, signature: String, name: String = "SkinRandom"): ItemBuilder {
         val skinProfile = Bukkit.createProfile(UUID.randomUUID(), name)
         skinProfile.setProperty(
             ProfileProperty(
