@@ -359,6 +359,29 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    /**
+     * Generates an ItemBuilder with a custom texture based on the provided texture and signature.
+     *
+     * @param texture The SkinTexture object containing texture information.
+     * @param signature The SkinTexture object containing signature information.
+     * @param name A name for that skin
+     * @return An ItemBuilder instance with the custom texture applied.
+     */
+    private fun textureFromTextureData(texture: String, signature: String, name: String = "SkinRandom"): ItemBuilder {
+        val skinProfile = Bukkit.createProfile(UUID.randomUUID(), name)
+        skinProfile.setProperty(
+            ProfileProperty(
+                "textures",
+                texture,
+                signature
+            )
+        )
+        val skullMeta = itemStack.itemMeta as SkullMeta
+        skullMeta.playerProfile = skinProfile
+        itemStack.itemMeta = skullMeta
+        return this
+    }
+
 
     /**
      * Change the displayname of the item if a certain condition is true.
