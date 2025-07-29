@@ -1,6 +1,6 @@
 package cc.modlabs.kpaper.inventory
 
-import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player

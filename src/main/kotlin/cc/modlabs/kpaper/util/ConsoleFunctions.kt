@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.functions
+package cc.modlabs.kpaper.util
 
 const val ANSI_RESET = "\u001B[0m"
 const val ANSI_BLACK = "\u001B[30m"

@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.inventory._internal
+package cc.modlabs.kpaper.inventory.internal
 
 import cc.modlabs.kpaper.inventory.AnvilGUI
 import cc.modlabs.kpaper.inventory.AnvilSlot

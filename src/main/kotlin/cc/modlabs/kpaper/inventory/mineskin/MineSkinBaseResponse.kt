@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.inventory.mineskin.models
+package cc.modlabs.kpaper.inventory.mineskin
 
 data class MineSkinBaseResponse(
     val success: Boolean,

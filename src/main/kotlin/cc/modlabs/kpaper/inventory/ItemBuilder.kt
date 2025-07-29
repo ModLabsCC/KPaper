@@ -3,12 +3,12 @@
 package cc.modlabs.kpaper.inventory
 
 import cc.modlabs.kpaper.coroutines.taskRunLater
-import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.mineskin.MineSkinFetcher
 import cc.modlabs.kpaper.inventory.mineskin.MinecraftSkin
 import cc.modlabs.kpaper.inventory.mineskin.SKIN
 import cc.modlabs.kpaper.inventory.mineskin.Textures
-import cc.modlabs.kpaper.inventory.mineskin.models.texture.MineSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
 import dev.fruxz.ascend.extension.forceCastOrNull

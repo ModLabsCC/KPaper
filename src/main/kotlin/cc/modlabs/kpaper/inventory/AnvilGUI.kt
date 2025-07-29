@@ -1,6 +1,6 @@
 package cc.modlabs.kpaper.inventory
 
-import cc.modlabs.kpaper.inventory._internal.AnvilListener
+import cc.modlabs.kpaper.inventory.internal.AnvilListener
 import dev.fruxz.stacked.text
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
