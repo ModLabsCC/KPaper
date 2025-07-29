@@ -184,11 +184,11 @@ object ItemStackConverter {
         return try {
             val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(data))
             val dataInput = BukkitObjectInputStream(inputStream)
-            val items = arrayOfNulls<ItemStack>(dataInput.readInt())
+            val items = arrayOfNulls<ItemStack?>(dataInput.readInt())
 
             // Read the serialized inventory
             for (i in items.indices) {
-                items[i] = dataInput.readObject() as ItemStack
+                items[i] = dataInput.readObject() as? ItemStack? ?: ItemStack(Material.AIR)
             }
             dataInput.close()
             items
