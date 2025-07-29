@@ -16,13 +16,14 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
+import org.jetbrains.annotations.ApiStatus.Experimental
+import java.util.UUID
 
 // Constants for inventory namespaces
 val NAMESPACE_GUI_IDENTIFIER = pluginKey("gui_identifier")
 val NAMESPACE_ITEM_IDENTIFIER = pluginKey("item_identifier")
-import org.bukkit.persistence.PersistentDataType
-import org.jetbrains.annotations.ApiStatus.Experimental
-import java.util.UUID
+
 
 /**
  * Each gridIndex is a 3x3 grid inside the inventory
