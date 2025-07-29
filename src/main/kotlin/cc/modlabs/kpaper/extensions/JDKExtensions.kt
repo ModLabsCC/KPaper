@@ -1,12 +1,10 @@
 ﻿package cc.modlabs.kpaper.extensions
 
-import cc.modlabs.kpaper.main.PluginInstance
-import org.slf4j.LoggerFactory
+import cc.modlabs.kpaper.functions.getInternalKPaperLogger
+import cc.modlabs.kpaper.functions.getLogger
 
-fun getLogger(): org.slf4j.Logger {
-    return LoggerFactory.getLogger(PluginInstance::class.java)
-}
+@Deprecated("Moved into functions folder", replaceWith = ReplaceWith("getLogger()", "cc.modlabs.kpaper.functions"))
+fun getLogger(): org.slf4j.Logger = getLogger()
 
-fun getInternalKPaperLogger(): org.slf4j.Logger {
-    return LoggerFactory.getLogger("cc.modlabs.kpaper")
-}
+@Deprecated("Moved into functions folder", replaceWith = ReplaceWith("getInternalKPaperLogger()", "cc.modlabs.kpaper.functions"))
+fun getInternalKPaperLogger(): org.slf4j.Logger = getInternalKPaperLogger()

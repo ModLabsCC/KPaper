@@ -5,6 +5,7 @@ import cc.modlabs.kpaper.consts.NAMESPACE_ITEM_IDENTIFIER
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.ItemBuilder
 import cc.modlabs.kpaper.inventory.toItemBuilder
+import cc.modlabs.kpaper.main.PluginInstance
 import dev.fruxz.ascend.extension.isNull
 import dev.fruxz.stacked.text
 import org.bukkit.Bukkit
@@ -152,10 +153,24 @@ fun ItemStack.hasKey(namespacedKey: NamespacedKey): Boolean {
     ) == true
 }
 
+fun <T : Any> ItemStack.hasKey(namespacedKey: NamespacedKey, type: PersistentDataType<T, T>): Boolean {
+    return this.itemMeta?.persistentDataContainer?.has(
+        namespacedKey,
+        type
+    ) == true
+}
+
 fun ItemStack.getKey(namespacedKey: NamespacedKey): String? {
     return this.itemMeta?.persistentDataContainer?.get(
         namespacedKey,
         PersistentDataType.STRING
+    )
+}
+
+fun <T : Any> ItemStack.getKey(namespacedKey: NamespacedKey, type: PersistentDataType<T, T>): T? {
+    return this.itemMeta?.persistentDataContainer?.get(
+        namespacedKey,
+        type
     )
 }
 
