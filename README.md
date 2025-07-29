@@ -32,6 +32,23 @@ class MyPlugin : KPlugin() {
 }
 ```
 
+## Package Structure
+
+KPaper is organized into several focused packages:
+
+- **`util`** - Utility functions including console output, logging, random number generation, and text processing
+- **`extensions`** - Kotlin extension functions for Bukkit/Paper classes
+- **`event`** - Event handling system with custom events and listeners
+- **`inventory`** - Inventory management, item builders, and GUI systems
+- **`command`** - Command framework and argument parsing
+- **`main`** - Core plugin functionality and feature configuration
+- **`world`** - World generation and manipulation utilities
+- **`messages`** - Message formatting and translation support
+- **`visuals`** - Visual effects and display systems
+- **`game`** - Game mechanics like countdowns and player management
+- **`file`** - File I/O and configuration management
+- **`coroutines`** - Kotlin coroutines integration for async operations
+
 Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests on the [GitHub repository](https://github.com/ModLabsCC/KPaper).
 
 ## Acknowledgments

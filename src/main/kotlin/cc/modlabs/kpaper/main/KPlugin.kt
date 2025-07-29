@@ -1,8 +1,8 @@
 ﻿package cc.modlabs.kpaper.main
 
 import cc.modlabs.kpaper.event.CustomEventListener
-import cc.modlabs.kpaper.inventory._internal.AnvilListener
-import cc.modlabs.kpaper.inventory._internal.ItemClickListener
+import cc.modlabs.kpaper.inventory.internal.AnvilListener
+import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.simple.SimpleGUIListener
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin

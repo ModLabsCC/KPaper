@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.inventory.mineskin.models.texture
+package cc.modlabs.kpaper.inventory.mineskin
 
 data class Texture(
     val signature: String = "",

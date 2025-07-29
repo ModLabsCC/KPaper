@@ -1,7 +1,7 @@
-package cc.modlabs.kpaper.inventory.mineskin.models.texture
+package cc.modlabs.kpaper.inventory.mineskin
 
-import cc.modlabs.kpaper.inventory.mineskin.models.MineSkinLinks
-import cc.modlabs.kpaper.inventory.mineskin.models.MineSkinWarning
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinLinks
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinWarning
 
 
 data class MineSkinSingleSkinResponse(

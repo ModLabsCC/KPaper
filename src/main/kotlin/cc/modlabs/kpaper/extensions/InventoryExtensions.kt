@@ -1,7 +1,5 @@
 ﻿package cc.modlabs.kpaper.extensions
 
-import cc.modlabs.kpaper.consts.NAMESPACE_GUI_IDENTIFIER
-import cc.modlabs.kpaper.consts.NAMESPACE_ITEM_IDENTIFIER
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.ItemBuilder
 import cc.modlabs.kpaper.inventory.toItemBuilder
@@ -18,6 +16,10 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.bukkit.inventory.meta.ItemMeta
+
+// Constants for inventory namespaces
+val NAMESPACE_GUI_IDENTIFIER = pluginKey("gui_identifier")
+val NAMESPACE_ITEM_IDENTIFIER = pluginKey("item_identifier")
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.annotations.ApiStatus.Experimental
 import java.util.UUID

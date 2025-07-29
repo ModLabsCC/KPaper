@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.utils
+package cc.modlabs.kpaper.util
 
 import cc.modlabs.kpaper.main.PluginInstance
 import net.kyori.adventure.text.Component

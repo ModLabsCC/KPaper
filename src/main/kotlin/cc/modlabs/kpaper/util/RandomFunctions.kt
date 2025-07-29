@@ -1,4 +1,4 @@
-package cc.modlabs.kpaper.functions
+package cc.modlabs.kpaper.util
 
 import kotlin.math.abs
 import kotlin.random.Random

@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.functions
+package cc.modlabs.kpaper.util
 
 import cc.modlabs.kpaper.main.PluginInstance
 import org.slf4j.Logger

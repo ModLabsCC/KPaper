@@ -1,8 +1,8 @@
 package cc.modlabs.kpaper.inventory.mineskin
 
 import cc.modlabs.klassicx.tools.Environment
-import cc.modlabs.kpaper.inventory.mineskin.models.texture.MineSkinResponse
-import cc.modlabs.kpaper.inventory.mineskin.models.texture.MineSkinSingleSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinSingleSkinResponse
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 import okhttp3.Request
