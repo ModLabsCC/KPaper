@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.extensions
+package cc.modlabs.kpaper.extensions
 
 import cc.modlabs.kpaper.main.PluginInstance
 import dev.fruxz.stacked.text

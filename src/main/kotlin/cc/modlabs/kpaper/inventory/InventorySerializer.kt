@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.inventory
+package cc.modlabs.kpaper.inventory
 
 
 import org.bukkit.Bukkit

@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.extensions
+package cc.modlabs.kpaper.extensions
 
 import cc.modlabs.kpaper.visuals.effect.ParticleData
 import dev.fruxz.ascend.extension.time.inWholeMinecraftTicks

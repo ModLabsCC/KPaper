@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.main
+package cc.modlabs.kpaper.main
 
 import cc.modlabs.kpaper.event.CustomEventListener
 import cc.modlabs.kpaper.inventory.internal.AnvilListener

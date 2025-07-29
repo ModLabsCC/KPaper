@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.extensions
+package cc.modlabs.kpaper.extensions
 
 import com.mojang.brigadier.context.CommandContext
 import dev.fruxz.stacked.extension.Times

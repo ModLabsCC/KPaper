@@ -1,4 +1,4 @@
-﻿@file:Suppress("unused", "EXPERIMENTAL_API_USAGE")
+@file:Suppress("unused", "EXPERIMENTAL_API_USAGE")
 
 package cc.modlabs.kpaper.inventory
 

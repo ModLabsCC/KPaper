@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.extensions
+package cc.modlabs.kpaper.extensions
 
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.ItemBuilder
