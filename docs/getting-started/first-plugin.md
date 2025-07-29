@@ -99,45 +99,51 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
 private fun setupCommands() {
-    // Simple welcome command
-    CommandBuilder("welcome")
-        .description("Get a welcome message")
-        .permission("welcomeplugin.welcome")
-        .playerOnly(true)
-        .execute { sender, _ ->
-            val player = sender as Player
-            player.sendFormattedMessage("&aWelcome to our server, &e${player.name}&a!")
-            player.sendFormattedMessage("&7Use &f/welcome gui &7to open the welcome GUI!")
-        }
-        .register()
+    // Commands are registered through Paper's lifecycle system
+    // This would be done in a CommandBootstrapper class
+}
+
+// Command implementations would look like:
+class WelcomeCommand : CommandBuilder {
     
-    // Welcome GUI command
-    CommandBuilder("welcome")
-        .subcommand("gui")
-        .description("Open the welcome GUI")
-        .permission("welcomeplugin.gui")
-        .playerOnly(true)
-        .execute { sender, _ ->
-            val player = sender as Player
-            openWelcomeGUI(player)
-        }
-        .register()
+    override val description = "Welcome command with GUI and admin features"
     
-    // Admin command to welcome specific players
-    CommandBuilder("welcome")
-        .subcommand("player")
-        .description("Send welcome message to a specific player")
-        .permission("welcomeplugin.admin")
-        .argument(playerArgument("target"))
-        .argument(stringArgument("message", optional = true))
-        .execute { sender, args ->
-            val target = args.getPlayer("target")
-            val message = args.getString("message") ?: "Welcome to the server!"
-            
-            target.sendFormattedMessage("&a$message")
-            sender.sendMessage("Welcome message sent to ${target.name}!")
+    override fun register() = Commands.literal("welcome")
+        .requires { it.sender.hasPermission("welcomeplugin.welcome") && it.sender is Player }
+        .executes { ctx ->
+            val player = ctx.source.sender as Player
+            player.sendFormattedMessage("§aWelcome to our server, §e${player.name}§a!")
+            player.sendFormattedMessage("§7Use §f/welcome gui §7to open the welcome GUI!")
+            Command.SINGLE_SUCCESS
         }
-        .register()
+        
+        // Welcome GUI sub-command
+        .then(Commands.literal("gui")
+            .requires { it.sender.hasPermission("welcomeplugin.gui") }
+            .executes { ctx ->
+                val player = ctx.source.sender as Player
+                openWelcomeGUI(player)
+                Command.SINGLE_SUCCESS
+            }
+        )
+        
+        // Admin sub-command to welcome specific players
+        .then(Commands.literal("player")
+            .requires { it.sender.hasPermission("welcomeplugin.admin") }
+            .then(Commands.argument("target", ArgumentTypes.player())
+                .executes { ctx ->
+                    val sender = ctx.source.sender
+                    val target = ArgumentTypes.player().parse(ctx.input).resolve(ctx.source).singlePlayer
+                    
+                    target.sendFormattedMessage("§aWelcome to our server, §e${target.name}§a!")
+                    target.sendFormattedMessage("§7An admin has sent you a welcome message!")
+                    
+                    sender.sendMessage("§aWelcome message sent to ${target.name}!")
+                    Command.SINGLE_SUCCESS
+                }
+            )
+        )
+        .build()
 }
 ```
 
@@ -363,14 +369,8 @@ class WelcomePlugin : KPlugin() {
     }
     
     private fun setupCommands() {
-        CommandBuilder("welcome")
-            .description("Welcome commands")
-            .permission("welcomeplugin.use")
-            .playerOnly(true)
-            .execute { sender, _ ->
-                openWelcomeGUI(sender as Player)
-            }
-            .register()
+        // In a real implementation, this would be registered in a CommandBootstrapper
+        // Example: WelcomeCommand class as shown earlier
     }
     
     private fun giveWelcomeItems(player: Player) {

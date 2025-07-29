@@ -74,15 +74,24 @@ class MyPlugin : KPlugin() {
             player.inventory.addItem(welcomeItem)
         }
         
-        // ⌨️ Commands with fluent API
-        CommandBuilder("shop")
-            .description("Open the server shop")
-            .permission("shop.use")
-            .playerOnly(true)
-            .execute { sender, _ ->
-                openShopGUI(sender as Player)
-            }
-            .register()
+        // ⌨️ Commands with KPaper integration
+        class ShopCommand : CommandBuilder {
+            override val description = "Open the server shop"
+            
+            override fun register() = Commands.literal("shop")
+                .requires { it.sender.hasPermission("shop.use") && it.sender is Player }
+                .executes { ctx ->
+                    openShopGUI(ctx.source.sender as Player)
+                    Command.SINGLE_SUCCESS
+                }
+                .build()
+        }
+        
+        // Register in lifecycle event
+        manager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+            val shopCommand = ShopCommand()
+            event.registrar().register(shopCommand.register(), shopCommand.description)
+        }
     }
     
     private fun openShopGUI(player: Player) {
@@ -236,39 +245,58 @@ class ShopGUI(private val category: ShopCategory) : KGUI() {
 <summary><b>Advanced Commands</b></summary>
 
 ```kotlin
-// Complex command with sub-commands and validation
-CommandBuilder("economy")
-    .description("Economy management commands")
-    .permission("economy.admin")
+// Complex command with sub-commands and validation  
+class EconomyCommand : CommandBuilder {
+    override val description = "Economy management commands"
     
-    // /economy balance [player]
-    .subcommand("balance")
-    .argument(playerArgument("target", optional = true))
-    .execute { sender, args ->
-        val target = args.getPlayerOrSelf("target", sender)
-        val balance = economyAPI.getBalance(target)
-        sender.sendMessage("${target.name}'s balance: $${balance}")
-    }
-    
-    // /economy pay <player> <amount>
-    .subcommand("pay")
-    .argument(playerArgument("target"))
-    .argument(doubleArgument("amount", min = 0.01))
-    .playerOnly(true)
-    .execute { sender, args ->
-        val player = sender as Player
-        val target = args.getPlayer("target")
-        val amount = args.getDouble("amount")
+    override fun register() = Commands.literal("economy")
+        .requires { it.sender.hasPermission("economy.admin") }
         
-        if (economyAPI.getBalance(player) < amount) {
-            player.sendMessage("&cInsufficient funds!")
-            return@execute
-        }
+        // /economy balance [player]
+        .then(Commands.literal("balance")
+            .executes { ctx ->
+                val sender = ctx.source.sender as Player
+                val balance = economyAPI.getBalance(sender)
+                sender.sendMessage("Your balance: $$balance")
+                Command.SINGLE_SUCCESS
+            }
+            .then(Commands.argument("target", ArgumentTypes.player())
+                .executes { ctx ->
+                    val sender = ctx.source.sender
+                    val target = ArgumentTypes.player().parse(ctx.input).resolve(ctx.source).singlePlayer
+                    val balance = economyAPI.getBalance(target)
+                    sender.sendMessage("${target.name}'s balance: $$balance")
+                    Command.SINGLE_SUCCESS
+                }
+            )
+        )
         
-        economyAPI.transfer(player, target, amount)
-        player.sendMessage("&aSent $${amount} to ${target.name}")
-        target.sendMessage("&aReceived $${amount} from ${player.name}")
-    }
+        // /economy pay <player> <amount>
+        .then(Commands.literal("pay")
+            .requires { it.sender is Player }
+            .then(Commands.argument("target", ArgumentTypes.player())
+                .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0.01))
+                    .executes { ctx ->
+                        val player = ctx.source.sender as Player
+                        val target = ArgumentTypes.player().parse(ctx.input).resolve(ctx.source).singlePlayer
+                        val amount = DoubleArgumentType.getDouble(ctx, "amount")
+                        
+                        if (economyAPI.getBalance(player) < amount) {
+                            player.sendMessage("§cInsufficient funds!")
+                            return@executes Command.SINGLE_SUCCESS
+                        }
+                        
+                        economyAPI.transfer(player, target, amount)
+                        player.sendMessage("§aSent $$amount to ${target.name}")
+                        target.sendMessage("§aReceived $$amount from ${player.name}")
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+            )
+        )
+        .build()
+}
+```
     
     // /economy set <player> <amount>
     .subcommand("set")

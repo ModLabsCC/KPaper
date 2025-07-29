@@ -55,13 +55,19 @@ class MyPlugin : KPlugin() {
             event.player.sendMessage("Welcome ${event.player.name}!")
         }
         
-        // Register commands (fluent API)
-        CommandBuilder("test")
-            .description("Test command")
-            .execute { sender, args ->
-                sender.sendMessage("Hello from KPaper!")
-            }
-            .register()
+        // Register commands (through CommandBuilder interface)
+        // In practice, this would be done in a CommandBootstrapper:
+        /*
+        class TestCommand : CommandBuilder {
+            override val description = "Test command"
+            override fun register() = Commands.literal("test")
+                .executes { ctx ->
+                    ctx.source.sender.sendMessage("Hello from KPaper!")
+                    Command.SINGLE_SUCCESS
+                }
+                .build()
+        }
+        */
         
         // Configuration is handled automatically
         
@@ -255,17 +261,24 @@ Objects.requireNonNull(getCommand("test")).setExecutor(new TestCommand());
 ```kotlin
 class MyPlugin : KPlugin() {
     override fun startup() {
-        CommandBuilder("test")
-            .description("Test command")
-            .usage("/test <message>")
-            .playerOnly(true)
-            .argument(stringArgument("message"))
-            .execute { sender, args ->
-                val player = sender as Player
-                val message = args.getString("message")
-                player.sendMessage("You said: $message")
-            }
-            .register()
+        // Command would be registered through CommandBootstrapper:
+        /*
+        class TestCommand : CommandBuilder {
+            override val description = "Test command"
+            
+            override fun register() = Commands.literal("test")
+                .requires { it.sender is Player }
+                .then(Commands.argument("message", StringArgumentType.greedyString())
+                    .executes { ctx ->
+                        val player = ctx.source.sender as Player
+                        val message = StringArgumentType.getString(ctx, "message")
+                        player.sendMessage("You said: $message")
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+                .build()
+        }
+        */
     }
 }
 ```
@@ -329,36 +342,54 @@ public class AdminCommand implements CommandExecutor {
 
 **After:**
 ```kotlin
-class MyPlugin : KPlugin() {
-    override fun startup() {
-        CommandBuilder("admin")
-            .description("Admin commands")
-            .permission("admin.use")
-            
-            // /admin ban <player> [reason]
-            .subcommand("ban")
-            .permission("admin.ban")
-            .argument(playerArgument("target"))
-            .argument(stringArgument("reason", optional = true))
-            .execute { sender, args ->
-                val target = args.getPlayer("target")
-                val reason = args.getStringOrDefault("reason", "Banned by admin")
-                
-                target.ban(reason, sender.name)
-                sender.sendMessage("Banned ${target.name}")
+class AdminCommand : CommandBuilder {
+    override val description = "Admin commands"
+    
+    override fun register() = Commands.literal("admin")
+        .requires { it.sender.hasPermission("admin.use") }
+        
+        // /admin ban <player> [reason]
+        .then(Commands.literal("ban")
+            .requires { it.sender.hasPermission("admin.ban") }
+            .then(Commands.argument("target", ArgumentTypes.player())
+                .executes { ctx ->
+                    val sender = ctx.source.sender
+                    val target = ArgumentTypes.player().parse(ctx.input).resolve(ctx.source).singlePlayer
+                    val reason = "Banned by admin"
+                    
+                    target.ban(reason, sender.name)
+                    sender.sendMessage("Banned ${target.name}: $reason")
+                    Command.SINGLE_SUCCESS
+                }
+                .then(Commands.argument("reason", StringArgumentType.greedyString())
+                    .executes { ctx ->
+                        val sender = ctx.source.sender
+                        val target = ArgumentTypes.player().parse(ctx.input).resolve(ctx.source).singlePlayer
+                        val reason = StringArgumentType.getString(ctx, "reason")
+                        
+                        target.ban(reason, sender.name)
+                        sender.sendMessage("Banned ${target.name}: $reason")
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+            )
+        )
+        
+        // /admin heal
+        .then(Commands.literal("heal")
+            .requires { 
+                it.sender.hasPermission("admin.heal") && 
+                it.sender is Player 
             }
-            
-            // /admin heal
-            .subcommand("heal")
-            .permission("admin.heal")
-            .playerOnly(true)
-            .execute { sender, _ ->
-                val player = sender as Player
+            .executes { ctx ->
+                val player = ctx.source.sender as Player
                 player.health = player.maxHealth
                 player.sendMessage("Healed!")
+                Command.SINGLE_SUCCESS
             }
-            
-            .register()
+        )
+        .build()
+}
     }
 }
 ```
@@ -663,13 +694,29 @@ listen<PlayerJoinEvent> { /* new handler */ }
 
 **Solution:**
 ```kotlin
-// Ensure you call .register() on CommandBuilder
-CommandBuilder("mycommand")
-    .description("My command")
-    .execute { sender, args ->
-        // Command logic
+// Commands should be registered through Paper's lifecycle system
+// in a CommandBootstrapper, not directly in plugin startup
+
+class CommandBootstrapper : PluginBootstrap {
+    override fun bootstrap(context: BootstrapContext) {
+        val manager = context.lifecycleManager
+        
+        manager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+            val myCommand = MyCommand()
+            event.registrar().register(myCommand.register(), myCommand.description)
+        }
     }
-    .register() // Don't forget this!
+}
+
+class MyCommand : CommandBuilder {
+    override val description = "My command"
+    override fun register() = Commands.literal("mycommand")
+        .executes { ctx ->
+            // Command logic
+            Command.SINGLE_SUCCESS
+        }
+        .build()
+}
 ```
 
 ### Issue 4: Configuration Not Loading
