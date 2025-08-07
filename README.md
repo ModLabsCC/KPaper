@@ -1,5 +1,7 @@
 # KPaper
 
+<!-- GitAds-Verify: EHIZCRK1MG5K8OEKLLA46DC5MKO6QSZP -->
+
 <div align="center">
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ModLabsCC/KPaper/build.yml?branch=main)](https://github.com/ModLabsCC/KPaper/actions)
