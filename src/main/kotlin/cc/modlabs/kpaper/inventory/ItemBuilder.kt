@@ -4,22 +4,22 @@ package cc.modlabs.kpaper.inventory
 
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.internal.ItemClickListener
-import cc.modlabs.kpaper.inventory.mineskin.MineSkinFetcher
-import cc.modlabs.kpaper.inventory.mineskin.MinecraftSkin
-import cc.modlabs.kpaper.inventory.mineskin.SKIN
-import cc.modlabs.kpaper.inventory.mineskin.Textures
-import cc.modlabs.kpaper.inventory.mineskin.MineSkinResponse
+import cc.modlabs.kpaper.inventory.mineskin.*
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
 import dev.fruxz.ascend.extension.forceCastOrNull
 import dev.fruxz.stacked.text
+import io.papermc.paper.datacomponent.DataComponentType
+import io.papermc.paper.datacomponent.DataComponentTypes.CONSUMABLE
+import io.papermc.paper.datacomponent.item.Consumable
+import io.papermc.paper.datacomponent.item.consumable.ConsumeEffect
+import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.minecraft.world.item.component.CustomModelData
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.OfflinePlayer
+import org.bukkit.*
 import org.bukkit.craftbukkit.inventory.components.CraftCustomModelDataComponent
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -559,14 +559,40 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      */
     fun equippable(slot: EquipmentSlot): ItemBuilder {
         val meta = itemStack.itemMeta
-
         val equippable = meta.equippable
-
         equippable.slot = slot
-
         meta.setEquippable(equippable)
 
         itemStack.itemMeta = meta
+        return this
+    }
+
+
+    /**
+     * Sets the item as consumable with the specified parameters.
+     *
+     * @param consumeSeconds The time in seconds it takes to consume the item. Default is 1.6 seconds.
+     * @param animation The animation used when consuming the item. Default is ItemUseAnimation.EAT.
+     * @param sound The sound played when consuming the item. Default is "minecraft:entity.generic.eat".
+     * @param hasConsumeEffects Whether the item has consume effects. Default is true.
+     * @param onConsumeEffects A list of effects to apply when consuming the item. Default is an empty list.
+     * @return The updated ItemBuilder instance with the consumable data set.
+     */
+    fun consumable(consumeSeconds: Float = 1.6f,
+                   animation: ItemUseAnimation = ItemUseAnimation.EAT,
+                   sound: Key = Key.key("minecraft:entity.generic.eat"),
+                   hasConsumeEffects: Boolean = true,
+                   onConsumeEffects: List<ConsumeEffect> = listOf()): ItemBuilder {
+
+        val consumable = Consumable.consumable()
+            .consumeSeconds(consumeSeconds)
+            .animation(animation)
+            .sound(sound)
+            .hasConsumeParticles(hasConsumeEffects)
+            .addEffects(onConsumeEffects)
+            .build()
+
+        itemStack.setData(CONSUMABLE, consumable)
         return this
     }
 
