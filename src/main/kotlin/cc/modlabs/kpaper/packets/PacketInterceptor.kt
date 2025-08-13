@@ -1,7 +1,7 @@
 package cc.modlabs.kpaper.packets
 
-import cc.modlabs.kpaper.extensions.connection
-import cc.modlabs.kpaper.extensions.getLogger
+import cc.modlabs.kpaper.extensions.packetHandler
+import cc.modlabs.kpaper.util.getLogger
 import dev.fruxz.ascend.extension.forceCast
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
@@ -83,7 +83,7 @@ fun Player.injectPacketInterceptor() {
     }
     var channel: Channel? = null
     try {
-        channel = connection.connection.channel
+        channel = packetHandler.connection.channel
         channel.pipeline().addBefore("packet_handler", name, channelDuplexHandler)
     } catch (e: IllegalArgumentException) {
         if (channel == null) {

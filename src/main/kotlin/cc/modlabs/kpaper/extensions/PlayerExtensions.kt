@@ -113,7 +113,7 @@ fun Player.title(
 }
 
 
-val Player.connection: ServerGamePacketListenerImpl
+val Player.packetHandler: ServerGamePacketListenerImpl
     get() {
         val serverPlayer = (player as CraftPlayer).handle as ServerPlayer
         return serverPlayer.connection
