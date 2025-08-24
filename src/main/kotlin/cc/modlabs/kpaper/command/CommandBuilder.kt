@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.command
+package cc.modlabs.kpaper.command
 
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack

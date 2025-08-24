@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.extensions
+package cc.modlabs.kpaper.extensions
 
 import cc.modlabs.kpaper.util.getInternalKPaperLogger
 import cc.modlabs.kpaper.util.getLogger
