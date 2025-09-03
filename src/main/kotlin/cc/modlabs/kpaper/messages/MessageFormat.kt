@@ -10,7 +10,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 enum class MessageFormat(val format: String) {
-    INFO("\uE012<color:#CAD3C8> %s"),
+    INFO("ℹ<color:#CAD3C8> %s"),
     WARNING("<color:#F8EFBA>⚠ %s"),
     ERROR("<color:#FD7272>🪲 %s"),
     SUCCESS("✔ <color:#a3e877>%s"),
