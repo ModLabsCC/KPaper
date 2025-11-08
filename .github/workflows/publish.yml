@@ -44,7 +44,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Trigger Workflow in future secret project :O
+      - name: Trigger Publish in KPaperGradle
         run: |
           # Set the required variables
           repo_name=${{ secrets.TARGET_REPO }}
