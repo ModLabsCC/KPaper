@@ -8,7 +8,6 @@
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ModLabsCC/KPaper/build.yml?branch=main)](https://github.com/ModLabsCC/KPaper/actions)
 [![License](https://img.shields.io/github/license/ModLabsCC/KPaper)](LICENSE)
-[![Version](https://img.shields.io/maven-central/v/cc.modlabs/KPaper)](https://central.sonatype.com/artifact/cc.modlabs/KPaper)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Paper](https://img.shields.io/badge/paper-1.21.6-green.svg)](https://papermc.io)
 
