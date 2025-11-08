@@ -533,6 +533,6 @@ KPaper is licensed under the **GPL-3.0 License**. See [LICENSE](LICENSE) for det
 
 **Made with ❤️ by the ModLabs Team**
 
-[Website](https://modlabs.cc) • [Discord](https://discord.gg/modlabs) • [GitHub](https://github.com/ModLabsCC)
+[Website](https://modlabs.cc) • [Discord](https://dc.modlabs.cc) • [GitHub](https://github.com/ModLabsCC)
 
 </div>
