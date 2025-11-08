@@ -1,9 +1,5 @@
 # KPaper
 
-<!-- GitAds-Verify: EHIZCRK1MG5K8OEKLLA46DC5MKO6QSZP -->
-## GitAds Sponsored
-[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=modlabscc/kpaper@github)](https://gitads.dev/v1/ad-track?source=modlabscc/kpaper@github)
-
 <div align="center">
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ModLabsCC/KPaper/build.yml?branch=main)](https://github.com/ModLabsCC/KPaper/actions)
