@@ -16,4 +16,8 @@ abstract class KGUI<T> {
         val builder = buildInventory(player, context)
         builder.open(player)
     }
+
+    fun refresh(player: Player, context: T? = null) {
+        open(player, context)
+    }
 }
