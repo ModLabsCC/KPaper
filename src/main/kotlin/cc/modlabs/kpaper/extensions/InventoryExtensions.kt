@@ -439,3 +439,38 @@ fun canItemFitInInventorySimulated(inventory: PlayerInventory, itemToAdd: ItemSt
 fun PlayerInventory.canFit(itemToAdd: ItemStack): Boolean {
     return canItemFitInInventory(this, itemToAdd)
 }
+
+/** Returns true if there is at least one empty slot. */
+fun Inventory.hasSpace(): Boolean = contents.any { it == null || it.type == Material.AIR }
+
+/** Number of empty slots in this inventory. */
+fun Inventory.availableSpace(): Int = contents.count { it == null || it.type == Material.AIR }
+
+/** Remove a specific amount of items of the given material. */
+fun Inventory.removeItem(material: Material, amount: Int) {
+    var remaining = amount
+    if (remaining <= 0) return
+    for (i in 0 until size) {
+        val stack = getItem(i) ?: continue
+        if (stack.type != material) continue
+        if (stack.amount <= remaining) {
+            remaining -= stack.amount
+            setItem(i, null)
+        } else {
+            stack.amount = stack.amount - remaining
+            setItem(i, stack)
+            return
+        }
+        if (remaining <= 0) return
+    }
+}
+
+/** Clear all items of the specified material types. */
+fun Inventory.clearItems(vararg materials: Material) {
+    if (materials.isEmpty()) return
+    val set = materials.toSet()
+    for (i in 0 until size) {
+        val stack = getItem(i) ?: continue
+        if (stack.type in set) setItem(i, null)
+    }
+}
