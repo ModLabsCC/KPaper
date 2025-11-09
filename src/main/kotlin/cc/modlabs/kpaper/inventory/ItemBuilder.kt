@@ -722,6 +722,14 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    fun onClick(handler: (Player, InventoryClickEvent) -> Unit): ItemBuilder {
+        ItemClickListener.registerItemClickEvent(itemStack) { event ->
+            val player = event.whoClicked as? Player ?: return@registerItemClickEvent
+            handler(player, event)
+        }
+        return this
+    }
+
     /**
      * Creates a deep copy of the current ItemBuilder object.
      *
