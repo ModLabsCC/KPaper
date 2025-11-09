@@ -16,6 +16,8 @@ import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.entity.Player
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
 val CommandContext<CommandSourceStack>.sender: CommandSender
@@ -126,3 +128,10 @@ fun Player.actionBar(text: String) {
 fun broadcastActionbar(component: Component) {
     Bukkit.getOnlinePlayers().forEach { it.sendActionBar(component) }
 }
+
+// --- Docs-friendly Player inventory helpers ---
+fun Player.hasSpace(): Boolean = inventory.hasSpace()
+fun Player.giveItem(item: ItemStack) { inventory.addItem(item) }
+fun Player.clearInventory() { inventory.clear() }
+fun Player.removeItem(material: Material, amount: Int) { inventory.removeItem(material, amount) }
+fun Player.hasItem(material: Material, amount: Int): Boolean = inventory.hasItems(material, amount)
