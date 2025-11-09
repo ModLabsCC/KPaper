@@ -1,23 +1,22 @@
 package cc.modlabs.kpaper.inventory
 
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.jetbrains.annotations.ApiStatus
+import org.bukkit.inventory.Inventory
 
 @ApiStatus.Experimental
-abstract class KGUI<T> {
-
+abstract class KGUI {
+    protected abstract val title: String
     protected abstract val size: Int
-    protected abstract val title: Component
 
-    protected abstract fun buildInventory(player: Player, context: T?): InventoryBuilder
+    protected abstract fun build(player: Player): Inventory
 
-    fun open(player: Player, context: T?) {
-        val builder = buildInventory(player, context)
-        builder.open(player)
+    fun open(player: Player) {
+        val inv = build(player)
+        player.openInventory(inv)
     }
 
-    fun refresh(player: Player, context: T? = null) {
-        open(player, context)
+    fun refresh(player: Player) {
+        open(player)
     }
 }
