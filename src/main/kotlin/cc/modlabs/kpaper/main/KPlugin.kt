@@ -55,7 +55,9 @@ abstract class KPlugin : JavaPlugin() {
         if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) {
             CustomEventListener.load()
         }
-        Bukkit.getPluginManager().registerEvents(SimpleGUIListener(), this)
+        if (isFeatureEnabled(Feature.INVENTORY)) {
+            Bukkit.getPluginManager().registerEvents(SimpleGUIListener(), this)
+        }
 
         startup()
     }
