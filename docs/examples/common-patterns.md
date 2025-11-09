@@ -674,9 +674,9 @@ class TaskQueue<T>(
                 for (task in queue) {
                     try {
                         processor(task)
-                    } catch (e: Exception) {
-                        logger.error("Task processing failed in worker $workerId", e)
-                    }
+        } catch (e: Exception) {
+            cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Task processing failed in worker $workerId", e)
+        }
                 }
             }
             workers.add(worker)
@@ -743,7 +743,7 @@ class ResourceManager {
             try {
                 resource.close()
             } catch (e: Exception) {
-                logger.error("Failed to close resource", e)
+                cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to close resource", e)
             }
         }
         resources.clear()
@@ -839,7 +839,7 @@ class PlayerService {
                     }
                 }
                 .onFailure { error, exception ->
-                    logger.error("Failed to load player data for ${player.name}: $error", exception)
+                    cc.modlabs.kpaper.main.PluginInstance.logger.severe("Failed to load player data for ${player.name}: $error")
                     withContext(Dispatchers.Main) {
                         player.sendMessage("Failed to load your data. Using defaults.")
                         applyDefaultData(player)

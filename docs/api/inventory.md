@@ -523,7 +523,7 @@ fun safeGUIOpen(player: Player, guiFactory: () -> Inventory) {
         val gui = guiFactory()
         player.openInventory(gui)
     } catch (exception: Exception) {
-        logger.error("Failed to open GUI for ${player.name}", exception)
+        cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to open GUI for ${player.name}", exception)
         player.sendMessage("&cFailed to open menu. Please try again.")
         
         // Fallback to a simple error GUI

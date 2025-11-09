@@ -187,7 +187,7 @@ class ComplexPlugin : KPlugin() {
                 system.initialize()
                 logger.info("Initialized ${system.javaClass.simpleName}")
             } catch (e: Exception) {
-                logger.error("Failed to initialize ${system.javaClass.simpleName}", e)
+                logger.severe("Failed to initialize ${system.javaClass.simpleName}: ${e.message}")
             }
         }
         
@@ -202,7 +202,7 @@ class ComplexPlugin : KPlugin() {
                 try {
                     system.shutdown()
                 } catch (e: Exception) {
-                    logger.error("Error shutting down ${system.javaClass.simpleName}", e)
+                    logger.severe("Error shutting down ${system.javaClass.simpleName}: ${e.message}")
                 }
             }
         
@@ -220,7 +220,8 @@ abstract class PluginSystem(protected val plugin: ComplexPlugin) {
     }
     
     protected fun logError(message: String, exception: Throwable? = null) {
-        plugin.logger.error("[${javaClass.simpleName}] $message", exception)
+        if (exception != null) plugin.logger.log(java.util.logging.Level.SEVERE, "[${javaClass.simpleName}] $message", exception)
+        else plugin.logger.severe("[${javaClass.simpleName}] $message")
     }
 }
 ```
@@ -362,15 +363,15 @@ class RobustPlugin : KPlugin() {
         try {
             initializePlugin()
         } catch (e: ConfigurationException) {
-            logger.error("Configuration error: ${e.message}")
-            logger.error("Plugin will be disabled. Please fix your configuration.")
+            logger.severe("Configuration error: ${e.message}")
+            logger.severe("Plugin will be disabled. Please fix your configuration.")
             server.pluginManager.disablePlugin(this)
         } catch (e: DatabaseException) {
-            logger.error("Database connection failed: ${e.message}")
-            logger.error("Running in offline mode with limited functionality.")
+            logger.severe("Database connection failed: ${e.message}")
+            logger.severe("Running in offline mode with limited functionality.")
             initializeOfflineMode()
         } catch (e: Exception) {
-            logger.error("Unexpected error during startup", e)
+            logger.log(java.util.logging.Level.SEVERE, "Unexpected error during startup", e)
             server.pluginManager.disablePlugin(this)
         }
     }
@@ -426,10 +427,10 @@ class LoggingExamples : KPlugin() {
     
     override fun startup() {
         // Use appropriate log levels
-        logger.debug("Debug information for developers")
+        logger.info("[DEBUG] Debug information for developers")
         logger.info("General information")
-        logger.warn("Warning about potential issues")
-        logger.error("Error that needs attention")
+        logger.warning("Warning about potential issues")
+        logger.severe("Error that needs attention")
         
         // Log with context
         logPlayerAction("Steve", "joined the server")
@@ -498,9 +499,9 @@ class OptimizedPlugin : KPlugin() {
         databaseScope.launch {
             try {
                 database.savePlayerData(player.uniqueId, data)
-                logger.debug("Saved data for ${player.name}")
+                logger.info("[DEBUG] Saved data for ${player.name}")
             } catch (e: Exception) {
-                logger.error("Failed to save data for ${player.name}", e)
+                logger.log(java.util.logging.Level.SEVERE, "Failed to save data for ${player.name}", e)
             }
         }
     }

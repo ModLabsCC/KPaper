@@ -319,7 +319,7 @@ listen<MyCustomEvent> { event ->
                // Click handler
            }
        } catch (e: Exception) {
-           plugin.logger.error("Error building GUI", e)
+           plugin.logger.log(java.util.logging.Level.SEVERE, "Error building GUI", e)
        }
    }
    ```
@@ -520,7 +520,7 @@ listen<MyCustomEvent> { event ->
            val config = loadConfiguration<MyConfig>()
            // Use config
        } catch (e: Exception) {
-           logger.error("Failed to load configuration", e)
+           cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to load configuration", e)
            // Use defaults or disable plugin
            server.pluginManager.disablePlugin(this)
            return
@@ -563,7 +563,7 @@ listen<MyCustomEvent> { event ->
                    database.connect()
                    isConnected = true
                } catch (e: SQLException) {
-                   logger.error("Failed to connect to database", e)
+                   cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to connect to database", e)
                    throw e
                }
            }
@@ -574,7 +574,7 @@ listen<MyCustomEvent> { event ->
                ensureConnection()
                database.save(data)
            } catch (e: SQLException) {
-               logger.error("Failed to save data", e)
+               cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to save data", e)
                // Implement retry logic or fallback
            }
        }

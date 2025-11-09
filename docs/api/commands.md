@@ -569,7 +569,7 @@ object CommandRegistration {
                 
                 logger.info("Registered command: ${clazz.simpleName}")
             } catch (e: Exception) {
-                logger.error("Failed to register command: ${clazz.simpleName}", e)
+                cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Failed to register command: ${clazz.simpleName}", e)
             }
         }
         
@@ -824,7 +824,7 @@ class EconomyTransferCommand : CommandBuilder {
                                     
                                 } catch (e: Exception) {
                                     sender.sendMessage("§cTransfer failed: ${e.message}")
-                                    logger.error("Economy transfer failed", e)
+                                    cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Economy transfer failed", e)
                                 }
                                 
                                 Command.SINGLE_SUCCESS
@@ -861,7 +861,7 @@ abstract class SafeCommandBuilder : CommandBuilder {
             Command.SINGLE_SUCCESS
         } catch (e: Exception) {
             ctx.source.sender.sendMessage("§cAn error occurred while executing the command.")
-            logger.error("Command execution failed", e)
+            cc.modlabs.kpaper.main.PluginInstance.logger.log(java.util.logging.Level.SEVERE, "Command execution failed", e)
             Command.SINGLE_SUCCESS
         }
     }
