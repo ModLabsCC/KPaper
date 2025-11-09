@@ -24,6 +24,7 @@ import org.bukkit.craftbukkit.inventory.components.CraftCustomModelDataComponent
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
@@ -68,6 +69,8 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         itemStack.itemMeta = meta
         return this
     }
+
+    fun name(displayName: String): ItemBuilder = display(displayName)
 
     /**
     * Sets the amount of the item stack.
@@ -265,6 +268,8 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         itemStack.itemMeta = skullMeta
         return this
     }
+
+    fun skullOwner(player: Player): ItemBuilder = owner(player)
 
     /**
      * Sets the owning player of the skull item.
@@ -524,6 +529,10 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    fun hideEnchants(): ItemBuilder = flag(ItemFlag.HIDE_ENCHANTS)
+
+    fun hideAttributes(): ItemBuilder = flag(ItemFlag.HIDE_ATTRIBUTES)
+
     /**
      * Sets whether the item should have a glint effect or not.
      *
@@ -541,6 +550,8 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    fun glowing(glow: Boolean = true): ItemBuilder = glinting(glow, force = true)
+
     /**
      * Sets the rarity of the item.
      *
@@ -550,6 +561,13 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     fun rarity(rarity: ItemRarity): ItemBuilder {
         meta<ItemMeta> {
             this.setRarity(rarity)
+        }
+        return this
+    }
+
+    fun unbreakable(value: Boolean = true): ItemBuilder {
+        meta<ItemMeta> {
+            isUnbreakable = value
         }
         return this
     }
@@ -802,4 +820,15 @@ fun ItemStack.changeNameForTime(name: String, time: Long, unit: TimeUnit = TimeU
         this.itemMeta = meta
         afterTask()
     }
+}
+
+// Lightweight helpers for PDC via simple string/int values
+fun ItemBuilder.nbt(key: String, value: String): ItemBuilder {
+    addPersistentData(NamespacedKey("kpaper", key), value)
+    return this
+}
+
+fun ItemBuilder.nbt(key: String, value: Int): ItemBuilder {
+    addPersistentData(NamespacedKey("kpaper", key), PersistentDataType.INTEGER, value)
+    return this
 }
