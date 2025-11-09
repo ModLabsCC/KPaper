@@ -308,7 +308,6 @@ fun Inventory.setRightLowerCorner(item: ItemStack) {
     this.setItem(this.size - 1, item)
 }
 
-// --- Additional docs utilities ---
 /** Fill only the border slots (top/bottom rows and left/right columns). */
 fun Inventory.fillBorder(item: ItemStack) {
     val width = 9

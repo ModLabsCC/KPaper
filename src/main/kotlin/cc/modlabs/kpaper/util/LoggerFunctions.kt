@@ -14,7 +14,6 @@ fun getInternalKPaperLogger(): Logger {
     return LoggerFactory.getLogger("cc.modlabs.kpaper")
 }
 
-// Docs-friendly console + logging helpers
 fun consoleOutput(message: String) {
     PluginInstance.logger.info(message)
 }

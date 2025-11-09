@@ -51,7 +51,6 @@ class FeatureConfigBuilder {
         flags[feature] = enabled
     }
 
-    // Docs-compatible toggles
     var enableEventFeatures: Boolean
         get() = flags[Feature.CUSTOM_EVENTS] == true
         set(value) { flags[Feature.CUSTOM_EVENTS] = value }

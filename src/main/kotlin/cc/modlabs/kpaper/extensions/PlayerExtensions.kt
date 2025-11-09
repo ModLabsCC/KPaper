@@ -129,7 +129,6 @@ fun broadcastActionbar(component: Component) {
     Bukkit.getOnlinePlayers().forEach { it.sendActionBar(component) }
 }
 
-// --- Docs-friendly Player inventory helpers ---
 fun Player.hasSpace(): Boolean = inventory.hasSpace()
 fun Player.giveItem(item: ItemStack) { inventory.addItem(item) }
 fun Player.clearInventory() { inventory.clear() }
