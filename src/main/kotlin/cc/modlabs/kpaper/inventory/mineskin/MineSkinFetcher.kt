@@ -39,5 +39,14 @@ object MineSkinFetcher {
         return sR.skin
     }
 
+    /**
+     * Accept a textures.minecraft.net URL and return the texture ID segment.
+     * If the input is already an ID, returns it unchanged.
+     */
+    fun fetchTexture(textureUrl: String): String {
+        val idx = textureUrl.lastIndexOf('/')
+        return if (idx >= 0) textureUrl.substring(idx + 1) else textureUrl
+    }
+
 
 }
