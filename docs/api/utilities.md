@@ -1,5 +1,12 @@
 # Utilities & Extensions
 
+Note: This page includes forward-looking examples. In this build, the following utilities are implemented and ready to use:
+- Logging helpers: `consoleOutput`, `logInfo`, `logWarning`, `logError`, `logDebug`, `logSuccess`, `logFailure`.
+- Player inventory helpers: `Player.hasSpace()`, `Player.giveItem(...)`, `Player.clearInventory()`, `Player.removeItem(Material, Int)`, `Player.hasItem(...)`.
+- Inventory helpers: `Inventory.hasSpace()`, `Inventory.availableSpace()`, `Inventory.removeItem(Material, Int)`, `Inventory.clearItems(...)`, `Inventory.fillBorder(...)`, `Inventory.fillSlots(...)`, `Inventory.getAvailableSlots()`, `Inventory.getSpaceFor(item)`, `Inventory.findItems(...)`, `Inventory.lastEmpty()`, `Inventory.countItems(...)`, `Inventory.hasItems(...)`, `Inventory.replaceItems(...)`, `Inventory.sort()`, `Inventory.compress()`, `Inventory.shuffle()`.
+
+Other snippets are guidance/patterns and may require your own implementations.
+
 KPaper provides extensive utility functions and Kotlin extensions that make common Minecraft development tasks more intuitive and efficient.
 
 ## Utility Functions

@@ -308,6 +308,111 @@ fun Inventory.setRightLowerCorner(item: ItemStack) {
     this.setItem(this.size - 1, item)
 }
 
+// --- Additional docs utilities ---
+/** Fill only the border slots (top/bottom rows and left/right columns). */
+fun Inventory.fillBorder(item: ItemStack) {
+    val width = 9
+    val rows = this.size / width
+    // top and bottom
+    for (x in 0 until width) {
+        setItem(x, item)
+        setItem((rows - 1) * width + x, item)
+    }
+    // sides
+    for (y in 0 until rows) {
+        setItem(y * width, item)
+        setItem(y * width + (width - 1), item)
+    }
+}
+
+/** Set specific slots to an item. */
+fun Inventory.fillSlots(slots: Collection<Int>, item: ItemStack) {
+    slots.forEach { if (it in 0 until size) setItem(it, item) }
+}
+
+/** Return list of empty slot indices. */
+fun Inventory.getAvailableSlots(): List<Int> = (0 until size).filter { getItem(it).isNull }
+
+/** Return how many of this item could be added, considering stacks. */
+fun Inventory.getSpaceFor(sample: ItemStack): Int {
+    var space = 0
+    for (i in 0 until size) {
+        val stack = getItem(i)
+        if (stack == null || stack.type == Material.AIR) {
+            space += sample.type.maxStackSize
+        } else if (stack.isSimilar(sample)) {
+            space += (sample.type.maxStackSize - stack.amount).coerceAtLeast(0)
+        }
+    }
+    return space
+}
+
+/** Find slots containing the given material. */
+fun Inventory.findItems(material: Material): List<Int> = (0 until size).filter { getItem(it)?.type == material }
+
+/** Index of last empty slot or -1. */
+fun Inventory.lastEmpty(): Int = (size - 1 downTo 0).firstOrNull { getItem(it).isNull } ?: -1
+
+/** Add items and return leftovers as a list. */
+fun Inventory.addItemSafely(vararg items: ItemStack): List<ItemStack> =
+    this.addItem(*items).values.toList()
+
+/** Count total amount of the given material. */
+fun Inventory.countItems(material: Material): Int = contents.filterNotNull().filter { it.type == material }.sumOf { it.amount }
+
+/** Check if inventory has at least the given amount of a material. */
+fun Inventory.hasItems(material: Material, amount: Int): Boolean = countItems(material) >= amount
+
+/** Replace all stacks of one material with another (keeping amounts). */
+fun Inventory.replaceItems(from: Material, to: Material) {
+    for (i in 0 until size) {
+        val stack = getItem(i) ?: continue
+        if (stack.type == from) setItem(i, ItemStack(to, stack.amount))
+    }
+}
+
+/** Randomize item positions, preserving amounts and metadata. */
+fun Inventory.shuffle() {
+    val items = contents.filterNotNull().toMutableList()
+    items.shuffle()
+    clear()
+    items.forEachIndexed { index, item -> if (index < size) setItem(index, item) }
+}
+
+/** Combine similar stacks up to their max stack size to free up space. */
+fun Inventory.compress() {
+    val grouped = mutableMapOf<String, MutableList<ItemStack>>()
+    fun keyOf(it: ItemStack): String = it.type.name + "|" + (it.itemMeta?.asString() ?: "")
+
+    contents.filterNotNull().forEach { stack ->
+        grouped.computeIfAbsent(keyOf(stack)) { mutableListOf() }.add(stack.clone())
+    }
+    clear()
+    var index = 0
+    grouped.values.forEach { list ->
+        if (list.isEmpty()) return@forEach
+        val base = list.first()
+        var combined = list.sumOf { it.amount }
+        val max = base.type.maxStackSize
+        while (combined > 0 && index < size) {
+            val take = combined.coerceAtMost(max)
+            val out = base.clone().apply { amount = take }
+            setItem(index++, out)
+            combined -= take
+        }
+    }
+}
+
+/** Sort items by material name then amount descending. */
+fun Inventory.sort() {
+    val items = contents.filterNotNull()
+        .sortedWith(compareBy<ItemStack> { it.type.name }.thenByDescending { it.amount })
+    clear()
+    items.forEachIndexed { i, it -> if (i < size) setItem(i, it) }
+}
+
+private fun ItemMeta?.asString(): String = this?.let { it.toString() } ?: ""
+
 fun ItemStack.hasKey(namespacedKey: String): Boolean {
     return this.itemMeta?.persistentDataContainer?.has(
         pluginKey(namespacedKey),
