@@ -17,6 +17,7 @@ Welcome to the comprehensive documentation for KPaper - a Kotlin utility library
 ### API Guides
 - [Event System](api/events.md) - Event handling and custom events
 - [Command Framework](api/commands.md) - Creating commands with arguments
+  - Tip: Using the official Gradle plugin? See the “Using KPaperGradle (recommended)” section in that page for auto‑registration (https://github.com/ModLabsCC/KPaperGradle).
 - [Inventory & GUI](api/inventory.md) - Item builders and GUI systems
 - [Extensions](api/extensions.md) - Kotlin extensions for Bukkit classes
 - [Utilities](api/utilities.md) - Helper functions and utilities

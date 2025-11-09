@@ -501,6 +501,8 @@ class AsyncShopGUI(player: Player) : KGUI() {
 
 ## Command Patterns
 
+Note: The CommandBuilder DSL shown below is conceptual in this release. The current API exposes a `CommandBuilder` interface; a full fluent command DSL is planned. Treat these snippets as patterns, not drop‑in code.
+
 ### 1. Command Router Pattern
 
 Route commands to appropriate handlers:

@@ -1,5 +1,82 @@
 # Command Framework
 
+Note: The fluent CommandBuilder DSL used in some examples is not included in this build of KPaper. You can either implement the `CommandBuilder` interface directly (examples below) or install the companion Gradle plugin, KPaperGradle, which auto‑wires command registration for you.
+
+## Using KPaperGradle (recommended)
+
+Project page: https://github.com/ModLabsCC/KPaperGradle
+
+KPaperGradle automates KPaper setup, generates registration bootstrappers, and auto‑registers commands. It also discovers listeners (you call a one‑liner to register them).
+
+1) Add plugin repositories
+
+```kotlin
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven("https://nexus.modlabs.cc/repository/maven-public/")
+        mavenLocal()
+    }
+}
+```
+
+2) Apply the plugin and configure
+
+```kotlin
+// build.gradle.kts (your Paper plugin)
+plugins {
+    kotlin("jvm") version "2.0.0"
+    id("cc.modlabs.kpaper-gradle") version "LATEST" // replace with latest
+}
+
+repositories {
+    mavenCentral()
+    maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
+}
+
+kpaper {
+    javaVersion.set(21) // toolchain + compiler --release
+    registrationBasePackage.set("com.example.myplugin") // scanned for commands/listeners
+    // Optional: deliver extra runtime libs via Paper's loader
+    // deliver("com.github.ben-manes.caffeine:caffeine:3.1.8")
+}
+```
+
+3) Register discovered listeners (commands are auto‑registered)
+
+```kotlin
+import cc.modlabs.kpaper.main.KPlugin
+
+class MyPlugin : KPlugin() {
+    override fun startup() {
+        cc.modlabs.registration.RegisterManager.registerListeners(this)
+    }
+}
+```
+
+4) Implement commands under your `registrationBasePackage`
+
+```kotlin
+package com.example.myplugin.commands
+
+import cc.modlabs.kpaper.command.CommandBuilder
+import io.papermc.paper.command.brigadier.Commands
+
+class HelloCommand : CommandBuilder {
+    override val description = "Say hello"
+    override fun register() =
+        Commands.literal("hello")
+            .executes {
+                it.source.sender.sendMessage("Hello from KPaper!")
+                com.mojang.brigadier.Command.SINGLE_SUCCESS
+            }
+            .build()
+}
+```
+
+That’s it — build as usual. The plugin generates the bootstrap classes, patches `paper-plugin.yml` as needed, and wires resources.
+
 KPaper's command framework provides integration with Paper's Brigadier-based command system through the `CommandBuilder` interface, allowing you to create powerful commands with argument parsing, validation, and sub-command support.
 
 ## Basic Command Creation
