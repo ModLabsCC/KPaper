@@ -76,5 +76,13 @@ class InventorySerializer : ISerializer {
             }
             return inventory
         }
+
+        fun serialize(inventory: Inventory): String {
+            return Serializer.serialize(listOf(inventory))
+        }
+
+        fun deserialize(serialized: String): Inventory {
+            return Serializer.deserializeInventories(serialized).first()
+        }
     }
 }
