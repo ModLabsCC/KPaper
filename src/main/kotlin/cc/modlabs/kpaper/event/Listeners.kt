@@ -1,4 +1,4 @@
-﻿package cc.modlabs.kpaper.event
+package cc.modlabs.kpaper.event
 
 import cc.modlabs.kpaper.main.PluginInstance
 import cc.modlabs.kpaper.extensions.pluginManager
