@@ -34,9 +34,13 @@ dependencies {
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
+    // Redis client for Redis-backed PartyAPI implementation (Jedis)
+    implementation("redis.clients:jedis:7.1.0")
+
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testImplementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.11.0")
 }
 
 paperweight {
