@@ -34,6 +34,9 @@ dependencies {
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
+    // PacketEvents for TextDisplayFactory (display entities)
+    api("com.github.retrooper:packetevents-spigot:2.10.1")
+
     // Redis client for Redis-backed PartyAPI implementation (Jedis)
     implementation("redis.clients:jedis:7.1.0")
 
