@@ -30,7 +30,7 @@ dependencies {
 
     api("dev.fruxz:stacked:2024.1.1")
 
-    api("cc.modlabs:KlassicX:2025.6.21.1902")
+    api("cc.modlabs:KlassicX:2025.11.26.1906")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
