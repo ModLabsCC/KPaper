@@ -5,6 +5,7 @@ package cc.modlabs.kpaper.inventory
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.mineskin.*
+import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
 import dev.fruxz.ascend.extension.forceCastOrNull
@@ -247,6 +248,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param name The name of the player who will own the skull
      * @return The updated ItemBuilder instance
      */
+    @Deprecated("Use profile(name: String) instead.", ReplaceWith("profile(name)"))
     fun owner(name: String): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
         val skullMeta = itemStack.itemMeta as SkullMeta
@@ -261,6 +263,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param offlinePlayer the OfflinePlayer to set as the owner of the Player Head item
      * @return the modified ItemBuilder object
      */
+    @Deprecated("Use profile(offlinePlayer: OfflinePlayer) instead.", ReplaceWith("profile(offlinePlayer)"))
     fun owner(offlinePlayer: OfflinePlayer): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
         val skullMeta = itemStack.itemMeta as SkullMeta
@@ -269,6 +272,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         return this
     }
 
+    @Deprecated("Use profile(offlinePlayer: OfflinePlayer) instead.", ReplaceWith("profile(offlinePlayer)"))
     fun skullOwner(player: Player): ItemBuilder = owner(player)
 
     /**
@@ -277,6 +281,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param uuid The UUID of the player who should own the skull.
      * @return The modified ItemBuilder instance.
      */
+    @Deprecated("Use profile(uuid: UUID) instead.", ReplaceWith("profile(uuid)"))
     fun owner(uuid: UUID): ItemBuilder {
         if (itemStack.type != Material.PLAYER_HEAD) return this
         val skullMeta = itemStack.itemMeta as SkullMeta
@@ -289,6 +294,50 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
             itemStack.itemMeta = skullMeta
         }
         return this
+    }
+
+    /**
+     * Sets the player profile for this item if it is a player head.
+     *
+     * @param playerProfile The player profile to set on the player head.
+     * @return The updated ItemBuilder instance.
+     */
+    fun profile(playerProfile: PlayerProfile): ItemBuilder {
+        if (itemStack.type != Material.PLAYER_HEAD) return this
+        val skullMeta = itemStack.itemMeta as SkullMeta
+        skullMeta.playerProfile = playerProfile
+        itemStack.itemMeta = skullMeta
+        return this
+    }
+
+    /**
+     * Creates an ItemBuilder object based on the profile of the given OfflinePlayer.
+     *
+     * @param offlinePlayer the OfflinePlayer whose profile is used to generate the ItemBuilder
+     * @return an ItemBuilder constructed from the player's profile
+     */
+    fun profile(offlinePlayer: OfflinePlayer): ItemBuilder {
+        return profile(offlinePlayer.playerProfile)
+    }
+
+    /**
+     * Retrieves an ItemBuilder instance for the given player's profile using their UUID.
+     *
+     * @param uuid The UUID of the player whose profile is being used.
+     * @return An ItemBuilder instance associated with the player's profile.
+     */
+    fun profile(uuid: UUID): ItemBuilder {
+        return profile(Bukkit.getOfflinePlayer(uuid).playerProfile)
+    }
+
+    /**
+     * Creates an ItemBuilder instance based on the profile of the given player's name.
+     *
+     * @param name The name of the player whose profile will be used to create the ItemBuilder.
+     * @return An ItemBuilder instance containing the player's profile information.
+     */
+    fun profile(name: String): ItemBuilder {
+        return profile(Bukkit.getOfflinePlayer(name).playerProfile)
     }
 
     /**
