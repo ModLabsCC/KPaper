@@ -11,12 +11,12 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
 
 /**
- * Builder class for creating [MannequinNPC] instances with a fluent API.
+ * Builder class for creating [NPC] instances with a fluent API.
  * Provides convenient methods for configuring all aspects of a mannequin NPC.
  *
  * @example
  * ```kotlin
- * val npc = MannequinNPCBuilder(location)
+ * val npc = NPCBuilder(location)
  *     .name("Shop Keeper")
  *     .description("&7Click to open shop!")
  *     .profile(playerProfile)
@@ -212,9 +212,9 @@ class NPCBuilder(
     }
 
     /**
-     * Builds and returns a [MannequinNPC] instance with the configured settings.
+     * Builds and returns a [NPC] instance with the configured settings.
      *
-     * @return The created MannequinNPC.
+     * @return The created NPC.
      */
     fun build(): NPC {
         val mannequin = location.world.spawn<Mannequin>(location)

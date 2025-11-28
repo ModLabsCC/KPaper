@@ -60,7 +60,7 @@ fun createNPCWithProfile(
  * Converts an existing [Mannequin] entity to a [NPC].
  * Useful when you already have a mannequin entity and want to use the NPC API.
  *
- * @param mannequin The existing Mannequin entity.
+ * @param Mannequin The existing Mannequin entity.
  * @return A MannequinNPC wrapping the entity.
  */
 fun Mannequin.toNPC(): NPC {

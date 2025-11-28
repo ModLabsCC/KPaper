@@ -2,12 +2,13 @@ package cc.modlabs.kpaper.npc
 
 import cc.modlabs.kpaper.event.listen
 import cc.modlabs.kpaper.extensions.timer
-import cc.modlabs.kpaper.main.PluginInstance
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerAnimationEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.scheduler.BukkitTask
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 /**
  * Global event listener for NPC events.
@@ -48,7 +49,7 @@ object NPCEventListener {
                 player = player,
                 eventType = eventType,
                 data = mapOf(
-                    "interactionHand" to (event.hand?.name ?: "UNKNOWN"),
+                    "interactionHand" to event.hand.name,
                     "isSneaking" to isSneaking
                 )
             )
@@ -205,11 +206,11 @@ object NPCEventListener {
         val direction = target.toVector().subtract(entityLoc.toVector())
         
         // Calculate yaw (horizontal rotation)
-        val yaw = Math.toDegrees(-Math.atan2(direction.x, direction.z)).toFloat()
+        val yaw = Math.toDegrees(-atan2(direction.x, direction.z)).toFloat()
         
         // Calculate pitch (vertical rotation)
-        val horizontalDistance = Math.sqrt(direction.x * direction.x + direction.z * direction.z)
-        val pitch = Math.toDegrees(-Math.atan2(direction.y, horizontalDistance)).toFloat()
+        val horizontalDistance = sqrt(direction.x * direction.x + direction.z * direction.z)
+        val pitch = Math.toDegrees(-atan2(direction.y, horizontalDistance)).toFloat()
         
         // Apply rotation
         val newLocation = entityLoc.clone()
