@@ -1,6 +1,8 @@
 package cc.modlabs.kpaper.npc
 
 import cc.modlabs.kpaper.inventory.ItemBuilder
+import cc.modlabs.kpaper.main.KPlugin
+import dev.fruxz.stacked.text
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -58,6 +60,112 @@ fun noDescriptionExample(location: Location): NPC {
         // No description provided - will be automatically hidden
         customNameVisible(true)
     }
+}
+
+/**
+ * Example 2d: NPC with gravity disabled (floating NPC)
+ */
+fun floatingNPCExample(location: Location): NPC {
+    return location.createNPC {
+        name("&bFloating NPC")
+        description("&7I float in the air!")
+        gravity(false) // Disable gravity - NPC will float
+        immovable(true)
+    }
+}
+
+/**
+ * Example 16: NPC with a simple conversation
+ */
+fun conversationNPCExample(location: Location): NPC {
+    return location.createNPC {
+        name("&eMerchant")
+        description("&7Right-click to talk!")
+        conversation {
+            prompt("greeting", text("&aHello! Welcome to my shop. What would you like to buy?"))
+            prompt("response", text("&ePlease type 'yes' or 'no'"), validator = { input ->
+                input.equals("yes", ignoreCase = true) || input.equals("no", ignoreCase = true)
+            })
+            onComplete { npc, player, inputs ->
+                val response = inputs["response"]?.lowercase()
+                if (response == "yes") {
+                    player.sendMessage(text("&aGreat! Here's your item."))
+                    // Give item to player, open shop GUI, etc.
+                } else {
+                    player.sendMessage(text("&cMaybe next time!"))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Example 17: NPC with a multi-step conversation
+ */
+fun multiStepConversationExample(location: Location): NPC {
+    return location.createNPC {
+        name("&bQuest Giver")
+        description("&7Right-click to start a quest!")
+        conversation {
+            prompt("start", text("&aWelcome, adventurer! Are you ready for a quest?"))
+            prompt("name", text("&eWhat is your name?"), 
+                validator = { input -> input.isNotBlank() && input.length >= 2 },
+                onInput = { npc, player, input ->
+                    // This is called when player provides input for this prompt
+                    if (input.length > 10) {
+                        player.sendMessage(text("&eThat's a long name!"))
+                    }
+                }
+            )
+            prompt("confirm", text("&aNice to meet you! Ready to begin? (yes/no)"), validator = { input ->
+                input.equals("yes", ignoreCase = true) || input.equals("no", ignoreCase = true)
+            })
+            onComplete { npc, player, inputs ->
+                val playerName = inputs["name"] ?: "Unknown"
+                val confirmed = inputs["confirm"]?.equals("yes", ignoreCase = true) ?: false
+                
+                if (confirmed) {
+                    player.sendMessage(text("&aQuest started! Good luck, $playerName!"))
+                    // Start quest logic here
+                } else {
+                    player.sendMessage(text("&cQuest cancelled. Come back when you're ready!"))
+                }
+            }
+            escapeSequence("quit") // Custom escape sequence
+            timeout(60) // 60 second timeout
+        }
+    }
+}
+
+/**
+ * Example 18: NPC with conversation set programmatically
+ */
+fun programmaticConversationExample(location: Location): NPC {
+    val npc = location.createNPC {
+        name("&dProgrammatic NPC")
+        description("&7Right-click me!")
+    }
+    
+    // Set conversation after creation
+    npc.setConversation {
+        prompt("question1", text("&aWhat's your favorite color?"))
+        prompt("question2", text("&eDo you like Minecraft? (yes/no)"), validator = { input ->
+            input.equals("yes", ignoreCase = true) || input.equals("no", ignoreCase = true)
+        })
+        onComplete { npc, player, inputs ->
+            val color = inputs["question1"] ?: "unknown"
+            val likesMinecraft = inputs["question2"]?.equals("yes", ignoreCase = true) ?: false
+            
+            player.sendMessage(text("&aYour favorite color is $color!"))
+            if (likesMinecraft) {
+                player.sendMessage(text("&aGreat! I like Minecraft too!"))
+            } else {
+                player.sendMessage(text("&cThat's okay, everyone has different tastes!"))
+            }
+        }
+    }
+    
+    return npc
 }
 
 /**

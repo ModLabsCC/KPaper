@@ -35,8 +35,12 @@ class NPCBuilder(
     private var profile: MannequinProfile? = null
     private var mainHand: MainHand? = null
     private var immovable: Boolean = true
+    private var gravity: Boolean = true
+    private var proximityRange: Double = 5.0
+    private var lookAtPlayers: Boolean = false
     private var skinParts: MannequinSkinParts? = null
     private val equipment: MutableMap<EquipmentSlot, ItemStack?> = mutableMapOf()
+    private var conversation: ((NPCConversation.ConversationBuilder.() -> Unit)?) = null
 
     /**
      * Sets the name of the mannequin.
@@ -116,6 +120,18 @@ class NPCBuilder(
      */
     fun immovable(immovable: Boolean): NPCBuilder {
         this.immovable = immovable
+        return this
+    }
+
+    /**
+     * Sets whether the mannequin is affected by gravity.
+     * Default is true.
+     *
+     * @param gravity Whether the mannequin should be affected by gravity.
+     * @return This builder instance for chaining.
+     */
+    fun gravity(gravity: Boolean): NPCBuilder {
+        this.gravity = gravity
         return this
     }
 
@@ -224,6 +240,18 @@ class NPCBuilder(
     }
 
     /**
+     * Sets a conversation for this NPC.
+     * The conversation will start when a player right-clicks the NPC.
+     *
+     * @param conversation The conversation configuration builder.
+     * @return This builder instance for chaining.
+     */
+    fun conversation(conversation: NPCConversation.ConversationBuilder.() -> Unit): NPCBuilder {
+        this.conversation = conversation
+        return this
+    }
+
+    /**
      * Builds and returns a [NPC] instance with the configured settings.
      *
      * @return The created NPC.
@@ -254,6 +282,9 @@ class NPCBuilder(
         // Set immovable state
         mannequin.isImmovable = immovable
 
+        // Set gravity
+        mannequin.setGravity(gravity)
+
         // Apply skin parts DSL block if provided
         skinPartsBlock?.let { block ->
             block(mannequin.skinParts)
@@ -283,7 +314,16 @@ class NPCBuilder(
             }
         }
 
-        return NPCImpl(mannequin)
+        val npc = NPCImpl(mannequin)
+        
+        // Set conversation if provided
+        conversation?.let { npc.setConversation(it) }
+        
+        // Apply proximity range and look-at settings
+        npc.setProximityRange(proximityRange)
+        npc.setLookAtPlayers(lookAtPlayers)
+        
+        return npc
     }
 }
 

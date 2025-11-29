@@ -481,6 +481,37 @@ class NPCImpl(
         return lookAtPlayers
     }
 
+    override fun setGravity(gravity: Boolean) {
+        val entity = getMannequin() ?: return
+        entity.setGravity(gravity)
+    }
+
+    override fun hasGravity(): Boolean {
+        return mannequin.hasGravity()
+    }
+
+    // Conversation state
+    private var conversationBuilder: ((NPCConversation.ConversationBuilder.() -> Unit)?) = null
+
+    override fun setConversation(conversation: NPCConversation.ConversationBuilder.() -> Unit) {
+        conversationBuilder = conversation
+    }
+
+    override fun getConversation(): (NPCConversation.ConversationBuilder.() -> Unit)? {
+        return conversationBuilder
+    }
+
+    override fun removeConversation() {
+        conversationBuilder = null
+    }
+
+    override fun startConversation(player: org.bukkit.entity.Player) {
+        val builder = conversationBuilder ?: return
+        val conversation = NPCConversation(this, player)
+        conversation.conversation(builder)
+        conversation.start()
+    }
+
     /**
      * Internal method to trigger an event for this NPC.
      */

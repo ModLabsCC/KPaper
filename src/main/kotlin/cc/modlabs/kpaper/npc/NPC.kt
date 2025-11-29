@@ -311,4 +311,46 @@ interface NPC {
      * @return True if the NPC looks at nearby players, false otherwise.
      */
     fun isLookingAtPlayers(): Boolean
+
+    /**
+     * Sets whether the NPC is affected by gravity.
+     * Default is true.
+     *
+     * @param gravity Whether the NPC should be affected by gravity.
+     */
+    fun setGravity(gravity: Boolean)
+
+    /**
+     * Gets whether the NPC is affected by gravity.
+     *
+     * @return True if the NPC is affected by gravity, false otherwise.
+     */
+    fun hasGravity(): Boolean
+
+    /**
+     * Sets a conversation for this NPC.
+     * The conversation will start when a player right-clicks the NPC.
+     *
+     * @param conversation The conversation configuration.
+     */
+    fun setConversation(conversation: NPCConversation.ConversationBuilder.() -> Unit)
+
+    /**
+     * Gets the conversation for this NPC, or null if none is set.
+     *
+     * @return The conversation builder function, or null.
+     */
+    fun getConversation(): (NPCConversation.ConversationBuilder.() -> Unit)?
+
+    /**
+     * Removes the conversation from this NPC.
+     */
+    fun removeConversation()
+
+    /**
+     * Starts a conversation with a player.
+     *
+     * @param player The player to start the conversation with.
+     */
+    fun startConversation(player: org.bukkit.entity.Player)
 }

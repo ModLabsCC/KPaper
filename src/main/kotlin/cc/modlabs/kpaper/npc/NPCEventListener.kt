@@ -37,6 +37,13 @@ object NPCEventListener {
             val player = event.player
             val isSneaking = player.isSneaking
 
+            // Check if NPC has a conversation and start it (only on normal right-click, not shift-click)
+            if (!isSneaking && npc.getConversation() != null) {
+                npc.startConversation(player)
+                event.isCancelled = true // Prevent other interactions
+                return@listen
+            }
+
             // Determine event type based on shift state
             val eventType = if (isSneaking) {
                 NPCEventType.SHIFT_RIGHT_CLICKED
@@ -113,6 +120,9 @@ object NPCEventListener {
 
         // Start proximity monitoring task
         startProximityMonitoring()
+        
+        // Initialize conversation system
+        NPCConversation.initialize()
     }
 
     /**
