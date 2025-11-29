@@ -38,6 +38,29 @@ fun BuilderPatternExample(location: Location): NPC {
 }
 
 /**
+ * Example 2b: NPC with custom name visibility control
+ */
+fun customNameVisibilityExample(location: Location): NPC {
+    return location.createNPC {
+        name("&eHidden Name NPC")
+        description("&7My name is hidden!")
+        // Hide the custom name
+        customNameVisible(false)
+    }
+}
+
+/**
+ * Example 2c: NPC without description (description will be hidden automatically)
+ */
+fun noDescriptionExample(location: Location): NPC {
+    return location.createNPC {
+        name("&aSimple NPC")
+        // No description provided - will be automatically hidden
+        customNameVisible(true)
+    }
+}
+
+/**
  * Example 3: Create an NPC with custom equipment using ItemBuilder
  */
 fun customEquipmentExample(location: Location): NPC {

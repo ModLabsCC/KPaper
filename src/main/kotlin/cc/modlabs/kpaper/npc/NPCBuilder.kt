@@ -31,6 +31,7 @@ class NPCBuilder(
 ) {
     private var name: String? = null
     private var description: Component? = null
+    private var customNameVisible: Boolean = true
     private var profile: MannequinProfile? = null
     private var mainHand: MainHand? = null
     private var immovable: Boolean = true
@@ -69,6 +70,17 @@ class NPCBuilder(
      */
     fun description(description: Component): NPCBuilder {
         this.description = description
+        return this
+    }
+
+    /**
+     * Sets whether the custom name is visible.
+     *
+     * @param visible Whether the custom name should be visible.
+     * @return This builder instance for chaining.
+     */
+    fun customNameVisible(visible: Boolean): NPCBuilder {
+        this.customNameVisible = visible
         return this
     }
 
@@ -221,9 +233,17 @@ class NPCBuilder(
 
         // Set name if provided
         name?.let { mannequin.customName(text(it)) }
+        
+        // Set custom name visibility
+        mannequin.isCustomNameVisible = customNameVisible
 
-        // Set description if provided
-        description?.let { mannequin.description = it }
+        // Set description if provided, otherwise hide it
+        if (description != null) {
+            mannequin.description = description
+        } else {
+            // Hide description if none is provided
+            mannequin.description = null
+        }
 
         // Set profile if provided, otherwise use default
         profile?.let { mannequin.profile = it }

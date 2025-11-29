@@ -308,6 +308,8 @@ class NPCImpl(
     override fun changeName(name: String) {
         val entity = getMannequin() ?: return
         entity.customName(text(name))
+        // Ensure custom name is visible when setting a name
+        entity.isCustomNameVisible = true
     }
 
     override fun getProfile(): MannequinProfile {
@@ -338,6 +340,15 @@ class NPCImpl(
     override fun setDescription(description: Component?) {
         val entity = getMannequin() ?: return
         entity.description = description
+    }
+
+    override fun setCustomNameVisible(visible: Boolean) {
+        val entity = getMannequin() ?: return
+        entity.isCustomNameVisible = visible
+    }
+
+    override fun isCustomNameVisible(): Boolean {
+        return mannequin.isCustomNameVisible
     }
 
     override fun getMainHand(): MainHand {

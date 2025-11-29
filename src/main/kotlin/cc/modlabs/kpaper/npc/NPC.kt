@@ -161,6 +161,20 @@ interface NPC {
     fun setDescription(description: Component?)
 
     /**
+     * Sets whether the custom name is visible.
+     *
+     * @param visible Whether the custom name should be visible.
+     */
+    fun setCustomNameVisible(visible: Boolean)
+
+    /**
+     * Gets whether the custom name is visible.
+     *
+     * @return True if the custom name is visible, false otherwise.
+     */
+    fun isCustomNameVisible(): Boolean
+
+    /**
      * Gets the main hand of this mannequin.
      *
      * @return The main hand (LEFT or RIGHT).
@@ -223,7 +237,7 @@ interface NPC {
     /**
      * Sets the helmet.
      *
-     * @param item The item to place as helmet, or null to remove it.
+     * @param item The item to place as helmet, or null to remove it
      */
     fun setHelmet(item: ItemStack?)
 
