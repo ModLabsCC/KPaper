@@ -640,9 +640,6 @@ class NPCImpl(
         // Start monitoring task - this will run continuously every nearbyFollowCheckInterval ticks
         logDebug("[NPC] followNearbyPlayers: Starting monitoring task with interval=$nearbyFollowCheckInterval ticks (${nearbyFollowCheckInterval * 50}ms)")
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
-            // Log every tick to confirm task is running
-            logDebug("[NPC] NearbyFollow task: [TICK START] isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
-
             // Wrap everything in try-catch to ensure task never stops on error
             try {
                 // Only cancel if explicitly stopped
@@ -653,14 +650,13 @@ class NPCImpl(
                     return@timer
                 }
 
-                val currentEntity = getMannequin() as? LivingEntity
-                if (currentEntity == null || !currentEntity.isValid) {
-                    logDebug("[NPC] NearbyFollow task: Entity invalid, but continuing to check")
+                if (!npcEntity.isValid) {
+                    logDebug("[NPC] NearbyFollow task: Entity for ${npcEntity.name} invalid, but continuing to check")
                     // Don't stop the task, just skip this tick
                     return@timer
                 }
 
-                val npcLocation = currentEntity.location
+                val npcLocation = npcEntity.location
                 val npcWorld = npcLocation.world
                 if (npcWorld == null) {
                     logDebug("[NPC] NearbyFollow task: World is null, but continuing to check")

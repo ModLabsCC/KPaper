@@ -2,6 +2,7 @@ package cc.modlabs.kpaper.npc
 
 import cc.modlabs.kpaper.event.listen
 import cc.modlabs.kpaper.extensions.timer
+import cc.modlabs.kpaper.util.getLogger
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerAnimationEvent
@@ -41,6 +42,7 @@ object NPCEventListener {
             val npc = npcMap[entity] ?: return@listen
             val player = event.player
             val isSneaking = player.isSneaking
+            getLogger().info("Interacted with NPC $npc for player $player ($isSneaking) - ${event.hand.name}")
 
             // Check if NPC has a conversation and start it (only on normal right-click, not shift-click)
             if (!isSneaking && npc.getConversation() != null) {
