@@ -3,15 +3,19 @@ package cc.modlabs.kpaper.npc
 import cc.modlabs.kpaper.extensions.timer
 import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
+import cc.modlabs.kpaper.main.PluginInstance
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Mannequin
+import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import kotlin.math.atan2
 
 /**
  * Implementation of [NPC] that wraps a [Mannequin] entity.
@@ -40,6 +44,17 @@ class NPCImpl(
     private var isPatrolling = false
     private var isPatrolPaused = false
     private val patrolPath = mutableListOf<Location>()
+    
+    // Following state
+    private var isFollowing = false
+    private var followingEntity: Entity? = null
+    private var followDistance = 2.0 // Minimum distance to maintain from target
+    private var followUpdateInterval = 20 // Ticks between path recalculations (1 second)
+    private var followUpdateCounter = 0
+    
+    // Visibility state
+    // null = visible to all players, non-null = only visible to players in the set
+    private var visibleToPlayers: MutableSet<Player>? = null
 
     init {
         // Enable AI for the mannequin so it can move
@@ -191,6 +206,63 @@ class NPCImpl(
                 return@timer
             }
 
+            // Handle following behavior
+            if (isFollowing) {
+                val targetEntity = followingEntity
+                if (targetEntity == null || !targetEntity.isValid) {
+                    // Target entity is invalid, stop following
+                    stopFollowing()
+                    return@timer
+                }
+
+                val targetLoc = targetEntity.location
+                val currentLoc = currentEntity.location
+                val distanceToTarget = currentLoc.distance(targetLoc)
+
+                // Check if we're close enough to the target
+                if (distanceToTarget <= followDistance) {
+                    // Close enough, just look at the target
+                    val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
+                    val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
+                    val newLoc = currentLoc.clone()
+                    newLoc.yaw = yaw
+                    currentEntity.teleport(newLoc)
+                    return@timer
+                }
+
+                // Update path periodically or if target moved significantly
+                followUpdateCounter++
+                val shouldUpdatePath = followUpdateCounter >= followUpdateInterval ||
+                        currentTarget == null ||
+                        (currentTarget != null && currentTarget!!.distance(targetLoc) > 3.0)
+
+                if (shouldUpdatePath) {
+                    followUpdateCounter = 0
+                    // Recalculate path to target entity
+                    updateFollowingPath(currentEntity, targetLoc)
+                }
+
+                // Use current target from path
+                val target = currentTarget ?: targetLoc
+                val distance = currentLoc.distance(target)
+
+                // Check if we've arrived at the current waypoint
+                if (distance <= arrivalThreshold) {
+                    // Arrived at waypoint, get next one or recalculate
+                    if (pathQueue.isEmpty()) {
+                        // No more waypoints, recalculate path
+                        updateFollowingPath(currentEntity, targetLoc)
+                    } else {
+                        currentTarget = pathQueue.removeAt(0)
+                    }
+                } else {
+                    // Move towards current waypoint
+                    moveTowards(currentEntity, target, walkSpeed)
+                }
+                return@timer
+            }
+
+            // Regular walking behavior (non-following)
             val target = currentTarget ?: run {
                 // No current target, check if there's a next location in the path
                 if (pathQueue.isEmpty()) {
@@ -267,11 +339,14 @@ class NPCImpl(
         isPaused = false
         isPatrolling = false
         isPatrolPaused = false
+        isFollowing = false
+        followingEntity = null
         currentTarget = null
         pathQueue.clear()
         patrolPath.clear()
         currentPath.clear()
         pathIndex = 0
+        followUpdateCounter = 0
         walkingTask?.cancel()
         walkingTask = null
     }
@@ -283,6 +358,7 @@ class NPCImpl(
         val entity = getMannequin()
         if (entity != null) {
             NPCEventListener.unregisterNPC(entity)
+            NPCEventListener.unregisterVisibilityNPC(this)
         }
         stopWalking()
         removeAllEventHandlers()
@@ -343,6 +419,103 @@ class NPCImpl(
         return true
     }
 
+    override fun followEntity(entity: Entity, followDistance: Double): Boolean {
+        if (!entity.isValid) return false
+        val npcEntity = getMannequin() as? LivingEntity ?: return false
+
+        // Stop any existing walking/patrolling
+        if (isPatrolling) {
+            stopPatrolling()
+        }
+
+        // Set following state
+        isFollowing = true
+        followingEntity = entity
+        this.followDistance = followDistance.coerceAtLeast(1.0) // Minimum 1 block
+        followUpdateCounter = 0
+
+        // Calculate initial path
+        val currentLoc = npcEntity.location
+        val targetLoc = entity.location
+        updateFollowingPath(npcEntity, targetLoc)
+
+        // Start walking if not already walking
+        if (!isWalking) {
+            startWalking()
+        }
+
+        return true
+    }
+
+    override fun stopFollowing(): Boolean {
+        if (!isFollowing) return false
+
+        isFollowing = false
+        followingEntity = null
+        followUpdateCounter = 0
+
+        // If no current target and no path queue, stop walking completely
+        if (currentTarget == null && pathQueue.isEmpty()) {
+            stopWalking()
+        } else {
+            // Clear following-specific state but keep walking to current target
+            currentTarget = null
+            pathQueue.clear()
+            currentPath.clear()
+            pathIndex = 0
+        }
+
+        return true
+    }
+
+    override fun isFollowingEntity(): Boolean {
+        return isFollowing && followingEntity != null && followingEntity!!.isValid
+    }
+
+    override fun getFollowingEntity(): Entity? {
+        return if (isFollowingEntity()) followingEntity else null
+    }
+
+    /**
+     * Updates the path when following an entity.
+     * Recalculates the path using pathfinding if enabled.
+     */
+    private fun updateFollowingPath(npcEntity: LivingEntity, targetLoc: Location) {
+        val currentLoc = npcEntity.location
+
+        // Clear existing path
+        pathQueue.clear()
+        currentPath.clear()
+        pathIndex = 0
+
+        // Use pathfinding if enabled
+        if (usePathfinding) {
+            val path = Pathfinder.findPath(currentLoc, targetLoc)
+            if (path.isNotEmpty()) {
+                // Add all waypoints except the first (current position) to the queue
+                currentPath.addAll(path)
+                if (currentPath.size > 1) {
+                    pathQueue.addAll(currentPath.subList(1, currentPath.size))
+                } else {
+                    pathQueue.add(targetLoc.clone())
+                }
+            } else {
+                // Pathfinding failed, use direct path
+                pathQueue.add(targetLoc.clone())
+            }
+        } else {
+            // Direct path without pathfinding
+            pathQueue.add(targetLoc.clone())
+        }
+
+        // Set first location as target
+        if (pathQueue.isNotEmpty()) {
+            currentTarget = pathQueue.removeAt(0)
+        } else {
+            currentTarget = targetLoc.clone()
+        }
+    }
+
     private fun moveTowards(entity: LivingEntity, target: Location, speed: Double) {
         val currentLoc = entity.location
         val direction = target.toVector().subtract(currentLoc.toVector()).normalize()
@@ -373,7 +546,7 @@ class NPCImpl(
 
         // Make entity look at target
         val lookDirection = target.toVector().subtract(currentLoc.toVector())
-        val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
+        val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
         newLoc.yaw = yaw
         newLoc.pitch = 0f
 
@@ -633,6 +806,148 @@ class NPCImpl(
      */
     internal fun isCurrentlyWalking(): Boolean {
         return isWalking && !isPaused
+    }
+
+    override fun setVisibleToAllPlayers(visible: Boolean) {
+        val entity = getMannequin() ?: return
+        
+        if (visible) {
+            // Make visible to all players
+            visibleToPlayers = null
+            // Show entity to all online players
+            Bukkit.getOnlinePlayers().forEach { player ->
+                player.showEntity(PluginInstance, entity)
+            }
+            // Unregister from visibility tracking since visible to all
+            NPCEventListener.unregisterVisibilityNPC(this)
+        } else {
+            // Hide from all players (set empty set)
+            val currentVisible = visibleToPlayers ?: mutableSetOf()
+            Bukkit.getOnlinePlayers().forEach { player ->
+                if (!currentVisible.contains(player)) {
+                    player.hideEntity(PluginInstance, entity)
+                }
+            }
+            visibleToPlayers = mutableSetOf()
+            // Register for visibility tracking
+            NPCEventListener.registerVisibilityNPC(this)
+        }
+    }
+
+    override fun setVisibleToPlayers(players: Set<Player>) {
+        val entity = getMannequin() ?: return
+        
+        val oldVisible = visibleToPlayers
+        visibleToPlayers = if (players.isEmpty()) {
+            null // Empty set means visible to all
+        } else {
+            players.toMutableSet()
+        }
+        
+        // Update visibility for all online players
+        Bukkit.getOnlinePlayers().forEach { player ->
+            val shouldBeVisible = visibleToPlayers == null || visibleToPlayers!!.contains(player)
+            val wasVisible = oldVisible == null || oldVisible.contains(player)
+            
+            if (shouldBeVisible && !wasVisible) {
+                // Show entity to this player
+                player.showEntity(PluginInstance, entity)
+            } else if (!shouldBeVisible && wasVisible) {
+                // Hide entity from this player
+                player.hideEntity(PluginInstance, entity)
+            }
+        }
+        
+        // Register/unregister for visibility tracking
+        if (visibleToPlayers == null) {
+            NPCEventListener.unregisterVisibilityNPC(this)
+        } else {
+            NPCEventListener.registerVisibilityNPC(this)
+        }
+    }
+
+    override fun addVisiblePlayer(player: Player) {
+        val entity = getMannequin() ?: return
+        
+        if (visibleToPlayers == null) {
+            // Currently visible to all, switch to specific list
+            // Hide from all players first
+            Bukkit.getOnlinePlayers().forEach { p ->
+                if (p != player) {
+                    p.hideEntity(PluginInstance, entity)
+                }
+            }
+            visibleToPlayers = mutableSetOf(player)
+            // Register for visibility tracking
+            NPCEventListener.registerVisibilityNPC(this)
+        } else {
+            visibleToPlayers!!.add(player)
+        }
+        
+        // Show entity to this player
+        player.showEntity(PluginInstance, entity)
+    }
+
+    override fun removeVisiblePlayer(player: Player) {
+        val entity = getMannequin() ?: return
+        
+        if (visibleToPlayers == null) {
+            // Currently visible to all, switch to list without this player
+            visibleToPlayers = Bukkit.getOnlinePlayers().filter { it != player }.toMutableSet()
+            // Register for visibility tracking
+            NPCEventListener.registerVisibilityNPC(this)
+        } else {
+            visibleToPlayers!!.remove(player)
+            // If list becomes empty, make visible to all
+            if (visibleToPlayers!!.isEmpty()) {
+                visibleToPlayers = null
+                Bukkit.getOnlinePlayers().forEach { p ->
+                    p.showEntity(PluginInstance, entity)
+                }
+                // Unregister from visibility tracking
+                NPCEventListener.unregisterVisibilityNPC(this)
+                return
+            }
+        }
+        
+        // Hide entity from this player
+        player.hideEntity(PluginInstance, entity)
+    }
+
+    override fun getVisiblePlayers(): Set<Player>? {
+        return visibleToPlayers?.toSet()
+    }
+
+    override fun isVisibleToAllPlayers(): Boolean {
+        return visibleToPlayers == null
+    }
+
+    /**
+     * Internal method called when a player joins the server.
+     * Updates visibility for the new player.
+     */
+    internal fun onPlayerJoin(player: Player) {
+        val entity = getMannequin() ?: return
+        
+        if (visibleToPlayers == null) {
+            // Visible to all, show to new player
+            player.showEntity(PluginInstance, entity)
+        } else if (visibleToPlayers!!.contains(player)) {
+            // Player is in visible list, show to them
+            player.showEntity(PluginInstance, entity)
+        } else {
+            // Player not in visible list, ensure hidden
+            player.hideEntity(PluginInstance, entity)
+        }
+    }
+
+    /**
+     * Internal method called when a player leaves the server.
+     * Cleans up visibility tracking.
+     */
+    internal fun onPlayerQuit(player: Player) {
+        // Remove from visible players set if present
+        visibleToPlayers?.remove(player)
     }
 }
 

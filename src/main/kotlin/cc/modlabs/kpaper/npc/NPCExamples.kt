@@ -5,6 +5,7 @@ import cc.modlabs.kpaper.main.KPlugin
 import dev.fruxz.stacked.text
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
@@ -353,9 +354,123 @@ fun ComplexTerrainNPCExample(spawnLocation: Location): NPC {
     return npc
 }
 
+/**
+ * Example 7i: NPC visible only to specific players
+ */
+fun PrivateNPCExample(spawnLocation: Location, visiblePlayers: Set<Player>): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&dPrivate NPC")
+        description("&7Only certain players can see me!")
+        immovable(true)
+    }
+    
+    // Set which players can see this NPC
+    // Only players in the set will be able to see the NPC
+    npc.setVisibleToPlayers(visiblePlayers)
+    
+    return npc
+}
+
+/**
+ * Example 7j: NPC visible to a single player
+ */
+fun SinglePlayerNPCExample(spawnLocation: Location, player: Player): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&bPersonal Guide")
+        description("&7I'm your personal guide!")
+        immovable(false)
+    }
+    
+    // Make NPC visible only to one specific player
+    npc.setVisibleToPlayers(setOf(player))
+    
+    return npc
+}
+
+/**
+ * Example 7k: Control NPC visibility dynamically
+ */
+fun VisibilityControlExample(npc: NPC, players: Set<Player>) {
+    // Make visible to all players (default)
+    npc.setVisibleToAllPlayers(true)
+    
+    // Make visible only to specific players
+    npc.setVisibleToPlayers(players)
+    
+    // Add a player to the visible list
+    val newPlayer = players.firstOrNull() ?: return
+    npc.addVisiblePlayer(newPlayer)
+    
+    // Remove a player from the visible list
+    npc.removeVisiblePlayer(newPlayer)
+    
+    // Check if visible to all
+    if (npc.isVisibleToAllPlayers()) {
+        // NPC is visible to everyone
+    } else {
+        // NPC is only visible to specific players
+        val visiblePlayers = npc.getVisiblePlayers()
+        // Do something with the visible players set
+    }
+    
+    // Hide from all players
+    npc.setVisibleToAllPlayers(false)
+}
+
 // ============================================================================
 // ADVANCED EXAMPLES
 // ============================================================================
+
+/**
+ * Example 7f: NPC that follows a player with pathfinding
+ */
+fun FollowingNPCExample(spawnLocation: Location, targetPlayer: Player): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&bFollower")
+        description("&7I'll follow you anywhere!")
+        immovable(false)
+    }
+    
+    // Make the NPC follow the player with pathfinding
+    // The NPC will automatically navigate around obstacles and jump when needed
+    // Path is recalculated as the player moves
+    npc.followEntity(targetPlayer, followDistance = 2.0)
+    
+    return npc
+}
+
+/**
+ * Example 7g: NPC that follows an entity with custom follow distance
+ */
+fun CustomFollowDistanceExample(spawnLocation: Location, targetEntity: Entity): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&eBodyguard")
+        description("&7I protect my target!")
+        immovable(false)
+    }
+    
+    // Follow with a larger distance (5 blocks)
+    npc.followEntity(targetEntity, followDistance = 5.0)
+    
+    return npc
+}
+
+/**
+ * Example 7h: Control NPC following behavior
+ */
+fun FollowingControlExample(npc: NPC, targetEntity: Entity) {
+    // Start following an entity
+    npc.followEntity(targetEntity, followDistance = 3.0)
+    
+    // Check if NPC is following
+    if (npc.isFollowingEntity()) {
+        val followedEntity = npc.getFollowingEntity()
+        // Do something with the followed entity
+    }
+    
+    // Stop following
+    npc.stopFollowing()
+}
 
 /**
  * Example 8: NPC that approaches a player
@@ -377,12 +492,8 @@ class FriendlyNPC(private val spawnLocation: Location) {
     }
     
     fun followPlayer(player: Player, distance: Double = 3.0) {
-        // Calculate a location near the player
-        val direction = player.location.direction
-        val followLocation = player.location.clone()
-            .subtract(direction.multiply(distance))
-        
-        npc.walkTo(followLocation)
+        // Use the new followEntity method with pathfinding
+        npc.followEntity(player, followDistance = distance)
     }
     
     fun getNPC(): NPC = npc

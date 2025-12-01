@@ -2,7 +2,9 @@ package cc.modlabs.kpaper.npc
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Mannequin
+import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
@@ -104,7 +106,7 @@ interface NPC {
      *
      * @return The underlying entity, or null if the entity is no longer valid.
      */
-    fun getEntity(): org.bukkit.entity.Entity?
+    fun getEntity(): Entity?
 
     /**
      * Gets the underlying Mannequin entity.
@@ -352,7 +354,7 @@ interface NPC {
      *
      * @param player The player to start the conversation with.
      */
-    fun startConversation(player: org.bukkit.entity.Player)
+    fun startConversation(player: Player)
 
     /**
      * Enable or disable pathfinding for this NPC.
@@ -370,4 +372,85 @@ interface NPC {
      * @return True if pathfinding is enabled, false otherwise.
      */
     fun isPathfindingEnabled(): Boolean
+
+    /**
+     * Makes the NPC follow a target entity using pathfinding.
+     * The NPC will automatically navigate around obstacles and jump when needed.
+     * The path is recalculated periodically as the target moves.
+     *
+     * @param entity The entity to follow (player, mob, etc.).
+     * @param followDistance The minimum distance to maintain from the target (default: 2.0 blocks).
+     * @return True if following successfully starts, false otherwise.
+     */
+    fun followEntity(entity: Entity, followDistance: Double = 2.0): Boolean
+
+    /**
+     * Stops the NPC from following its target entity.
+     *
+     * @return True if following is successfully stopped, false otherwise.
+     */
+    fun stopFollowing(): Boolean
+
+    /**
+     * Checks if the NPC is currently following an entity.
+     *
+     * @return True if the NPC is following an entity, false otherwise.
+     */
+    fun isFollowingEntity(): Boolean
+
+    /**
+     * Gets the entity that this NPC is currently following, if any.
+     *
+     * @return The entity being followed, or null if not following any entity.
+     */
+    fun getFollowingEntity(): Entity?
+
+    /**
+     * Sets whether the NPC is visible to all players.
+     * When set to true, all players can see the NPC (default behavior).
+     * When set to false, the NPC is hidden from all players.
+     *
+     * @param visible True to make visible to all players, false to hide from all.
+     */
+    fun setVisibleToAllPlayers(visible: Boolean)
+
+    /**
+     * Sets the list of players who can see this NPC.
+     * If an empty set is provided, the NPC becomes visible to all players.
+     * Players not in the list will not be able to see the NPC.
+     *
+     * @param players The set of players who should be able to see this NPC.
+     */
+    fun setVisibleToPlayers(players: Set<Player>)
+
+    /**
+     * Adds a player to the list of players who can see this NPC.
+     * If the NPC was previously visible to all players, it will become visible only to the specified players.
+     *
+     * @param player The player to add to the visible players list.
+     */
+    fun addVisiblePlayer(player: Player)
+
+    /**
+     * Removes a player from the list of players who can see this NPC.
+     * If the list becomes empty after removal, the NPC becomes visible to all players.
+     *
+     * @param player The player to remove from the visible players list.
+     */
+    fun removeVisiblePlayer(player: Player)
+
+    /**
+     * Gets the set of players who can see this NPC.
+     * Returns null if the NPC is visible to all players.
+     *
+     * @return The set of visible players, or null if visible to all.
+     */
+    fun getVisiblePlayers(): Set<Player>?
+
+    /**
+     * Checks if the NPC is visible to all players.
+     *
+     * @return True if visible to all players, false if restricted to specific players.
+     */
+    fun isVisibleToAllPlayers(): Boolean
 }
