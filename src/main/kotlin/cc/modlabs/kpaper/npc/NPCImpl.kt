@@ -638,6 +638,9 @@ class NPCImpl(
         // Start monitoring task - this will run continuously every nearbyFollowCheckInterval ticks
         logDebug("[NPC] followNearbyPlayers: Starting monitoring task with interval=$nearbyFollowCheckInterval ticks (${nearbyFollowCheckInterval * 50}ms)")
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
+            // Log every tick to confirm task is running
+            logDebug("[NPC] NearbyFollow task: [TICK START] isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
+            
             // Wrap everything in try-catch to ensure task never stops on error
             try {
                 // Only cancel if explicitly stopped
@@ -783,9 +786,26 @@ class NPCImpl(
                 e.printStackTrace()
                 // Task continues to next tick automatically
             }
+            
+            // Explicitly log that we're returning and the task should continue
+            // The timer will automatically schedule the next run
         }
         
-        logDebug("[NPC] followNearbyPlayers: Monitoring task started, will run every ${nearbyFollowCheckInterval} ticks")
+        // Verify the task was created
+        if (nearbyFollowTask == null) {
+            logDebug("[NPC] followNearbyPlayers: ERROR - Task was not created!")
+        } else {
+            logDebug("[NPC] followNearbyPlayers: Monitoring task started successfully, taskId=${nearbyFollowTask?.taskId}, will run every ${nearbyFollowCheckInterval} ticks")
+            
+            // Add a verification log after a short delay to confirm it's still running
+            Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                if (nearbyFollowTask?.isCancelled == true) {
+                    logDebug("[NPC] followNearbyPlayers: WARNING - Task was canceled after ${nearbyFollowCheckInterval * 2} ticks!")
+                } else {
+                    logDebug("[NPC] followNearbyPlayers: Task is still active after ${nearbyFollowCheckInterval * 2} ticks")
+                }
+            }, nearbyFollowCheckInterval * 2)
+        }
 
         return true
     }
