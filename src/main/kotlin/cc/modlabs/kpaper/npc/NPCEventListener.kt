@@ -12,6 +12,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -21,7 +22,7 @@ import kotlin.math.sqrt
  */
 object NPCEventListener {
     private var isRegistered = false
-    private val npcMap = mutableMapOf<org.bukkit.entity.Entity, NPC>()
+    private val npcMap = mutableMapOf<UUID, NPC>()
     private val proximityNPCs = mutableSetOf<NPC>()
     private val visibilityNPCs = mutableSetOf<NPC>()
     private var proximityTask: BukkitTask? = null
@@ -40,7 +41,7 @@ object NPCEventListener {
         // Listen for player right-click on entities
         listen<PlayerInteractEntityEvent> { event ->
             val entity = event.rightClicked
-            val npc = npcMap[entity] ?: return@listen
+            val npc = npcMap[entity.uniqueId] ?: return@listen
             val player = event.player
             val isSneaking = player.isSneaking
             getLogger().info("Interacted with NPC $npc for player $player ($isSneaking) - ${event.hand.name}")
@@ -74,7 +75,7 @@ object NPCEventListener {
         // Listen for player interact at entity (click at specific position)
         listen<PlayerInteractAtEntityEvent> { event ->
             val entity = event.rightClicked
-            val npc = npcMap[entity] ?: return@listen
+            val npc = npcMap[entity.uniqueId] ?: return@listen
             val player = event.player
             val isSneaking = player.isSneaking
             
@@ -100,7 +101,7 @@ object NPCEventListener {
         // Listen for entity damage (left-click or damage)
         listen<EntityDamageByEntityEvent> { event ->
             val entity = event.entity
-            val npc = npcMap[entity] ?: return@listen
+            val npc = npcMap[entity.uniqueId] ?: return@listen
             val damager = event.damager
 
             if (damager is Player) {
@@ -285,7 +286,7 @@ object NPCEventListener {
      * Called automatically when an NPC is created.
      */
     fun registerNPC(entity: org.bukkit.entity.Entity, npc: NPC) {
-        npcMap[entity] = npc
+        npcMap[entity.uniqueId] = npc
     }
 
     /**
@@ -293,7 +294,7 @@ object NPCEventListener {
      * Called automatically when an NPC is removed.
      */
     fun unregisterNPC(entity: org.bukkit.entity.Entity) {
-        val npc = npcMap.remove(entity)
+        val npc = npcMap.remove(entity.uniqueId)
         if (npc != null) {
             unregisterProximityNPC(npc)
         }
