@@ -34,9 +34,8 @@ object NPCEventListener {
      * This is called automatically when an NPC registers its first event handler.
      */
     fun register() {
-        if (isRegistered) return getLogger().info("Tried to register NPC event listener twice")
+        if (isRegistered) return
         isRegistered = true
-        getLogger().info("Registered NPC event listener")
 
         // Listen for player right-click on entities
         listen<PlayerInteractEntityEvent> { event ->
@@ -44,7 +43,6 @@ object NPCEventListener {
             val npc = npcMap[entity.uniqueId] ?: return@listen
             val player = event.player
             val isSneaking = player.isSneaking
-            getLogger().info("Interacted with NPC $npc for player $player ($isSneaking) - ${event.hand.name}")
 
             // Check if NPC has a conversation and start it (only on normal right-click, not shift-click)
             if (!isSneaking && npc.getConversation() != null) {
