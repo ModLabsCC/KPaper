@@ -109,6 +109,14 @@ interface NPC {
     fun getEntity(): Entity?
 
     /**
+     * Gets the underlying LivingEntity for this NPC.
+     * For mannequin-based NPCs, this will return a [Mannequin] instance (which extends LivingEntity).
+     *
+     * @return The underlying LivingEntity, or null if the entity is no longer valid.
+     */
+    fun getLivingEntity(): org.bukkit.entity.LivingEntity?
+
+    /**
      * Gets the underlying Mannequin entity.
      *
      * @return The Mannequin entity, or null if the entity is no longer valid.

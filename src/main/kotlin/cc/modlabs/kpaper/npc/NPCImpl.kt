@@ -69,6 +69,8 @@ class NPCImpl(
 
     override fun getEntity(): Entity? = getMannequin()
 
+    override fun getLivingEntity(): LivingEntity? = if (mannequin.isValid) mannequin else null
+
     override fun walkTo(location: Location): Boolean {
         val entity = getMannequin() as? LivingEntity ?: return false
 
