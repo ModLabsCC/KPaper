@@ -1213,45 +1213,51 @@ class NPCImpl(
             return false
         }
         
-        // For feet position, use collision shape to check if there's collision at the specific Y
-        // NPC stands ON blocks, not IN them, so we need to check collision at the feet Y coordinate
+        // For feet position, check if there's collision at the feet Y
         val feetBlockY = y.toInt()
         val blockAtFeet = world.getBlockAt(x, feetBlockY, z)
         val relativeY = y - feetBlockY // Y position relative to the block (0.0 to 1.0)
         
+        // If the block at feet level is passable (air), no collision - NPC can stand here
+        if (isPassable(blockAtFeet)) {
+            return true
+        }
+        
+        // Block is not passable, check if NPC is standing on top of it using collision shape
         try {
             val collisionShape = blockAtFeet.collisionShape
             if (collisionShape != null) {
-                // Create a small bounding box representing the NPC's feet at this Y position
-                // NPC feet are roughly 0.6x0.6 at the center of the block
-                val feetCheckBox = org.bukkit.util.BoundingBox(
-                    0.2, relativeY - 0.1, 0.2,  // min (relative to block)
-                    0.8, relativeY + 0.1, 0.8   // max (relative to block)
-                )
-                
-                // If the collision shape overlaps at the feet position, there's collision
-                // But if relativeY is at or above the top of the collision shape, it's fine (NPC stands ON it)
                 val boundingBoxes = collisionShape.boundingBoxes
                 if (boundingBoxes.isNotEmpty()) {
                     val maxBlockY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
                     // If feet Y is at or above the top of the collision shape, NPC can stand on it
-                    if (relativeY >= maxBlockY - 0.1) {
-                        return true // Standing on top of the block
+                    if (relativeY >= maxBlockY - 0.15) {
+                        return true // Standing on top of the block (with small tolerance)
                     }
-                    // Otherwise, check if there's collision
+                    // Check if there's collision at the feet position
+                    val feetCheckBox = org.bukkit.util.BoundingBox(
+                        0.2, (relativeY - 0.15).coerceAtLeast(0.0), 0.2,  // min (relative to block)
+                        0.8, (relativeY + 0.15).coerceAtMost(1.0), 0.8   // max (relative to block)
+                    )
                     if (collisionShape.overlaps(feetCheckBox)) {
                         return false // Collision at feet
                     }
+                    // No collision detected, allow it
+                    return true
                 }
             }
+            // No collision shape or empty, check if block is walkable (NPC might be standing on it)
+            if (isWalkable(blockAtFeet) && relativeY >= 0.3) {
+                return true // Standing on a walkable block
+            }
         } catch (e: Exception) {
-            // Fallback: if block is passable, no collision
-            // But if NPC is standing ON the block (relativeY > 0.5), allow it
-            if (relativeY <= 0.5 && !isPassable(blockAtFeet)) {
-                return false
+            // Fallback: if relativeY is high enough (standing on top) or block is walkable, allow it
+            if (relativeY >= 0.3 || isWalkable(blockAtFeet)) {
+                return true
             }
         }
         
+        // Default: allow if no collision detected
         return true
     }
 
