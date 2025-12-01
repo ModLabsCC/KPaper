@@ -9,9 +9,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
-import org.bukkit.block.Block
-import org.bukkit.block.data.Bisected
-import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Mannequin
@@ -45,7 +42,7 @@ class NPCImpl(
     private var usePathfinding = true // Enable pathfinding by default
     private var currentPath = mutableListOf<Location>() // Current calculated path
     private var pathIndex = 0 // Current index in the path
-    
+
     // Patrolling state
     private var isPatrolling = false
     private var isPatrolPaused = false
@@ -65,7 +62,6 @@ class NPCImpl(
     private var spawnLocation: Location? = null // Spawn location to return to
     private var nearbyFollowTask: BukkitTask? = null
     private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
-    private var consecutiveInvalidChecks = 0 // Track consecutive invalid entity checks
 
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -75,7 +71,7 @@ class NPCImpl(
         // Enable AI for the mannequin so it can move
         // Mannequin extends LivingEntity, so we can directly enable AI
         mannequin.setAI(true)
-        
+
         // Register this NPC for event tracking
         NPCEventListener.registerNPC(mannequin, this)
     }
@@ -168,7 +164,7 @@ class NPCImpl(
             pathQueue.addAll(processedLocations.map { it.clone() })
         } else {
             // Direct path without pathfinding
-        pathQueue.addAll(locations.map { it.clone() })
+            pathQueue.addAll(locations.map { it.clone() })
         }
 
         isPaused = false
@@ -366,7 +362,7 @@ class NPCImpl(
                                 data = emptyMap()
                             )
                             triggerEvent(cycleEvent)
-                            
+
                             pathQueue.addAll(patrolPath.map { it.clone() })
                             val nextLocation: Location = pathQueue.removeAt(0)
                             currentTarget = nextLocation
@@ -409,7 +405,7 @@ class NPCImpl(
         walkingTask = null
     }
 
-    
+
     /**
      * Cleanup method called when NPC is removed.
      */
@@ -436,7 +432,7 @@ class NPCImpl(
         patrolPath.addAll(locations.map { it.clone() })
         pathQueue.clear()
         pathQueue.addAll(patrolPath.map { it.clone() })
-        
+
         // Set first location as target
         if (pathQueue.isNotEmpty()) {
             currentTarget = pathQueue.removeAt(0)
@@ -466,7 +462,7 @@ class NPCImpl(
 
     override fun stopPatrolling(): Boolean {
         if (!isPatrolling) return false
-        
+
         // Stop patrolling but keep walking task if there's a current target
         isPatrolling = false
         isPatrolPaused = false
@@ -475,7 +471,7 @@ class NPCImpl(
         if (currentTarget == null && pathQueue.isEmpty()) {
             stopWalking()
         }
-        
+
         return true
     }
 
@@ -610,7 +606,6 @@ class NPCImpl(
         isFollowingNearbyPlayers = true
         nearbyFollowRange = range.coerceAtLeast(1.0)
         nearbyFollowDistance = followDistance.coerceAtLeast(1.0)
-        consecutiveInvalidChecks = 0 // Reset counter when starting
         logDebug("[NPC] followNearbyPlayers: State set - range=$nearbyFollowRange, followDistance=$nearbyFollowDistance")
 
         // Immediately check for nearby players before starting the timer
@@ -647,7 +642,7 @@ class NPCImpl(
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
             // Log every tick to confirm task is running
             logDebug("[NPC] NearbyFollow task: [TICK START] isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
-            
+
             // Wrap everything in try-catch to ensure task never stops on error
             try {
                 // Only cancel if explicitly stopped
@@ -660,21 +655,10 @@ class NPCImpl(
 
                 val currentEntity = getMannequin() as? LivingEntity
                 if (currentEntity == null || !currentEntity.isValid) {
-                    consecutiveInvalidChecks++
-                    // Stop task after 10 consecutive invalid checks (5 seconds at 0.5s intervals)
-                    if (consecutiveInvalidChecks >= 10) {
-                        logDebug("[NPC] NearbyFollow task: Entity invalid for ${consecutiveInvalidChecks} consecutive checks, stopping task")
-                        nearbyFollowTask?.cancel()
-                        nearbyFollowTask = null
-                        isFollowingNearbyPlayers = false
-                        return@timer
-                    }
-                    logDebug("[NPC] NearbyFollow task: Entity invalid (${consecutiveInvalidChecks}/10), skipping this tick")
+                    logDebug("[NPC] NearbyFollow task: Entity invalid, but continuing to check")
+                    // Don't stop the task, just skip this tick
                     return@timer
                 }
-                
-                // Reset counter if entity is valid
-                consecutiveInvalidChecks = 0
 
                 val npcLocation = currentEntity.location
                 val npcWorld = npcLocation.world
@@ -689,11 +673,11 @@ class NPCImpl(
                 // Find nearby players - check ALL online players in the world, not just nearby entities
                 // This ensures we detect players that just joined or moved into range
                 val nearbyPlayers = mutableListOf<Player>()
-                
+
                 // Method 1: Check nearby entities (faster for large worlds)
                 val allNearbyEntities = npcWorld.getNearbyEntities(npcLocation, nearbyFollowRange, nearbyFollowRange, nearbyFollowRange)
                 logDebug("[NPC] NearbyFollow task: Found ${allNearbyEntities.size} total entities nearby")
-                
+
                 for (entity in allNearbyEntities) {
                     if (entity is Player && entity.isValid && !entity.isDead) {
                         val distance = entity.location.distance(npcLocation)
@@ -703,7 +687,7 @@ class NPCImpl(
                         }
                     }
                 }
-                
+
                 // Method 2: Also check all online players in the same world (catches players that just joined)
                 // This is a fallback to ensure we don't miss anyone
                 if (nearbyPlayers.isEmpty()) {
@@ -728,7 +712,7 @@ class NPCImpl(
                 if (currentFollowing != null && currentFollowing.isValid && !currentFollowing.isDead) {
                     val distanceToCurrent = npcLocation.distance(currentFollowing.location)
                     logDebug("[NPC] NearbyFollow task: Currently following ${currentFollowing.name}, distance=$distanceToCurrent, range=$nearbyFollowRange")
-                    
+
                     if (distanceToCurrent <= nearbyFollowRange) {
                         // Still in range, but check if there's a closer player
                         val closerPlayer = nearbyPlayers.minByOrNull { it.location.distance(npcLocation) }
@@ -768,7 +752,7 @@ class NPCImpl(
                         // Don't return - let task continue checking
                         return@timer
                     }
-                    
+
                     val distanceToSpawn = npcLocation.distance(spawn)
                     logDebug("[NPC] NearbyFollow task: No players found, distance to spawn=$distanceToSpawn")
 
@@ -797,24 +781,24 @@ class NPCImpl(
 
                 // Task will automatically continue to next tick - timer handles scheduling
                 logDebug("[NPC] NearbyFollow task: [TICK COMPLETE] Will check again in ${nearbyFollowCheckInterval} ticks")
-                
+
             } catch (e: Exception) {
                 // Log error but don't stop the task - it will continue checking
                 logDebug("[NPC] NearbyFollow task: ERROR in tick - ${e.message}, but task will continue")
                 e.printStackTrace()
                 // Task continues to next tick automatically
             }
-            
+
             // Explicitly log that we're returning and the task should continue
             // The timer will automatically schedule the next run
         }
-        
+
         // Verify the task was created
         if (nearbyFollowTask == null) {
             logDebug("[NPC] followNearbyPlayers: ERROR - Task was not created!")
         } else {
             logDebug("[NPC] followNearbyPlayers: Monitoring task started successfully, taskId=${nearbyFollowTask?.taskId}, will run every ${nearbyFollowCheckInterval} ticks")
-            
+
             // Add a verification log after a short delay to confirm it's still running
             Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                 if (nearbyFollowTask?.isCancelled == true) {
@@ -834,7 +818,6 @@ class NPCImpl(
         isFollowingNearbyPlayers = false
         nearbyFollowTask?.cancel()
         nearbyFollowTask = null
-        consecutiveInvalidChecks = 0 // Reset counter
 
         // Stop following current entity if it was from nearby following
         if (isFollowing && followingEntity is Player) {
@@ -924,7 +907,7 @@ class NPCImpl(
         // Use hybrid approach: teleport for horizontal movement, simulate gravity for vertical
         val normalizedDirection = direction.normalize()
         val moveDistance = speed.coerceAtMost(distance) // Don't overshoot the target
-        
+
         // Calculate horizontal movement (X, Z only)
         val horizontalDirection = Vector(normalizedDirection.x, 0.0, normalizedDirection.z).normalize()
         val horizontalMove = horizontalDirection.multiply(moveDistance)
@@ -932,43 +915,11 @@ class NPCImpl(
 
         // Check if NPC needs to jump
         val needsJump = usePathfinding && Pathfinder.needsJump(entity, target)
-        
+
         // Check for ground below the new horizontal position
-        val world = currentLoc.world ?: return
-        
-        // Check collision before attempting to move - ensure we can walk through blocks at the target position
-        val targetBlockX = newPosition.blockX
-        val targetBlockZ = newPosition.blockZ
-        val currentBlockY = currentLoc.blockY
-        
-        // Check if we can walk through blocks at feet and head level at the target position
-        if (!canWalkThrough(world, targetBlockX, currentBlockY, targetBlockZ) ||
-            !canWalkThrough(world, targetBlockX, currentBlockY + 1, targetBlockZ)) {
-            logDebug("[NPC] moveTowards: Cannot walk through blocks at ${targetBlockX},${currentBlockY},${targetBlockZ} - collision detected")
-            // Try to find a valid path by checking adjacent blocks
-            // Check if we can move in X or Z direction separately
-            val canMoveX = canWalkThrough(world, targetBlockX, currentBlockY, currentLoc.blockZ) &&
-                          canWalkThrough(world, targetBlockX, currentBlockY + 1, currentLoc.blockZ)
-            val canMoveZ = canWalkThrough(world, currentLoc.blockX, currentBlockY, targetBlockZ) &&
-                          canWalkThrough(world, currentLoc.blockX, currentBlockY + 1, targetBlockZ)
-            
-            if (canMoveX && Math.abs(horizontalDirection.x) > Math.abs(horizontalDirection.z)) {
-                // Can move in X direction, adjust position
-                newPosition.z = currentLoc.z
-                logDebug("[NPC] moveTowards: Adjusted to move only in X direction")
-            } else if (canMoveZ && Math.abs(horizontalDirection.z) > Math.abs(horizontalDirection.x)) {
-                // Can move in Z direction, adjust position
-                newPosition.x = currentLoc.x
-                logDebug("[NPC] moveTowards: Adjusted to move only in Z direction")
-            } else {
-                // Cannot move in either direction, abort
-                logDebug("[NPC] moveTowards: Cannot move in any direction, aborting")
-                return
-            }
-        }
-        
+        val world = currentLoc.world
         val groundY = findGroundLevel(world, newPosition.blockX, newPosition.blockZ, currentLoc.blockY.toInt())
-        
+
         // Handle vertical positioning
         if (needsJump) {
             logDebug("[NPC] moveTowards: Needs to jump, adding jump height")
@@ -982,9 +933,7 @@ class NPCImpl(
                 newPosition.y = currentLoc.y + 0.2
             } else if (groundY != null) {
                 // There's ground below - check if we should be on it or falling to it
-                // groundY is already calculated from collision shapes, so it's accurate for all block types
                 val distanceToGround = currentLoc.y - groundY
-                
                 if (distanceToGround > 0.1) {
                     // We're above ground - simulate gravity (fall down)
                     // Gravity: 0.08 blocks per tick (1.6 blocks per second)
@@ -993,21 +942,12 @@ class NPCImpl(
                     logDebug("[NPC] moveTowards: Falling - distanceToGround=$distanceToGround, fallDistance=$fallDistance, newY=${newPosition.y}")
                 } else if (distanceToGround < -0.1) {
                     // We're below ground - place on ground
-                    // groundY is already accurate from collision shapes (handles slabs, stairs, etc.)
                     newPosition.y = groundY
                     logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY")
                 } else {
-                    // We're on ground - stay there or adjust if needed
-                    if (Math.abs(currentLoc.y - groundY) > 0.1) {
-                        // Adjust to ground height for smoother walking
-                        // This works for all block types including slabs and stairs
-                        newPosition.y = groundY
-                        logDebug("[NPC] moveTowards: Adjusted to ground height Y=$groundY")
-                    } else {
-                        // We're on ground - stay there
-                        newPosition.y = currentLoc.y
-                        logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
-                    }
+                    // We're on ground - stay there
+                    newPosition.y = currentLoc.y
+                    logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
                 }
             } else {
                 // No ground found - keep current Y (might be in air, let it fall naturally if gravity is enabled)
@@ -1016,15 +956,14 @@ class NPCImpl(
             }
         }
 
-        // Validate that NPC can stand at the new position (both feet and head must have no collision)
-        // Use the actual Y position (can be fractional for slabs/stairs)
-        if (world != null && !canStandAt(world, newPosition.blockX, newPosition.y, newPosition.blockZ)) {
-            logDebug("[NPC] moveTowards: Cannot stand at ${newPosition.blockX},${newPosition.y},${newPosition.blockZ} - collision detected, aborting movement")
+        // Validate that NPC can stand at the new position (both feet and head must be air)
+        if (world != null && !canStandAt(world, newPosition.blockX, newPosition.blockY, newPosition.blockZ)) {
+            logDebug("[NPC] moveTowards: Cannot stand at ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ} - collision detected, aborting movement")
             // Try to find a valid Y position nearby
             // Search downward first (most common case - ceiling collision)
-            var foundValidY: Double? = null
+            var foundValidY: Int? = null
             for (offset in 0..3) {
-                val testY = newPosition.y - offset
+                val testY = newPosition.blockY - offset
                 if (testY >= 0 && canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
                     foundValidY = testY
                     break
@@ -1033,16 +972,16 @@ class NPCImpl(
             // If not found downward, try upward (floor collision)
             if (foundValidY == null) {
                 for (offset in 1..3) {
-                    val testY = newPosition.y + offset
+                    val testY = newPosition.blockY + offset
                     if (canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
                         foundValidY = testY
                         break
                     }
                 }
             }
-            
+
             if (foundValidY != null) {
-                newPosition.y = foundValidY
+                newPosition.y = foundValidY.toDouble() + 0.5 // Center in block
                 logDebug("[NPC] moveTowards: Adjusted Y to ${newPosition.y} to avoid collision")
             } else {
                 // No valid position found, abort movement for this tick
@@ -1055,7 +994,7 @@ class NPCImpl(
         val lookDirection = target.toVector().subtract(newPosition.toVector())
         val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
         val pitch = Math.toDegrees(-Math.asin(lookDirection.y / lookDirection.length())).toFloat()
-        
+
         newPosition.yaw = yaw
         newPosition.pitch = pitch.coerceIn(-90f, 90f)
 
@@ -1063,126 +1002,24 @@ class NPCImpl(
         entity.teleport(newPosition)
         logDebug("[NPC] moveTowards: Teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
     }
-    
-    /**
-     * Checks if a block is passable (can be walked through) using the official Paper API.
-     * Uses Block.isPassable() which checks if the block has no colliding parts.
-     * @see org.bukkit.block.Block#isPassable()
-     */
-    private fun isPassable(block: Block): Boolean {
-        // Use the built-in isPassable() method from Paper API
-        // This is more accurate as it uses the block's collision shape internally
-        return block.isPassable()
-    }
 
     /**
-     * Checks if a block can be walked on using collision shape.
-     * A block is walkable if it has a collision shape (even if partial, like slabs).
-     * Uses Block.isCollidable() and collision shape for accurate detection.
-     */
-    private fun isWalkable(block: Block): Boolean {
-        val type = block.type
-        if (type == Material.BARRIER) return false
-        
-        // Use isCollidable() to check if block has collision
-        // This is more accurate than checking isSolid
-        if (block.isCollidable()) {
-            return true
-        }
-        
-        // Also check collision shape directly for blocks that might be walkable
-        // but not marked as collidable (edge cases)
-        try {
-            val collisionShape = block.collisionShape
-            // If collision shape exists and has bounding boxes, block can be walked on
-            // This handles slabs, stairs, and other partial blocks correctly
-            if (collisionShape != null) {
-                val boundingBoxes = collisionShape.boundingBoxes
-                return boundingBoxes.isNotEmpty()
-            }
-            return false
-        } catch (e: Exception) {
-            // Fallback to material check if collision shape API is not available
-            return type.isSolid
-        }
-    }
-    
-    /**
-     * Gets the top Y coordinate of a block based on its collision shape.
-     * Uses the collision shape's bounding boxes for accurate height detection.
-     * Works for all block types including slabs, stairs, and partial blocks.
-     * @see org.bukkit.block.Block#getCollisionShape()
-     * @see org.bukkit.util.VoxelShape#getBoundingBoxes()
-     */
-    private fun getBlockTopY(block: Block, blockY: Int): Double {
-        // Use collision shape to determine top - works for all block types
-        try {
-            val collisionShape = block.collisionShape
-            if (collisionShape != null) {
-                // Get all bounding boxes from the collision shape
-                // VoxelShape.getBoundingBoxes() returns a Collection<BoundingBox>
-                val boundingBoxes = collisionShape.boundingBoxes
-                if (boundingBoxes.isNotEmpty()) {
-                    // Find the maximum Y from all bounding boxes
-                    // This automatically handles slabs, stairs, and other partial blocks
-                    val maxY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
-                    return blockY + maxY
-                }
-            }
-        } catch (e: Exception) {
-            // Fallback: use block's approximate bounding box
-            try {
-                val boundingBox = block.boundingBox
-                if (boundingBox != null) {
-                    // Check if bounding box has volume (not degenerate)
-                    val volume = boundingBox.volume
-                    if (volume > 0.0) {
-                        return blockY + boundingBox.maxY
-                    }
-                }
-            } catch (e2: Exception) {
-                // If all else fails, assume full block
-            }
-        }
-        
-        // Default: full block
-        return blockY + 1.0
-    }
-
-    /**
-     * Finds the ground level at the given X, Z coordinates using collision shapes.
+     * Finds the ground level (top solid block) at the given X, Z coordinates.
      * Returns null if no solid ground is found within reasonable range.
-     * Only returns a ground level if there's sufficient airspace above for the NPC to stand.
-     * Uses collision shapes and bounding boxes for accurate detection of all block types.
-     * @see org.bukkit.block.Block#getCollisionShape()
-     * @see org.bukkit.util.VoxelShape#getBoundingBoxes()
+     * Only returns a ground level if there's sufficient air space above for the NPC to stand.
      */
     private fun findGroundLevel(world: World, x: Int, z: Int, startY: Int): Double? {
         // Search from startY + 2 down to startY - 10
         for (y in (startY + 2).downTo(startY - 10)) {
             val block = world.getBlockAt(x, y, z)
-            
-            // Check if this is a walkable block using collision shape
-            if (isWalkable(block)) {
-                // Get the top Y of this block using collision shape
-                val blockTopY = getBlockTopY(block, y)
-                
-                // NPC needs space for head (2 blocks tall)
-                // Feet are at blockTopY, head is at blockTopY + 1.8
-                val headY = blockTopY + 1.8
-                val headBlockY = headY.toInt()
-                
-                // Check if there's enough headroom - the block at head level must be passable
-                // For feet: NPC stands ON the block (at blockTopY), so we don't need to check
-                // if the block itself is passable - it's the walkable surface
-                val headBlock = world.getBlockAt(x, headBlockY, z)
-                
-                // Also check the block above head (for 2-block tall NPC)
-                val headBlockAbove = world.getBlockAt(x, headBlockY + 1, z)
-                
-                if (isPassable(headBlock) && isPassable(headBlockAbove)) {
-                    // Sufficient space, return the top of this block
-                    return blockTopY
+            if (block.type.isSolid && block.type != Material.BARRIER) {
+                // Found solid ground, check if there's air space above for NPC to stand
+                // Check air at y + 1 (feet) and y + 2 (head) for a 2-block tall NPC
+                val above = world.getBlockAt(x, y + 1, z)
+                val above2 = world.getBlockAt(x, y + 2, z)
+                if (above.type.isAir && above2.type.isAir) {
+                    // Sufficient air space, return the top of this block
+                    return (y + 1).toDouble()
                 }
             }
         }
@@ -1190,133 +1027,17 @@ class NPCImpl(
     }
 
     /**
-     * Checks if the NPC can stand at the given position using collision shapes.
-     * Checks if both feet and head positions have no collision.
-     * Uses collision shapes to accurately detect if there's collision at the specific Y coordinates.
+     * Checks if the NPC can stand at the given position (both feet and head blocks must be air).
      * @param world The world to check in
      * @param x The X coordinate
-     * @param y The Y coordinate (feet level, can be fractional like 100.5 for slabs)
+     * @param y The Y coordinate (feet level)
      * @param z The Z coordinate
-     * @return true if both the feet and head positions have no collision
+     * @return true if both the feet and head positions are air blocks
      */
-    private fun canStandAt(world: World, x: Int, y: Double, z: Int): Boolean {
-        // For head position, check if the block is passable
-        val headY = (y + 1.8).toInt() // NPC is ~1.8 blocks tall
-        val blockAtHead = world.getBlockAt(x, headY, z)
-        if (!isPassable(blockAtHead)) {
-            return false
-        }
-        
-        // Also check the block above head
-        val blockAboveHead = world.getBlockAt(x, headY + 1, z)
-        if (!isPassable(blockAboveHead)) {
-            return false
-        }
-        
-        // For feet position, check if there's collision at the feet Y
-        val feetBlockY = y.toInt()
-        val blockAtFeet = world.getBlockAt(x, feetBlockY, z)
-        val relativeY = y - feetBlockY // Y position relative to the block (0.0 to 1.0)
-        
-        // If the block at feet level is passable (air), no collision - NPC can stand here
-        if (isPassable(blockAtFeet)) {
-            return true
-        }
-        
-        // Block is not passable, check if NPC is standing on top of it using collision shape
-        try {
-            val collisionShape = blockAtFeet.collisionShape
-            if (collisionShape != null) {
-                val boundingBoxes = collisionShape.boundingBoxes
-                if (boundingBoxes.isNotEmpty()) {
-                    val maxBlockY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
-                    // If feet Y is at or above the top of the collision shape, NPC can stand on it
-                    if (relativeY >= maxBlockY - 0.15) {
-                        return true // Standing on top of the block (with small tolerance)
-                    }
-                    // Check if there's collision at the feet position
-                    val feetCheckBox = org.bukkit.util.BoundingBox(
-                        0.2, (relativeY - 0.15).coerceAtLeast(0.0), 0.2,  // min (relative to block)
-                        0.8, (relativeY + 0.15).coerceAtMost(1.0), 0.8   // max (relative to block)
-                    )
-                    if (collisionShape.overlaps(feetCheckBox)) {
-                        return false // Collision at feet
-                    }
-                    // No collision detected, allow it
-                    return true
-                }
-            }
-            // No collision shape or empty, check if block is walkable (NPC might be standing on it)
-            if (isWalkable(blockAtFeet) && relativeY >= 0.3) {
-                return true // Standing on a walkable block
-            }
-        } catch (e: Exception) {
-            // Fallback: if relativeY is high enough (standing on top) or block is walkable, allow it
-            if (relativeY >= 0.3 || isWalkable(blockAtFeet)) {
-                return true
-            }
-        }
-        
-        // Default: allow if no collision detected
-        return true
-    }
-
-    /**
-     * Checks if the NPC can walk through the block at the given position using collision shape.
-     * This checks if the block has no collision at this position.
-     * @param world The world to check in
-     * @param x The X coordinate
-     * @param y The Y coordinate
-     * @param z The Z coordinate
-     * @return true if the block is passable (can walk through)
-     */
-    private fun canWalkThrough(world: World, x: Int, y: Int, z: Int): Boolean {
-        val block = world.getBlockAt(x, y, z)
-        // Use collision shape to determine if block can be walked through
-        return isPassable(block)
-    }
-    
-    /**
-     * Checks if a position within a block has collision using the block's collision shape.
-     * This provides more precise collision detection than just checking if the block is passable.
-     * Uses Block.getCollisionShape() and VoxelShape.overlaps() for accurate collision detection.
-     * @param block The block to check
-     * @param relativeY The Y position relative to the block (0.0 to 1.0)
-     * @return true if there's collision at this relative Y position
-     * @see org.bukkit.block.Block#getCollisionShape()
-     * @see org.bukkit.util.VoxelShape#overlaps(org.bukkit.util.BoundingBox)
-     */
-    private fun hasCollisionAt(block: Block, relativeY: Double): Boolean {
-        try {
-            val collisionShape = block.collisionShape
-            if (collisionShape == null) {
-                return false // No collision
-            }
-            // Check if collision shape has any bounding boxes
-            val boundingBoxes = collisionShape.boundingBoxes
-            if (boundingBoxes.isEmpty()) {
-                return false // No collision
-            }
-            
-            // Create a bounding box representing the NPC's collision area at this Y position
-            // We check a small area (0.6x0.6) at the center of the block at this Y level
-            // This represents the NPC's collision box at this height
-            val minX = 0.2
-            val maxX = 0.8
-            val minZ = 0.2
-            val maxZ = 0.8
-            val minY = relativeY - 0.1
-            val maxY = relativeY + 0.1
-            
-            // Create a BoundingBox for the NPC's collision area
-            val npcBoundingBox = org.bukkit.util.BoundingBox(minX, minY, minZ, maxX, maxY, maxZ)
-            
-            // Use VoxelShape.overlaps() to check if the collision shape intersects with our bounding box
-            return collisionShape.overlaps(npcBoundingBox)
-        } catch (e: Exception) {
-            // Fallback to simple passable check using official API
-            return !block.isPassable()
-        }
+    private fun canStandAt(world: World, x: Int, y: Int, z: Int): Boolean {
+        val blockAtFeet = world.getBlockAt(x, y, z)
+        val blockAtHead = world.getBlockAt(x, y + 1, z)
+        return blockAtFeet.type.isAir && blockAtHead.type.isAir
     }
 
     /**
@@ -1467,9 +1188,9 @@ class NPCImpl(
         eventHandlers.getOrPut(eventType) { mutableListOf() }.add(handler)
         // Register global listener if not already registered
         NPCEventListener.register()
-        
+
         // Register for proximity monitoring if needed
-        if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY || 
+        if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY ||
             eventType == NPCEventType.PLAYER_PUNCHING_NEARBY ||
             lookAtPlayers) {
             NPCEventListener.registerProximityNPC(this)
@@ -1478,12 +1199,12 @@ class NPCImpl(
 
     override fun removeEventHandlers(eventType: NPCEventType) {
         eventHandlers.remove(eventType)
-        
+
         // Unregister from proximity monitoring if no proximity handlers remain and not looking at players
-        if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY || 
+        if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY ||
             eventType == NPCEventType.PLAYER_PUNCHING_NEARBY) {
             val hasProximityHandlers = eventHandlers.containsKey(NPCEventType.PLAYER_SNEAKING_NEARBY) ||
-                                      eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
+                    eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
             if (!hasProximityHandlers && !lookAtPlayers) {
                 NPCEventListener.unregisterProximityNPC(this)
             }
@@ -1510,7 +1231,7 @@ class NPCImpl(
         } else {
             // Only unregister if no proximity event handlers are registered
             val hasProximityHandlers = eventHandlers.containsKey(NPCEventType.PLAYER_SNEAKING_NEARBY) ||
-                                      eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
+                    eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
             if (!hasProximityHandlers) {
                 NPCEventListener.unregisterProximityNPC(this)
             }
