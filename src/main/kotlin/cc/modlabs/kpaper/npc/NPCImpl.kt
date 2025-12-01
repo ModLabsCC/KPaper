@@ -7,6 +7,8 @@ import net.kyori.adventure.text.Component
 import cc.modlabs.kpaper.main.PluginInstance
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Mannequin
@@ -902,25 +904,55 @@ class NPCImpl(
             return
         }
 
-        // Mannequins are display entities and don't respond to velocity properly
-        // Use teleportation for movement instead
+        // Use hybrid approach: teleport for horizontal movement, simulate gravity for vertical
         val normalizedDirection = direction.normalize()
         val moveDistance = speed.coerceAtMost(distance) // Don't overshoot the target
-        val newPosition = currentLoc.clone().add(normalizedDirection.multiply(moveDistance))
+        
+        // Calculate horizontal movement (X, Z only)
+        val horizontalDirection = Vector(normalizedDirection.x, 0.0, normalizedDirection.z).normalize()
+        val horizontalMove = horizontalDirection.multiply(moveDistance)
+        val newPosition = currentLoc.clone().add(horizontalMove)
 
         // Check if NPC needs to jump
         val needsJump = usePathfinding && Pathfinder.needsJump(entity, target)
+        
+        // Check for ground below the new horizontal position
+        val world = currentLoc.world
+        val groundY = findGroundLevel(world, newPosition.blockX, newPosition.blockZ, currentLoc.blockY.toInt())
+        
+        // Handle vertical positioning
         if (needsJump) {
             logDebug("[NPC] moveTowards: Needs to jump, adding jump height")
-            // Add jump height to the new position
-            newPosition.y += 0.42 // Standard jump height
+            // Jump: move up from current position
+            newPosition.y = currentLoc.y + 0.42
         } else {
-            // Normal movement - handle small steps up
             val heightDiff = target.y - currentLoc.y
             if (heightDiff > 0.1 && heightDiff <= 0.5) {
                 logDebug("[NPC] moveTowards: Small step up (heightDiff=$heightDiff), adding step height")
-                // Small step up, add slight upward movement
-                newPosition.y += 0.2
+                // Small step up
+                newPosition.y = currentLoc.y + 0.2
+            } else if (groundY != null) {
+                // There's ground below - check if we should be on it or falling to it
+                val distanceToGround = currentLoc.y - groundY
+                if (distanceToGround > 0.1) {
+                    // We're above ground - simulate gravity (fall down)
+                    // Gravity: 0.08 blocks per tick (1.6 blocks per second)
+                    val fallDistance = 0.08.coerceAtMost(distanceToGround - 0.1)
+                    newPosition.y = currentLoc.y - fallDistance
+                    logDebug("[NPC] moveTowards: Falling - distanceToGround=$distanceToGround, fallDistance=$fallDistance, newY=${newPosition.y}")
+                } else if (distanceToGround < -0.1) {
+                    // We're below ground - place on ground
+                    newPosition.y = groundY
+                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY")
+                } else {
+                    // We're on ground - stay there
+                    newPosition.y = currentLoc.y
+                    logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
+                }
+            } else {
+                // No ground found - keep current Y (might be in air, let it fall naturally if gravity is enabled)
+                newPosition.y = currentLoc.y
+                logDebug("[NPC] moveTowards: No ground found, keeping current Y=${newPosition.y}")
             }
         }
 
@@ -932,9 +964,25 @@ class NPCImpl(
         newPosition.yaw = yaw
         newPosition.pitch = pitch.coerceIn(-90f, 90f)
 
-        // Teleport to new position (Mannequins need teleportation for movement)
+        // Teleport to new position
         entity.teleport(newPosition)
         logDebug("[NPC] moveTowards: Teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
+    }
+    
+    /**
+     * Finds the ground level (top solid block) at the given X, Z coordinates.
+     * Returns null if no solid ground is found within reasonable range.
+     */
+    private fun findGroundLevel(world: World, x: Int, z: Int, startY: Int): Double? {
+        // Search from startY + 2 down to startY - 10
+        for (y in (startY + 2).downTo(startY - 10)) {
+            val block = world.getBlockAt(x, y, z)
+            if (block.type.isSolid && block.type != Material.BARRIER) {
+                // Found solid ground, return the top of this block
+                return (y + 1).toDouble()
+            }
+        }
+        return null
     }
 
     /**
