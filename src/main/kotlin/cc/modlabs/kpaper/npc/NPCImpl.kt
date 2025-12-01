@@ -65,6 +65,7 @@ class NPCImpl(
     private var spawnLocation: Location? = null // Spawn location to return to
     private var nearbyFollowTask: BukkitTask? = null
     private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
+    private var consecutiveInvalidChecks = 0 // Track consecutive invalid entity checks
 
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -609,6 +610,7 @@ class NPCImpl(
         isFollowingNearbyPlayers = true
         nearbyFollowRange = range.coerceAtLeast(1.0)
         nearbyFollowDistance = followDistance.coerceAtLeast(1.0)
+        consecutiveInvalidChecks = 0 // Reset counter when starting
         logDebug("[NPC] followNearbyPlayers: State set - range=$nearbyFollowRange, followDistance=$nearbyFollowDistance")
 
         // Immediately check for nearby players before starting the timer
@@ -658,10 +660,21 @@ class NPCImpl(
 
                 val currentEntity = getMannequin() as? LivingEntity
                 if (currentEntity == null || !currentEntity.isValid) {
-                    logDebug("[NPC] NearbyFollow task: Entity invalid, but continuing to check")
-                    // Don't stop the task, just skip this tick
+                    consecutiveInvalidChecks++
+                    // Stop task after 10 consecutive invalid checks (5 seconds at 0.5s intervals)
+                    if (consecutiveInvalidChecks >= 10) {
+                        logDebug("[NPC] NearbyFollow task: Entity invalid for ${consecutiveInvalidChecks} consecutive checks, stopping task")
+                        nearbyFollowTask?.cancel()
+                        nearbyFollowTask = null
+                        isFollowingNearbyPlayers = false
+                        return@timer
+                    }
+                    logDebug("[NPC] NearbyFollow task: Entity invalid (${consecutiveInvalidChecks}/10), skipping this tick")
                     return@timer
                 }
+                
+                // Reset counter if entity is valid
+                consecutiveInvalidChecks = 0
 
                 val npcLocation = currentEntity.location
                 val npcWorld = npcLocation.world
@@ -821,6 +834,7 @@ class NPCImpl(
         isFollowingNearbyPlayers = false
         nearbyFollowTask?.cancel()
         nearbyFollowTask = null
+        consecutiveInvalidChecks = 0 // Reset counter
 
         // Stop following current entity if it was from nearby following
         if (isFollowing && followingEntity is Player) {
