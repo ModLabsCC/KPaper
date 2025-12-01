@@ -49,7 +49,14 @@ enum class NPCEventType {
     /**
      * Triggered when a player is punching within range of the NPC.
      */
-    PLAYER_PUNCHING_NEARBY
+    PLAYER_PUNCHING_NEARBY,
+    
+    /**
+     * Triggered when a player interacts at a specific position on the NPC.
+     * This event provides the exact click position on the entity.
+     * Uses PlayerInteractAtEntityEvent from Bukkit.
+     */
+    PLAYER_INTERACT_AT
 }
 
 /**

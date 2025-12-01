@@ -9,6 +9,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
+import org.bukkit.util.Vector
 
 /**
  * Example usage of the NPC API.
@@ -711,6 +712,56 @@ fun NPCWithEventsExample(location: Location): NPC {
     
     npc.onEvent(NPCEventType.PATROL_CYCLE_COMPLETE) { event ->
         // Do something when patrol cycle completes
+    }
+    
+    // Handle interact at event (click at specific position on NPC)
+    npc.onEvent(NPCEventType.PLAYER_INTERACT_AT) { event ->
+        val player = event.player ?: return@onEvent
+        val clickedPosition = event.data["clickedPosition"] as? Vector
+        val clickedX = event.data["clickedPositionX"] as? Double ?: 0.0
+        val clickedY = event.data["clickedPositionY"] as? Double ?: 0.0
+        val clickedZ = event.data["clickedPositionZ"] as? Double ?: 0.0
+        
+        player.sendMessage("&eYou clicked at position: X=$clickedX, Y=$clickedY, Z=$clickedZ")
+        // Use the click position to determine which part of the NPC was clicked
+        // For example, clicking on the head vs body vs legs
+    }
+    
+    return npc
+}
+
+/**
+ * Example 15b: NPC with interact at event handler (click position detection)
+ */
+fun NPCWithInteractAtExample(location: Location): NPC {
+    val npc = location.createNPC {
+        name("&bPosition Detector")
+        description("&7Click me to see where you clicked!")
+        immovable(true)
+    }
+    
+    // Handle interact at event - provides exact click position
+    npc.onEvent(NPCEventType.PLAYER_INTERACT_AT) { event ->
+        val player = event.player ?: return@onEvent
+        val clickedX = event.data["clickedPositionX"] as? Double ?: 0.0
+        val clickedY = event.data["clickedPositionY"] as? Double ?: 0.0
+        val clickedZ = event.data["clickedPositionZ"] as? Double ?: 0.0
+        val isSneaking = event.data["isSneaking"] as? Boolean ?: false
+        
+        // Determine which part of the NPC was clicked based on Y position
+        val bodyPart = when {
+            clickedY > 1.5 -> "head"
+            clickedY > 0.8 -> "body"
+            clickedY > 0.4 -> "legs"
+            else -> "feet"
+        }
+        
+        player.sendMessage("&aYou clicked on my $bodyPart!")
+        player.sendMessage("&7Position: X=${String.format("%.2f", clickedX)}, Y=${String.format("%.2f", clickedY)}, Z=${String.format("%.2f", clickedZ)}")
+        
+        if (isSneaking) {
+            player.sendMessage("&eYou were sneaking when you clicked!")
+        }
     }
     
     return npc

@@ -5,10 +5,12 @@ import cc.modlabs.kpaper.extensions.timer
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerAnimationEvent
+import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitTask
+import org.bukkit.util.Vector
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -61,6 +63,32 @@ object NPCEventListener {
                 data = mapOf(
                     "interactionHand" to event.hand.name,
                     "isSneaking" to isSneaking
+                )
+            )
+            (npc as? NPCImpl)?.triggerEvent(npcEvent)
+        }
+
+        // Listen for player interact at entity (click at specific position)
+        listen<PlayerInteractAtEntityEvent> { event ->
+            val entity = event.rightClicked
+            val npc = npcMap[entity] ?: return@listen
+            val player = event.player
+            val isSneaking = player.isSneaking
+            
+            // Get the interaction position (where the player clicked on the entity)
+            val clickedPosition = event.clickedPosition
+            
+            val npcEvent = NPCEvent(
+                npc = npc,
+                player = player,
+                eventType = NPCEventType.PLAYER_INTERACT_AT,
+                data = mapOf(
+                    "interactionHand" to event.hand.name,
+                    "isSneaking" to isSneaking,
+                    "clickedPosition" to clickedPosition,
+                    "clickedPositionX" to clickedPosition.x,
+                    "clickedPositionY" to clickedPosition.y,
+                    "clickedPositionZ" to clickedPosition.z
                 )
             )
             (npc as? NPCImpl)?.triggerEvent(npcEvent)
