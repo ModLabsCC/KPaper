@@ -33,8 +33,9 @@ object NPCEventListener {
      * This is called automatically when an NPC registers its first event handler.
      */
     fun register() {
-        if (isRegistered) return
+        if (isRegistered) return getLogger().info("Tried to register NPC event listener twice")
         isRegistered = true
+        getLogger().info("Registered NPC event listener")
 
         // Listen for player right-click on entities
         listen<PlayerInteractEntityEvent> { event ->
