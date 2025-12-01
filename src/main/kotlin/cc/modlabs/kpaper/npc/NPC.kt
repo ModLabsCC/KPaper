@@ -353,4 +353,21 @@ interface NPC {
      * @param player The player to start the conversation with.
      */
     fun startConversation(player: org.bukkit.entity.Player)
+
+    /**
+     * Enable or disable pathfinding for this NPC.
+     * When enabled, NPCs will use A* pathfinding to navigate around obstacles and jump when needed.
+     * When disabled, NPCs will move directly towards targets.
+     * Pathfinding is enabled by default.
+     *
+     * @param enabled Whether pathfinding should be enabled.
+     */
+    fun setPathfindingEnabled(enabled: Boolean)
+
+    /**
+     * Check if pathfinding is enabled for this NPC.
+     *
+     * @return True if pathfinding is enabled, false otherwise.
+     */
+    fun isPathfindingEnabled(): Boolean
 }

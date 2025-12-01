@@ -287,6 +287,72 @@ fun PatrollingControlExample(npc: NPC, patrolPoints: List<Location>) {
     npc.stopPatrolling()
 }
 
+/**
+ * Example 7c: NPC with pathfinding enabled (navigates around obstacles and jumps)
+ * Pathfinding is enabled by default, but you can control it explicitly.
+ */
+fun PathfindingNPCExample(location: Location, targetLocation: Location): NPC {
+    val npc = location.createNPC {
+        name("&bSmart Navigator")
+        description("&7I can navigate around obstacles!")
+        immovable(false) // Must be false for walking
+    }
+    
+    // Pathfinding is enabled by default, but you can explicitly enable it
+    npc.setPathfindingEnabled(true)
+    
+    // The NPC will automatically:
+    // - Navigate around obstacles using A* pathfinding
+    // - Jump over 1-block high obstacles
+    // - Find the best path to the target
+    npc.walkTo(targetLocation)
+    
+    return npc
+}
+
+/**
+ * Example 7d: NPC with pathfinding disabled (moves directly, ignoring obstacles)
+ */
+fun DirectPathNPCExample(location: Location, targetLocation: Location): NPC {
+    val npc = location.createNPC {
+        name("&cDirect Walker")
+        description("&7I walk straight to my target!")
+        immovable(false)
+    }
+    
+    // Disable pathfinding - NPC will move directly towards target
+    // This is useful for simple scenarios or when you want direct movement
+    npc.setPathfindingEnabled(false)
+    
+    npc.walkTo(targetLocation)
+    
+    return npc
+}
+
+/**
+ * Example 7e: NPC that navigates complex terrain with obstacles
+ */
+fun ComplexTerrainNPCExample(spawnLocation: Location): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&eMountain Climber")
+        description("&7I can climb and jump!")
+        immovable(false)
+    }
+    
+    // Pathfinding is enabled by default
+    // The NPC can:
+    // - Jump over 1-block high obstacles
+    // - Navigate around walls and barriers
+    // - Find paths through complex terrain
+    // - Drop down up to 3 blocks safely
+    
+    // Example: Walk to a location that requires navigating around obstacles
+    val targetLocation = spawnLocation.clone().add(20.0, 5.0, 20.0)
+    npc.walkTo(targetLocation)
+    
+    return npc
+}
+
 // ============================================================================
 // ADVANCED EXAMPLES
 // ============================================================================

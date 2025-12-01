@@ -11,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
 import org.bukkit.scheduler.BukkitTask
+import org.bukkit.util.Vector
 
 /**
  * Implementation of [NPC] that wraps a [Mannequin] entity.
@@ -29,6 +30,11 @@ class NPCImpl(
     private var isWalking = false
     private val walkSpeed = 0.25 // Blocks per tick
     private val arrivalThreshold = 1.5 // Distance to consider "arrived"
+    
+    // Pathfinding state
+    private var usePathfinding = true // Enable pathfinding by default
+    private var currentPath = mutableListOf<Location>() // Current calculated path
+    private var pathIndex = 0 // Current index in the path
     
     // Patrolling state
     private var isPatrolling = false
@@ -51,9 +57,41 @@ class NPCImpl(
     override fun walkTo(location: Location): Boolean {
         val entity = getMannequin() as? LivingEntity ?: return false
 
-        // Clear existing path and set new target
+        // Clear existing path
         pathQueue.clear()
-        currentTarget = location.clone()
+        currentPath.clear()
+        pathIndex = 0
+        
+        val targetLocation = location.clone()
+        val currentLoc = entity.location
+
+        // Use pathfinding if enabled
+        if (usePathfinding) {
+            val path = Pathfinder.findPath(currentLoc, targetLocation)
+            if (path.isNotEmpty()) {
+                // Add all waypoints except the first (current position) to the queue
+                currentPath.addAll(path)
+                if (currentPath.size > 1) {
+                    pathQueue.addAll(currentPath.subList(1, currentPath.size))
+                } else {
+                    pathQueue.add(targetLocation)
+                }
+            } else {
+                // Pathfinding failed, use direct path
+                pathQueue.add(targetLocation)
+            }
+        } else {
+            // Direct path without pathfinding
+            pathQueue.add(targetLocation)
+        }
+
+        // Set first location as target
+        if (pathQueue.isNotEmpty()) {
+            currentTarget = pathQueue.removeAt(0)
+        } else {
+            currentTarget = targetLocation
+        }
+        
         isPaused = false
 
         // Start walking if not already walking
@@ -68,9 +106,39 @@ class NPCImpl(
         if (locations.isEmpty()) return false
         val entity = getMannequin() as? LivingEntity ?: return false
 
-        // Clear existing path and queue new locations
+        // Clear existing path
         pathQueue.clear()
-        pathQueue.addAll(locations.map { it.clone() })
+        currentPath.clear()
+        pathIndex = 0
+        
+        val currentLoc = entity.location
+        val processedLocations = mutableListOf<Location>()
+
+        // Use pathfinding between each waypoint if enabled
+        if (usePathfinding) {
+            var lastLocation = currentLoc
+            for (target in locations) {
+                val path = Pathfinder.findPath(lastLocation, target)
+                if (path.isNotEmpty()) {
+                    // Add waypoints except the first (which is the last location)
+                    if (processedLocations.isEmpty()) {
+                        processedLocations.addAll(path)
+                    } else {
+                        processedLocations.addAll(path.subList(1, path.size))
+                    }
+                    lastLocation = target
+                } else {
+                    // Pathfinding failed, add direct waypoint
+                    processedLocations.add(target)
+                    lastLocation = target
+                }
+            }
+            pathQueue.addAll(processedLocations.map { it.clone() })
+        } else {
+            // Direct path without pathfinding
+            pathQueue.addAll(locations.map { it.clone() })
+        }
+        
         isPaused = false
 
         // Set first location as target
@@ -202,6 +270,8 @@ class NPCImpl(
         currentTarget = null
         pathQueue.clear()
         patrolPath.clear()
+        currentPath.clear()
+        pathIndex = 0
         walkingTask?.cancel()
         walkingTask = null
     }
@@ -265,7 +335,6 @@ class NPCImpl(
         isPatrolling = false
         isPatrolPaused = false
         patrolPath.clear()
-        
         // If no current target and no path queue, stop walking completely
         if (currentTarget == null && pathQueue.isEmpty()) {
             stopWalking()
@@ -278,11 +347,29 @@ class NPCImpl(
         val currentLoc = entity.location
         val direction = target.toVector().subtract(currentLoc.toVector()).normalize()
 
-        // Calculate the movement vector
-        val movement = direction.multiply(speed)
+        // Check if NPC needs to jump
+        if (usePathfinding && Pathfinder.needsJump(entity, target)) {
+            // Apply upward velocity for jumping
+            val jumpVelocity = Vector(0.0, 0.42, 0.0) // Standard jump velocity
+            val horizontalMovement = direction.multiply(speed)
+            entity.velocity = horizontalMovement.add(jumpVelocity)
+        } else {
+            // Normal movement
+            val movement = direction.multiply(speed)
+            
+            // Check if we need to go up a step (small elevation change)
+            val heightDiff = target.y - currentLoc.y
+            if (heightDiff > 0.1 && heightDiff <= 0.5) {
+                // Small step up, add slight upward velocity
+                val stepVelocity = Vector(0.0, 0.2, 0.0)
+                entity.velocity = movement.add(stepVelocity)
+            } else {
+                entity.velocity = movement
+            }
+        }
 
         // Get the new location
-        val newLoc = currentLoc.clone().add(movement)
+        val newLoc = currentLoc.clone().add(direction.multiply(speed))
 
         // Make entity look at target
         val lookDirection = target.toVector().subtract(currentLoc.toVector())
@@ -290,9 +377,24 @@ class NPCImpl(
         newLoc.yaw = yaw
         newLoc.pitch = 0f
 
-        // Apply movement
-        entity.velocity = movement
+        // Apply teleportation for position update
         entity.teleport(newLoc)
+    }
+    
+    /**
+     * Enable or disable pathfinding for this NPC.
+     * When enabled, NPCs will use A* pathfinding to navigate around obstacles and jump when needed.
+     * When disabled, NPCs will move directly towards targets.
+     */
+    override fun setPathfindingEnabled(enabled: Boolean) {
+        usePathfinding = enabled
+    }
+    
+    /**
+     * Check if pathfinding is enabled for this NPC.
+     */
+    override fun isPathfindingEnabled(): Boolean {
+        return usePathfinding
     }
 
     override fun teleport(location: Location): Boolean {
