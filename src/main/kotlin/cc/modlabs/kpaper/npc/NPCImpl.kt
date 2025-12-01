@@ -956,40 +956,6 @@ class NPCImpl(
             }
         }
 
-        // Validate that NPC can stand at the new position (both feet and head must be air)
-        if (world != null && !canStandAt(world, newPosition.blockX, newPosition.blockY, newPosition.blockZ)) {
-            logDebug("[NPC] moveTowards: Cannot stand at ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ} - collision detected, aborting movement")
-            // Try to find a valid Y position nearby
-            // Search downward first (most common case - ceiling collision)
-            var foundValidY: Int? = null
-            for (offset in 0..3) {
-                val testY = newPosition.blockY - offset
-                if (testY >= 0 && canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
-                    foundValidY = testY
-                    break
-                }
-            }
-            // If not found downward, try upward (floor collision)
-            if (foundValidY == null) {
-                for (offset in 1..3) {
-                    val testY = newPosition.blockY + offset
-                    if (canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
-                        foundValidY = testY
-                        break
-                    }
-                }
-            }
-
-            if (foundValidY != null) {
-                newPosition.y = foundValidY.toDouble() + 0.5 // Center in block
-                logDebug("[NPC] moveTowards: Adjusted Y to ${newPosition.y} to avoid collision")
-            } else {
-                // No valid position found, abort movement for this tick
-                logDebug("[NPC] moveTowards: No valid position found, aborting movement")
-                return
-            }
-        }
-
         // Make entity look at target
         val lookDirection = target.toVector().subtract(newPosition.toVector())
         val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
@@ -1006,38 +972,17 @@ class NPCImpl(
     /**
      * Finds the ground level (top solid block) at the given X, Z coordinates.
      * Returns null if no solid ground is found within reasonable range.
-     * Only returns a ground level if there's sufficient air space above for the NPC to stand.
      */
     private fun findGroundLevel(world: World, x: Int, z: Int, startY: Int): Double? {
         // Search from startY + 2 down to startY - 10
         for (y in (startY + 2).downTo(startY - 10)) {
             val block = world.getBlockAt(x, y, z)
             if (block.type.isSolid && block.type != Material.BARRIER) {
-                // Found solid ground, check if there's air space above for NPC to stand
-                // Check air at y + 1 (feet) and y + 2 (head) for a 2-block tall NPC
-                val above = world.getBlockAt(x, y + 1, z)
-                val above2 = world.getBlockAt(x, y + 2, z)
-                if (above.type.isAir && above2.type.isAir) {
-                    // Sufficient air space, return the top of this block
-                    return (y + 1).toDouble()
-                }
+                // Found solid ground, return the top of this block
+                return (y + 1).toDouble()
             }
         }
         return null
-    }
-
-    /**
-     * Checks if the NPC can stand at the given position (both feet and head blocks must be air).
-     * @param world The world to check in
-     * @param x The X coordinate
-     * @param y The Y coordinate (feet level)
-     * @param z The Z coordinate
-     * @return true if both the feet and head positions are air blocks
-     */
-    private fun canStandAt(world: World, x: Int, y: Int, z: Int): Boolean {
-        val blockAtFeet = world.getBlockAt(x, y, z)
-        val blockAtHead = world.getBlockAt(x, y + 1, z)
-        return blockAtFeet.type.isAir && blockAtHead.type.isAir
     }
 
     /**
