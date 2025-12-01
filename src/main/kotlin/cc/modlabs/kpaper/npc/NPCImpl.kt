@@ -59,7 +59,7 @@ class NPCImpl(
     private var nearbyFollowDistance = 2.0 // Distance to maintain from followed player
     private var spawnLocation: Location? = null // Spawn location to return to
     private var nearbyFollowTask: BukkitTask? = null
-    private var nearbyFollowCheckInterval = 20L // Ticks between checking for nearby players (1 second)
+    private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
     
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -234,10 +234,13 @@ class NPCImpl(
             // Handle following behavior (both direct following and nearby following)
             if (isFollowing || isFollowingNearbyPlayers) {
                 // For nearby following, we might not have a followingEntity yet
-                // In that case, let the nearby follow task handle it
+                // In that case, the nearby follow task will handle finding players
+                // The walking task should just wait - nearby follow task will call followEntity when it finds a player
                 if (isFollowingNearbyPlayers && followingEntity == null) {
-                    logDebug("[NPC] Walking task: Nearby following active but no followingEntity yet, waiting...")
-                    return@timer // Let nearby follow task find a player
+                    logDebug("[NPC] Walking task: Nearby following active but no followingEntity yet - waiting for nearby follow task to find player")
+                    // Just wait - nearby follow task will handle everything
+                    // Don't try to go to spawn here, let the nearby follow task handle it
+                    return@timer
                 }
                 
                 val targetEntity = followingEntity
@@ -633,10 +636,10 @@ class NPCImpl(
         }
         
         // Start monitoring task
-        logDebug("[NPC] followNearbyPlayers: Starting monitoring task with interval=$nearbyFollowCheckInterval")
+        logDebug("[NPC] followNearbyPlayers: Starting monitoring task with interval=$nearbyFollowCheckInterval ticks (${nearbyFollowCheckInterval * 50}ms)")
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
             if (!isFollowingNearbyPlayers) {
-                logDebug("[NPC] NearbyFollow task: Stopped, canceling task")
+                logDebug("[NPC] NearbyFollow task: isFollowingNearbyPlayers=false, canceling task")
                 nearbyFollowTask?.cancel()
                 nearbyFollowTask = null
                 return@timer
@@ -654,16 +657,24 @@ class NPCImpl(
                 return@timer
             }
             
-            // Find nearby players
-            val nearbyPlayers = world.getNearbyEntities(
-                currentLoc,
-                nearbyFollowRange,
-                nearbyFollowRange,
-                nearbyFollowRange
-            ).filterIsInstance<Player>()
-                .filter { it.isValid && it.location.distance(currentLoc) <= nearbyFollowRange }
+            logDebug("[NPC] NearbyFollow task: Checking for players at ${currentLoc.blockX},${currentLoc.blockY},${currentLoc.blockZ}, range=$nearbyFollowRange")
             
-            logDebug("[NPC] NearbyFollow task: Found ${nearbyPlayers.size} nearby players")
+            // Find nearby players - use a more reliable method
+            val nearbyPlayers = mutableListOf<Player>()
+            val allNearbyEntities = world.getNearbyEntities(currentLoc, nearbyFollowRange, nearbyFollowRange, nearbyFollowRange)
+            logDebug("[NPC] NearbyFollow task: Found ${allNearbyEntities.size} total entities nearby")
+            
+            for (entity in allNearbyEntities) {
+                if (entity is Player && entity.isValid) {
+                    val distance = entity.location.distance(currentLoc)
+                    logDebug("[NPC] NearbyFollow task: Found player ${entity.name} at distance=$distance")
+                    if (distance <= nearbyFollowRange) {
+                        nearbyPlayers.add(entity)
+                    }
+                }
+            }
+            
+            logDebug("[NPC] NearbyFollow task: Found ${nearbyPlayers.size} valid players within range")
             
             val currentFollowing = followingEntity as? Player
             
@@ -672,6 +683,18 @@ class NPCImpl(
                 val distanceToCurrent = currentLoc.distance(currentFollowing.location)
                 logDebug("[NPC] NearbyFollow task: Currently following ${currentFollowing.name}, distance=$distanceToCurrent, range=$nearbyFollowRange")
                 if (distanceToCurrent <= nearbyFollowRange) {
+                    // Still in range, but check if there's a closer player
+                    val closerPlayer = nearbyPlayers.minByOrNull { it.location.distance(currentLoc) }
+                    if (closerPlayer != null && closerPlayer != currentFollowing) {
+                        val distanceToCloser = currentLoc.distance(closerPlayer.location)
+                        // Switch to closer player if they're significantly closer (at least 2 blocks)
+                        if (distanceToCloser < distanceToCurrent - 2.0) {
+                            logDebug("[NPC] NearbyFollow task: Found closer player ${closerPlayer.name} (distance=$distanceToCloser vs $distanceToCurrent), switching")
+                            stopFollowing()
+                            followEntity(closerPlayer, nearbyFollowDistance)
+                            return@timer
+                        }
+                    }
                     // Still in range, continue following
                     logDebug("[NPC] NearbyFollow task: Player still in range, continuing to follow")
                     return@timer
@@ -682,21 +705,28 @@ class NPCImpl(
                 }
             }
             
-            // Find a new player to follow
-            val targetPlayer = nearbyPlayers.firstOrNull()
+            // Find a new player to follow (closest one)
+            val targetPlayer = nearbyPlayers.minByOrNull { it.location.distance(currentLoc) }
             
             if (targetPlayer != null) {
                 // Found a nearby player, follow them
-                logDebug("[NPC] NearbyFollow task: Found new player ${targetPlayer.name}, starting to follow")
+                val distance = currentLoc.distance(targetPlayer.location)
+                logDebug("[NPC] NearbyFollow task: Found new player ${targetPlayer.name} at distance=$distance, starting to follow")
                 followEntity(targetPlayer, nearbyFollowDistance)
-            } else {
-                // No nearby players, return to spawn
-                val spawn = spawnLocation ?: run {
-                    logDebug("[NPC] NearbyFollow task: No spawn location set")
-                    return@timer
-                }
+                } else {
+                    // No nearby players, return to spawn
+                    val spawn = spawnLocation ?: run {
+                        logDebug("[NPC] NearbyFollow task: No spawn location set")
+                        return@timer
+                    }
                 val distanceToSpawn = currentLoc.distance(spawn)
-                logDebug("[NPC] NearbyFollow task: No players found, distance to spawn=$distanceToSpawn")
+                logDebug("[NPC] NearbyFollow task: No players found, distance to spawn=$distanceToSpawn, nearbyPlayers list was empty")
+                
+                // Stop following current entity if we were following one
+                if (isFollowing && followingEntity != null) {
+                    logDebug("[NPC] NearbyFollow task: No players nearby, stopping current follow")
+                    stopFollowing()
+                }
                 
                 if (distanceToSpawn > 1.5) {
                     // Not at spawn yet, walk to spawn
@@ -705,13 +735,20 @@ class NPCImpl(
                         walkTo(spawn)
                     }
                 } else {
-                    // At spawn, stop walking
-                    logDebug("[NPC] NearbyFollow task: At spawn, stopping walking")
-                    if (isWalking && !isFollowing) {
-                        stopWalking()
+                    // At spawn - don't stop walking, keep it active
+                    // The walking task will handle the "no target" case and wait
+                    // We'll continue checking for players in the next tick
+                    logDebug("[NPC] NearbyFollow task: At spawn, waiting for players (task will continue checking)")
+                    // Ensure walking task is running so we can respond immediately when a player comes
+                    if (!isWalking) {
+                        logDebug("[NPC] NearbyFollow task: Starting walking task to be ready for players")
+                        startWalking()
                     }
                 }
             }
+            
+            // Task continues to next tick - this ensures we keep checking for players
+            logDebug("[NPC] NearbyFollow task: Task tick complete, will check again in ${nearbyFollowCheckInterval} ticks")
         }
         
         return true
