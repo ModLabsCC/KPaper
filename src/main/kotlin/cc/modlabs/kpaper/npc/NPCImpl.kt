@@ -1002,14 +1002,15 @@ class NPCImpl(
             }
         }
 
-        // Validate that NPC can stand at the new position (both feet and head must be air)
-        if (world != null && !canStandAt(world, newPosition.blockX, newPosition.blockY, newPosition.blockZ)) {
-            logDebug("[NPC] moveTowards: Cannot stand at ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ} - collision detected, aborting movement")
+        // Validate that NPC can stand at the new position (both feet and head must have no collision)
+        // Use the actual Y position (can be fractional for slabs/stairs)
+        if (world != null && !canStandAt(world, newPosition.blockX, newPosition.y, newPosition.blockZ)) {
+            logDebug("[NPC] moveTowards: Cannot stand at ${newPosition.blockX},${newPosition.y},${newPosition.blockZ} - collision detected, aborting movement")
             // Try to find a valid Y position nearby
             // Search downward first (most common case - ceiling collision)
-            var foundValidY: Int? = null
+            var foundValidY: Double? = null
             for (offset in 0..3) {
-                val testY = newPosition.blockY - offset
+                val testY = newPosition.y - offset
                 if (testY >= 0 && canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
                     foundValidY = testY
                     break
@@ -1018,7 +1019,7 @@ class NPCImpl(
             // If not found downward, try upward (floor collision)
             if (foundValidY == null) {
                 for (offset in 1..3) {
-                    val testY = newPosition.blockY + offset
+                    val testY = newPosition.y + offset
                     if (canStandAt(world, newPosition.blockX, testY, newPosition.blockZ)) {
                         foundValidY = testY
                         break
@@ -1027,7 +1028,7 @@ class NPCImpl(
             }
             
             if (foundValidY != null) {
-                newPosition.y = foundValidY.toDouble() + 0.5 // Center in block
+                newPosition.y = foundValidY
                 logDebug("[NPC] moveTowards: Adjusted Y to ${newPosition.y} to avoid collision")
             } else {
                 // No valid position found, abort movement for this tick
@@ -1152,16 +1153,20 @@ class NPCImpl(
                 // Get the top Y of this block using collision shape
                 val blockTopY = getBlockTopY(block, y)
                 
-                // Check if there's passable space above the block for NPC to stand
-                // We need space at the block top level (feet) and above (head) for a 2-block tall NPC
-                val feetY = blockTopY.toInt()
-                val headY = feetY + 1
+                // NPC needs space for head (2 blocks tall)
+                // Feet are at blockTopY, head is at blockTopY + 1.8
+                val headY = blockTopY + 1.8
+                val headBlockY = headY.toInt()
                 
-                // Check if blocks at feet and head level are passable
-                val feetBlock = world.getBlockAt(x, feetY, z)
-                val headBlock = world.getBlockAt(x, headY, z)
+                // Check if there's enough headroom - the block at head level must be passable
+                // For feet: NPC stands ON the block (at blockTopY), so we don't need to check
+                // if the block itself is passable - it's the walkable surface
+                val headBlock = world.getBlockAt(x, headBlockY, z)
                 
-                if (isPassable(feetBlock) && isPassable(headBlock)) {
+                // Also check the block above head (for 2-block tall NPC)
+                val headBlockAbove = world.getBlockAt(x, headBlockY + 1, z)
+                
+                if (isPassable(headBlock) && isPassable(headBlockAbove)) {
                     // Sufficient space, return the top of this block
                     return blockTopY
                 }
@@ -1173,19 +1178,67 @@ class NPCImpl(
     /**
      * Checks if the NPC can stand at the given position using collision shapes.
      * Checks if both feet and head positions have no collision.
+     * Uses collision shapes to accurately detect if there's collision at the specific Y coordinates.
      * @param world The world to check in
      * @param x The X coordinate
-     * @param y The Y coordinate (feet level)
+     * @param y The Y coordinate (feet level, can be fractional like 100.5 for slabs)
      * @param z The Z coordinate
      * @return true if both the feet and head positions have no collision
      */
-    private fun canStandAt(world: World, x: Int, y: Int, z: Int): Boolean {
-        val blockAtFeet = world.getBlockAt(x, y, z)
-        val blockAtHead = world.getBlockAt(x, y + 1, z)
+    private fun canStandAt(world: World, x: Int, y: Double, z: Int): Boolean {
+        // For head position, check if the block is passable
+        val headY = (y + 1.8).toInt() // NPC is ~1.8 blocks tall
+        val blockAtHead = world.getBlockAt(x, headY, z)
+        if (!isPassable(blockAtHead)) {
+            return false
+        }
         
-        // Check collision shapes at both positions
-        // Both blocks must be passable (no collision)
-        return isPassable(blockAtFeet) && isPassable(blockAtHead)
+        // Also check the block above head
+        val blockAboveHead = world.getBlockAt(x, headY + 1, z)
+        if (!isPassable(blockAboveHead)) {
+            return false
+        }
+        
+        // For feet position, use collision shape to check if there's collision at the specific Y
+        // NPC stands ON blocks, not IN them, so we need to check collision at the feet Y coordinate
+        val feetBlockY = y.toInt()
+        val blockAtFeet = world.getBlockAt(x, feetBlockY, z)
+        val relativeY = y - feetBlockY // Y position relative to the block (0.0 to 1.0)
+        
+        try {
+            val collisionShape = blockAtFeet.collisionShape
+            if (collisionShape != null) {
+                // Create a small bounding box representing the NPC's feet at this Y position
+                // NPC feet are roughly 0.6x0.6 at the center of the block
+                val feetCheckBox = org.bukkit.util.BoundingBox(
+                    0.2, relativeY - 0.1, 0.2,  // min (relative to block)
+                    0.8, relativeY + 0.1, 0.8   // max (relative to block)
+                )
+                
+                // If the collision shape overlaps at the feet position, there's collision
+                // But if relativeY is at or above the top of the collision shape, it's fine (NPC stands ON it)
+                val boundingBoxes = collisionShape.boundingBoxes
+                if (boundingBoxes.isNotEmpty()) {
+                    val maxBlockY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
+                    // If feet Y is at or above the top of the collision shape, NPC can stand on it
+                    if (relativeY >= maxBlockY - 0.1) {
+                        return true // Standing on top of the block
+                    }
+                    // Otherwise, check if there's collision
+                    if (collisionShape.overlaps(feetCheckBox)) {
+                        return false // Collision at feet
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Fallback: if block is passable, no collision
+            // But if NPC is standing ON the block (relativeY > 0.5), allow it
+            if (relativeY <= 0.5 && !isPassable(blockAtFeet)) {
+                return false
+            }
+        }
+        
+        return true
     }
 
     /**
