@@ -447,6 +447,14 @@ class NPCImpl(
         if (!entity.isValid) return false
         val npcEntity = getMannequin() as? LivingEntity ?: return false
 
+        // Ensure entity can move
+        if (npcEntity.isImmovable) {
+            npcEntity.isImmovable = false
+        }
+        
+        // Ensure AI is enabled
+        npcEntity.setAI(true)
+
         // Stop any existing walking/patrolling
         if (isPatrolling) {
             stopPatrolling()
@@ -502,6 +510,14 @@ class NPCImpl(
 
     override fun followNearbyPlayers(range: Double, followDistance: Double): Boolean {
         val npcEntity = getMannequin() as? LivingEntity ?: return false
+        
+        // Ensure entity can move
+        if (npcEntity.isImmovable) {
+            npcEntity.isImmovable = false
+        }
+        
+        // Ensure AI is enabled
+        npcEntity.setAI(true)
         
         // Stop any existing nearby following
         if (isFollowingNearbyPlayers) {
@@ -687,40 +703,49 @@ class NPCImpl(
 
     private fun moveTowards(entity: LivingEntity, target: Location, speed: Double) {
         val currentLoc = entity.location
-        val direction = target.toVector().subtract(currentLoc.toVector()).normalize()
+        val direction = target.toVector().subtract(currentLoc.toVector())
+        val distance = direction.length()
+        
+        // If very close, just look at target
+        if (distance < 0.1) {
+            val lookDirection = direction.normalize()
+            val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
+            val newLoc = currentLoc.clone()
+            newLoc.yaw = yaw
+            entity.teleport(newLoc)
+            return
+        }
+        
+        val normalizedDirection = direction.normalize()
+        val movementVector = normalizedDirection.multiply(speed)
 
         // Check if NPC needs to jump
         if (usePathfinding && Pathfinder.needsJump(entity, target)) {
             // Apply upward velocity for jumping
             val jumpVelocity = Vector(0.0, 0.42, 0.0) // Standard jump velocity
-            val horizontalMovement = direction.multiply(speed)
-            entity.velocity = horizontalMovement.add(jumpVelocity)
+            entity.velocity = movementVector.add(jumpVelocity)
         } else {
             // Normal movement
-            val movement = direction.multiply(speed)
-            
-            // Check if we need to go up a step (small elevation change)
             val heightDiff = target.y - currentLoc.y
             if (heightDiff > 0.1 && heightDiff <= 0.5) {
                 // Small step up, add slight upward velocity
                 val stepVelocity = Vector(0.0, 0.2, 0.0)
-                entity.velocity = movement.add(stepVelocity)
+                entity.velocity = movementVector.add(stepVelocity)
             } else {
-                entity.velocity = movement
+                entity.velocity = movementVector
             }
         }
 
-        // Get the new location
-        val newLoc = currentLoc.clone().add(direction.multiply(speed))
-
-        // Make entity look at target
+        // Make entity look at target (don't teleport, let velocity handle movement)
         val lookDirection = target.toVector().subtract(currentLoc.toVector())
         val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
-        newLoc.yaw = yaw
-        newLoc.pitch = 0f
-
-        // Apply teleportation for position update
-        entity.teleport(newLoc)
+        val pitch = Math.toDegrees(-Math.asin(lookDirection.y / lookDirection.length())).toFloat()
+        
+        // Update rotation without teleporting (to not override velocity)
+        val rotationLoc = currentLoc.clone()
+        rotationLoc.yaw = yaw
+        rotationLoc.pitch = pitch.coerceIn(-90f, 90f)
+        entity.teleport(rotationLoc) // Only teleport for rotation, velocity handles position
     }
     
     /**
