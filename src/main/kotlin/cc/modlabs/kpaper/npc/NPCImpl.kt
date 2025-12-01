@@ -218,10 +218,18 @@ class NPCImpl(
 
             // Handle following behavior (both direct following and nearby following)
             if (isFollowing || isFollowingNearbyPlayers) {
+                // For nearby following, we might not have a followingEntity yet
+                // In that case, let the nearby follow task handle it
+                if (isFollowingNearbyPlayers && followingEntity == null) {
+                    return@timer // Let nearby follow task find a player
+                }
+                
                 val targetEntity = followingEntity
                 if (targetEntity == null || !targetEntity.isValid) {
-                    // Target entity is invalid, stop following
-                    stopFollowing()
+                    // Target entity is invalid
+                    if (isFollowing) {
+                        stopFollowing()
+                    }
                     return@timer
                 }
 
@@ -230,8 +238,10 @@ class NPCImpl(
                 val distanceToTarget = currentLoc.distance(targetLoc)
 
                 // Check if we're close enough to the target
-                if (distanceToTarget <= followDistance) {
-                    // Close enough, just look at the target
+                // For nearby player following, always try to maintain followDistance
+                // For direct following, stop moving when close enough
+                if (distanceToTarget <= followDistance && !isFollowingNearbyPlayers) {
+                    // Close enough, just look at the target (only for direct following)
                     val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
                     val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
                     val newLoc = currentLoc.clone()
@@ -239,12 +249,14 @@ class NPCImpl(
                     currentEntity.teleport(newLoc)
                     return@timer
                 }
-
+                
                 // Update path periodically or if target moved significantly
+                // For nearby following, update more frequently to always follow player movement
                 followUpdateCounter++
-                val shouldUpdatePath = followUpdateCounter >= followUpdateInterval ||
+                val updateInterval = if (isFollowingNearbyPlayers) followUpdateInterval / 2 else followUpdateInterval
+                val shouldUpdatePath = followUpdateCounter >= updateInterval ||
                         currentTarget == null ||
-                        (currentTarget != null && currentTarget!!.distance(targetLoc) > 3.0)
+                        (currentTarget != null && currentTarget!!.distance(targetLoc) > (if (isFollowingNearbyPlayers) 1.5 else 3.0))
 
                 if (shouldUpdatePath) {
                     followUpdateCounter = 0
@@ -515,6 +527,29 @@ class NPCImpl(
         isFollowingNearbyPlayers = true
         nearbyFollowRange = range.coerceAtLeast(1.0)
         nearbyFollowDistance = followDistance.coerceAtLeast(1.0)
+        
+        // Immediately check for nearby players before starting the timer
+        val currentLoc = npcEntity.location
+        val world = currentLoc.world
+        if (world != null) {
+            val nearbyPlayers = world.getNearbyEntities(
+                currentLoc,
+                nearbyFollowRange,
+                nearbyFollowRange,
+                nearbyFollowRange
+            ).filterIsInstance<Player>()
+                .filter { it.isValid && it.location.distance(currentLoc) <= nearbyFollowRange }
+            
+            val targetPlayer = nearbyPlayers.firstOrNull()
+            if (targetPlayer != null) {
+                // Found a nearby player immediately, start following
+                followEntity(targetPlayer, nearbyFollowDistance)
+            } else {
+                // No nearby players, go to spawn
+                val spawn = spawnLocation ?: currentLoc.clone()
+                walkTo(spawn)
+            }
+        }
         
         // Start monitoring task
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
