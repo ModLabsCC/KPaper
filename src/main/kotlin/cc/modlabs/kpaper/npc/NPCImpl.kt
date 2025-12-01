@@ -1137,7 +1137,7 @@ class NPCImpl(
     /**
      * Finds the ground level at the given X, Z coordinates using collision shapes.
      * Returns null if no solid ground is found within reasonable range.
-     * Only returns a ground level if there's sufficient air space above for the NPC to stand.
+     * Only returns a ground level if there's sufficient airspace above for the NPC to stand.
      * Uses collision shapes and bounding boxes for accurate detection of all block types.
      * @see org.bukkit.block.Block#getCollisionShape()
      * @see org.bukkit.util.VoxelShape#getBoundingBoxes()
