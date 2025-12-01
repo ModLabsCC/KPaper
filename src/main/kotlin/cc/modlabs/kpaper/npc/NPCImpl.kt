@@ -902,43 +902,39 @@ class NPCImpl(
             return
         }
 
+        // Mannequins are display entities and don't respond to velocity properly
+        // Use teleportation for movement instead
         val normalizedDirection = direction.normalize()
-        val movementVector = normalizedDirection.multiply(speed)
+        val moveDistance = speed.coerceAtMost(distance) // Don't overshoot the target
+        val newPosition = currentLoc.clone().add(normalizedDirection.multiply(moveDistance))
 
         // Check if NPC needs to jump
         val needsJump = usePathfinding && Pathfinder.needsJump(entity, target)
         if (needsJump) {
-            logDebug("[NPC] moveTowards: Needs to jump, applying jump velocity")
-            // Apply upward velocity for jumping
-            val jumpVelocity = Vector(0.0, 0.42, 0.0) // Standard jump velocity
-            entity.velocity = movementVector.add(jumpVelocity)
+            logDebug("[NPC] moveTowards: Needs to jump, adding jump height")
+            // Add jump height to the new position
+            newPosition.y += 0.42 // Standard jump height
         } else {
-            // Normal movement
+            // Normal movement - handle small steps up
             val heightDiff = target.y - currentLoc.y
             if (heightDiff > 0.1 && heightDiff <= 0.5) {
-                logDebug("[NPC] moveTowards: Small step up (heightDiff=$heightDiff), adding step velocity")
-                // Small step up, add slight upward velocity
-                val stepVelocity = Vector(0.0, 0.2, 0.0)
-                entity.velocity = movementVector.add(stepVelocity)
-            } else {
-                logDebug("[NPC] moveTowards: Normal movement, velocity=${movementVector.x},${movementVector.y},${movementVector.z}")
-                entity.velocity = movementVector
+                logDebug("[NPC] moveTowards: Small step up (heightDiff=$heightDiff), adding step height")
+                // Small step up, add slight upward movement
+                newPosition.y += 0.2
             }
         }
 
-        logDebug("[NPC] moveTowards: Applied velocity=${entity.velocity.x},${entity.velocity.y},${entity.velocity.z}")
-
-        // Make entity look at target (don't teleport, let velocity handle movement)
-        val lookDirection = target.toVector().subtract(currentLoc.toVector())
+        // Make entity look at target
+        val lookDirection = target.toVector().subtract(newPosition.toVector())
         val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
         val pitch = Math.toDegrees(-Math.asin(lookDirection.y / lookDirection.length())).toFloat()
+        
+        newPosition.yaw = yaw
+        newPosition.pitch = pitch.coerceIn(-90f, 90f)
 
-        // Update rotation without teleporting (to not override velocity)
-        val rotationLoc = currentLoc.clone()
-        rotationLoc.yaw = yaw
-        rotationLoc.pitch = pitch.coerceIn(-90f, 90f)
-        entity.teleport(rotationLoc) // Only teleport for rotation, velocity handles position
-        logDebug("[NPC] moveTowards: Updated rotation - yaw=$yaw, pitch=$pitch")
+        // Teleport to new position (Mannequins need teleportation for movement)
+        entity.teleport(newPosition)
+        logDebug("[NPC] moveTowards: Teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
     }
 
     /**
