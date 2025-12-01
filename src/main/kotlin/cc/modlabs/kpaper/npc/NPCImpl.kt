@@ -9,6 +9,10 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.World
+import org.bukkit.block.Block
+import org.bukkit.block.data.Bisected
+import org.bukkit.block.data.BlockData
+import org.bukkit.block.data.type.Slab
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Mannequin
@@ -917,7 +921,39 @@ class NPCImpl(
         val needsJump = usePathfinding && Pathfinder.needsJump(entity, target)
         
         // Check for ground below the new horizontal position
-        val world = currentLoc.world
+        val world = currentLoc.world ?: return
+        
+        // Check collision before attempting to move - ensure we can walk through blocks at the target position
+        val targetBlockX = newPosition.blockX
+        val targetBlockZ = newPosition.blockZ
+        val currentBlockY = currentLoc.blockY
+        
+        // Check if we can walk through blocks at feet and head level at the target position
+        if (!canWalkThrough(world, targetBlockX, currentBlockY, targetBlockZ) ||
+            !canWalkThrough(world, targetBlockX, currentBlockY + 1, targetBlockZ)) {
+            logDebug("[NPC] moveTowards: Cannot walk through blocks at ${targetBlockX},${currentBlockY},${targetBlockZ} - collision detected")
+            // Try to find a valid path by checking adjacent blocks
+            // Check if we can move in X or Z direction separately
+            val canMoveX = canWalkThrough(world, targetBlockX, currentBlockY, currentLoc.blockZ) &&
+                          canWalkThrough(world, targetBlockX, currentBlockY + 1, currentLoc.blockZ)
+            val canMoveZ = canWalkThrough(world, currentLoc.blockX, currentBlockY, targetBlockZ) &&
+                          canWalkThrough(world, currentLoc.blockX, currentBlockY + 1, targetBlockZ)
+            
+            if (canMoveX && Math.abs(horizontalDirection.x) > Math.abs(horizontalDirection.z)) {
+                // Can move in X direction, adjust position
+                newPosition.z = currentLoc.z
+                logDebug("[NPC] moveTowards: Adjusted to move only in X direction")
+            } else if (canMoveZ && Math.abs(horizontalDirection.z) > Math.abs(horizontalDirection.x)) {
+                // Can move in Z direction, adjust position
+                newPosition.x = currentLoc.x
+                logDebug("[NPC] moveTowards: Adjusted to move only in Z direction")
+            } else {
+                // Cannot move in either direction, abort
+                logDebug("[NPC] moveTowards: Cannot move in any direction, aborting")
+                return
+            }
+        }
+        
         val groundY = findGroundLevel(world, newPosition.blockX, newPosition.blockZ, currentLoc.blockY.toInt())
         
         // Handle vertical positioning
@@ -934,6 +970,11 @@ class NPCImpl(
             } else if (groundY != null) {
                 // There's ground below - check if we should be on it or falling to it
                 val distanceToGround = currentLoc.y - groundY
+                
+                // Check if the ground is a slab for smoother positioning
+                val groundBlock = world.getBlockAt(newPosition.blockX, (groundY - 1).toInt(), newPosition.blockZ)
+                val isGroundSlab = isSlab(groundBlock)
+                
                 if (distanceToGround > 0.1) {
                     // We're above ground - simulate gravity (fall down)
                     // Gravity: 0.08 blocks per tick (1.6 blocks per second)
@@ -942,12 +983,24 @@ class NPCImpl(
                     logDebug("[NPC] moveTowards: Falling - distanceToGround=$distanceToGround, fallDistance=$fallDistance, newY=${newPosition.y}")
                 } else if (distanceToGround < -0.1) {
                     // We're below ground - place on ground
-                    newPosition.y = groundY
-                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY")
+                    // For slabs, use the exact slab top Y for smoother walking
+                    if (isGroundSlab) {
+                        newPosition.y = groundY
+                    } else {
+                        newPosition.y = groundY
+                    }
+                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY (slab=$isGroundSlab)")
                 } else {
-                    // We're on ground - stay there
-                    newPosition.y = currentLoc.y
-                    logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
+                    // We're on ground - stay there or adjust to slab height if needed
+                    if (isGroundSlab && Math.abs(currentLoc.y - groundY) > 0.1) {
+                        // Adjust to slab height for smoother walking
+                        newPosition.y = groundY
+                        logDebug("[NPC] moveTowards: Adjusted to slab height Y=$groundY")
+                    } else {
+                        // We're on ground - stay there
+                        newPosition.y = currentLoc.y
+                        logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
+                    }
                 }
             } else {
                 // No ground found - keep current Y (might be in air, let it fall naturally if gravity is enabled)
@@ -1004,22 +1057,147 @@ class NPCImpl(
     }
     
     /**
-     * Finds the ground level (top solid block) at the given X, Z coordinates.
+     * Checks if a block is a slab (half-height block).
+     */
+    private fun isSlab(block: Block): Boolean {
+        return block.blockData is Slab
+    }
+
+    /**
+     * Gets the top Y coordinate of a slab block.
+     * @param block The slab block
+     * @param blockY The Y coordinate of the block
+     * @return The Y coordinate where the top of the slab is (0.5 for bottom, 1.0 for top, 0.5 for double)
+     */
+    private fun getSlabTopY(block: Block, blockY: Int): Double {
+        val blockData = block.blockData
+        if (blockData is Slab) {
+            return when (blockData.type) {
+                Slab.Type.BOTTOM -> blockY + 0.5
+                Slab.Type.TOP -> blockY + 1.0
+                Slab.Type.DOUBLE -> blockY + 1.0
+            }
+        }
+        return blockY + 1.0
+    }
+
+    /**
+     * Checks if a block is passable (can be walked through) using the official Paper API.
+     * Uses Block.isPassable() which checks if the block has no colliding parts.
+     * @see org.bukkit.block.Block#isPassable()
+     */
+    private fun isPassable(block: Block): Boolean {
+        // Use the built-in isPassable() method from Paper API
+        // This is more accurate as it uses the block's collision shape internally
+        return block.isPassable()
+    }
+
+    /**
+     * Checks if a block can be walked on using collision shape.
+     * A block is walkable if it has a collision shape (even if partial, like slabs).
+     * Uses Block.isCollidable() and collision shape for accurate detection.
+     */
+    private fun isWalkable(block: Block): Boolean {
+        val type = block.type
+        if (type == Material.BARRIER) return false
+        
+        // Use isCollidable() to check if block has collision
+        // This is more accurate than checking isSolid
+        if (block.isCollidable()) {
+            return true
+        }
+        
+        // Also check collision shape directly for blocks that might be walkable
+        // but not marked as collidable (edge cases)
+        try {
+            val collisionShape = block.collisionShape
+            // If collision shape exists and has bounding boxes, block can be walked on
+            // This handles slabs, stairs, and other partial blocks correctly
+            if (collisionShape != null) {
+                val boundingBoxes = collisionShape.boundingBoxes
+                return boundingBoxes.isNotEmpty()
+            }
+            return false
+        } catch (e: Exception) {
+            // Fallback to material check if collision shape API is not available
+            return type.isSolid || isSlab(block)
+        }
+    }
+    
+    /**
+     * Gets the top Y coordinate of a block based on its collision shape.
+     * Uses the collision shape's bounding box for accurate height detection.
+     * For slabs, this returns the actual top of the slab.
+     * For full blocks, returns blockY + 1.0.
+     * @see org.bukkit.block.Block#getCollisionShape()
+     */
+    private fun getBlockTopY(block: Block, blockY: Int): Double {
+        // Handle slabs specially for precise positioning
+        if (isSlab(block)) {
+            return getSlabTopY(block, blockY)
+        }
+        
+        // For other blocks, use collision shape to determine top
+        try {
+            val collisionShape = block.collisionShape
+            if (collisionShape != null) {
+                // Get all bounding boxes from the collision shape
+                // VoxelShape.getBoundingBoxes() returns a Collection<BoundingBox>
+                val boundingBoxes = collisionShape.boundingBoxes
+                if (boundingBoxes.isNotEmpty()) {
+                    // Find the maximum Y from all bounding boxes
+                    val maxY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
+                    return blockY + maxY
+                }
+            }
+        } catch (e: Exception) {
+            // Fallback: use block's approximate bounding box
+            try {
+                val boundingBox = block.boundingBox
+                if (boundingBox != null) {
+                    // Check if bounding box has volume (not degenerate)
+                    val volume = boundingBox.volume
+                    if (volume > 0.0) {
+                        return blockY + boundingBox.maxY
+                    }
+                }
+            } catch (e2: Exception) {
+                // If all else fails, assume full block
+            }
+        }
+        
+        // Default: full block
+        return blockY + 1.0
+    }
+
+    /**
+     * Finds the ground level (top solid block or slab) at the given X, Z coordinates.
      * Returns null if no solid ground is found within reasonable range.
      * Only returns a ground level if there's sufficient air space above for the NPC to stand.
+     * Uses collision shapes for accurate detection.
      */
     private fun findGroundLevel(world: World, x: Int, z: Int, startY: Int): Double? {
         // Search from startY + 2 down to startY - 10
         for (y in (startY + 2).downTo(startY - 10)) {
             val block = world.getBlockAt(x, y, z)
-            if (block.type.isSolid && block.type != Material.BARRIER) {
-                // Found solid ground, check if there's air space above for NPC to stand
-                // Check air at y + 1 (feet) and y + 2 (head) for a 2-block tall NPC
-                val above = world.getBlockAt(x, y + 1, z)
-                val above2 = world.getBlockAt(x, y + 2, z)
-                if (above.type.isAir && above2.type.isAir) {
-                    // Sufficient air space, return the top of this block
-                    return (y + 1).toDouble()
+            
+            // Check if this is a walkable block using collision shape
+            if (isWalkable(block)) {
+                // Get the top Y of this block using collision shape
+                val blockTopY = getBlockTopY(block, y)
+                
+                // Check if there's passable space above the block for NPC to stand
+                // We need space at the block top level (feet) and above (head) for a 2-block tall NPC
+                val feetY = blockTopY.toInt()
+                val headY = feetY + 1
+                
+                // Check if blocks at feet and head level are passable
+                val feetBlock = world.getBlockAt(x, feetY, z)
+                val headBlock = world.getBlockAt(x, headY, z)
+                
+                if (isPassable(feetBlock) && isPassable(headBlock)) {
+                    // Sufficient space, return the top of this block
+                    return blockTopY
                 }
             }
         }
@@ -1027,17 +1205,79 @@ class NPCImpl(
     }
 
     /**
-     * Checks if the NPC can stand at the given position (both feet and head blocks must be air).
+     * Checks if the NPC can stand at the given position using collision shapes.
+     * Checks if both feet and head positions have no collision.
      * @param world The world to check in
      * @param x The X coordinate
      * @param y The Y coordinate (feet level)
      * @param z The Z coordinate
-     * @return true if both the feet and head positions are air blocks
+     * @return true if both the feet and head positions have no collision
      */
     private fun canStandAt(world: World, x: Int, y: Int, z: Int): Boolean {
         val blockAtFeet = world.getBlockAt(x, y, z)
         val blockAtHead = world.getBlockAt(x, y + 1, z)
-        return blockAtFeet.type.isAir && blockAtHead.type.isAir
+        
+        // Check collision shapes at both positions
+        // Both blocks must be passable (no collision)
+        return isPassable(blockAtFeet) && isPassable(blockAtHead)
+    }
+
+    /**
+     * Checks if the NPC can walk through the block at the given position using collision shape.
+     * This checks if the block has no collision at this position.
+     * @param world The world to check in
+     * @param x The X coordinate
+     * @param y The Y coordinate
+     * @param z The Z coordinate
+     * @return true if the block is passable (can walk through)
+     */
+    private fun canWalkThrough(world: World, x: Int, y: Int, z: Int): Boolean {
+        val block = world.getBlockAt(x, y, z)
+        // Use collision shape to determine if block can be walked through
+        return isPassable(block)
+    }
+    
+    /**
+     * Checks if a position within a block has collision using the block's collision shape.
+     * This provides more precise collision detection than just checking if the block is passable.
+     * Uses Block.getCollisionShape() and VoxelShape.overlaps() for accurate collision detection.
+     * @param block The block to check
+     * @param relativeY The Y position relative to the block (0.0 to 1.0)
+     * @return true if there's collision at this relative Y position
+     * @see org.bukkit.block.Block#getCollisionShape()
+     * @see org.bukkit.util.VoxelShape#overlaps(org.bukkit.util.BoundingBox)
+     */
+    private fun hasCollisionAt(block: Block, relativeY: Double): Boolean {
+        try {
+            val collisionShape = block.collisionShape
+            if (collisionShape == null) {
+                return false // No collision
+            }
+            // Check if collision shape has any bounding boxes
+            val boundingBoxes = collisionShape.boundingBoxes
+            if (boundingBoxes.isEmpty()) {
+                return false // No collision
+            }
+            
+            // Create a bounding box representing the NPC's collision area at this Y position
+            // We check a small area (0.6x0.6) at the center of the block at this Y level
+            // This represents the NPC's collision box at this height
+            val minX = 0.2
+            val maxX = 0.8
+            val minZ = 0.2
+            val maxZ = 0.8
+            val minY = relativeY - 0.1
+            val maxY = relativeY + 0.1
+            
+            // Create a BoundingBox for the NPC's collision area
+            val npcBoundingBox = org.bukkit.util.BoundingBox(minX, minY, minZ, maxX, maxY, maxZ)
+            
+            // Use VoxelShape.overlaps() to check if the collision shape intersects with our bounding box
+            return collisionShape.overlaps(npcBoundingBox)
+        } catch (e: Exception) {
+            // Fallback to simple passable check using official API
+            return !block.isPassable()
+        }
     }
 
     /**
