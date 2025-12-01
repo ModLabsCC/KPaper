@@ -12,7 +12,6 @@ import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.data.Bisected
 import org.bukkit.block.data.BlockData
-import org.bukkit.block.data.type.Slab
 import org.bukkit.entity.Entity
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Mannequin
@@ -969,11 +968,8 @@ class NPCImpl(
                 newPosition.y = currentLoc.y + 0.2
             } else if (groundY != null) {
                 // There's ground below - check if we should be on it or falling to it
+                // groundY is already calculated from collision shapes, so it's accurate for all block types
                 val distanceToGround = currentLoc.y - groundY
-                
-                // Check if the ground is a slab for smoother positioning
-                val groundBlock = world.getBlockAt(newPosition.blockX, (groundY - 1).toInt(), newPosition.blockZ)
-                val isGroundSlab = isSlab(groundBlock)
                 
                 if (distanceToGround > 0.1) {
                     // We're above ground - simulate gravity (fall down)
@@ -983,19 +979,16 @@ class NPCImpl(
                     logDebug("[NPC] moveTowards: Falling - distanceToGround=$distanceToGround, fallDistance=$fallDistance, newY=${newPosition.y}")
                 } else if (distanceToGround < -0.1) {
                     // We're below ground - place on ground
-                    // For slabs, use the exact slab top Y for smoother walking
-                    if (isGroundSlab) {
-                        newPosition.y = groundY
-                    } else {
-                        newPosition.y = groundY
-                    }
-                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY (slab=$isGroundSlab)")
+                    // groundY is already accurate from collision shapes (handles slabs, stairs, etc.)
+                    newPosition.y = groundY
+                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY")
                 } else {
-                    // We're on ground - stay there or adjust to slab height if needed
-                    if (isGroundSlab && Math.abs(currentLoc.y - groundY) > 0.1) {
-                        // Adjust to slab height for smoother walking
+                    // We're on ground - stay there or adjust if needed
+                    if (Math.abs(currentLoc.y - groundY) > 0.1) {
+                        // Adjust to ground height for smoother walking
+                        // This works for all block types including slabs and stairs
                         newPosition.y = groundY
-                        logDebug("[NPC] moveTowards: Adjusted to slab height Y=$groundY")
+                        logDebug("[NPC] moveTowards: Adjusted to ground height Y=$groundY")
                     } else {
                         // We're on ground - stay there
                         newPosition.y = currentLoc.y
@@ -1057,31 +1050,6 @@ class NPCImpl(
     }
     
     /**
-     * Checks if a block is a slab (half-height block).
-     */
-    private fun isSlab(block: Block): Boolean {
-        return block.blockData is Slab
-    }
-
-    /**
-     * Gets the top Y coordinate of a slab block.
-     * @param block The slab block
-     * @param blockY The Y coordinate of the block
-     * @return The Y coordinate where the top of the slab is (0.5 for bottom, 1.0 for top, 0.5 for double)
-     */
-    private fun getSlabTopY(block: Block, blockY: Int): Double {
-        val blockData = block.blockData
-        if (blockData is Slab) {
-            return when (blockData.type) {
-                Slab.Type.BOTTOM -> blockY + 0.5
-                Slab.Type.TOP -> blockY + 1.0
-                Slab.Type.DOUBLE -> blockY + 1.0
-            }
-        }
-        return blockY + 1.0
-    }
-
-    /**
      * Checks if a block is passable (can be walked through) using the official Paper API.
      * Uses Block.isPassable() which checks if the block has no colliding parts.
      * @see org.bukkit.block.Block#isPassable()
@@ -1120,24 +1088,19 @@ class NPCImpl(
             return false
         } catch (e: Exception) {
             // Fallback to material check if collision shape API is not available
-            return type.isSolid || isSlab(block)
+            return type.isSolid
         }
     }
     
     /**
      * Gets the top Y coordinate of a block based on its collision shape.
-     * Uses the collision shape's bounding box for accurate height detection.
-     * For slabs, this returns the actual top of the slab.
-     * For full blocks, returns blockY + 1.0.
+     * Uses the collision shape's bounding boxes for accurate height detection.
+     * Works for all block types including slabs, stairs, and partial blocks.
      * @see org.bukkit.block.Block#getCollisionShape()
+     * @see org.bukkit.util.VoxelShape#getBoundingBoxes()
      */
     private fun getBlockTopY(block: Block, blockY: Int): Double {
-        // Handle slabs specially for precise positioning
-        if (isSlab(block)) {
-            return getSlabTopY(block, blockY)
-        }
-        
-        // For other blocks, use collision shape to determine top
+        // Use collision shape to determine top - works for all block types
         try {
             val collisionShape = block.collisionShape
             if (collisionShape != null) {
@@ -1146,6 +1109,7 @@ class NPCImpl(
                 val boundingBoxes = collisionShape.boundingBoxes
                 if (boundingBoxes.isNotEmpty()) {
                     // Find the maximum Y from all bounding boxes
+                    // This automatically handles slabs, stairs, and other partial blocks
                     val maxY = boundingBoxes.maxOfOrNull { it.maxY } ?: 1.0
                     return blockY + maxY
                 }
@@ -1171,10 +1135,12 @@ class NPCImpl(
     }
 
     /**
-     * Finds the ground level (top solid block or slab) at the given X, Z coordinates.
+     * Finds the ground level at the given X, Z coordinates using collision shapes.
      * Returns null if no solid ground is found within reasonable range.
      * Only returns a ground level if there's sufficient air space above for the NPC to stand.
-     * Uses collision shapes for accurate detection.
+     * Uses collision shapes and bounding boxes for accurate detection of all block types.
+     * @see org.bukkit.block.Block#getCollisionShape()
+     * @see org.bukkit.util.VoxelShape#getBoundingBoxes()
      */
     private fun findGroundLevel(world: World, x: Int, z: Int, startY: Int): Double? {
         // Search from startY + 2 down to startY - 10
