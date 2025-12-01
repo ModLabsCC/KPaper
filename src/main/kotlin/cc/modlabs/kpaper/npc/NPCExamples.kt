@@ -474,6 +474,51 @@ fun FollowingControlExample(npc: NPC, targetEntity: Entity) {
 }
 
 /**
+ * Example 7i: NPC that follows nearby players and returns to spawn
+ */
+fun FollowNearbyPlayersExample(spawnLocation: Location): NPC {
+    val npc = spawnLocation.createNPC {
+        name("&aGuardian")
+        description("&7I follow nearby players!")
+        immovable(false)
+    }
+    
+    // Set spawn location (where NPC will return when no players nearby)
+    npc.setSpawnLocation(spawnLocation)
+    
+    // Start following nearby players within 15 blocks
+    // NPC will automatically:
+    // - Follow any player within range
+    // - Switch to another player if current one goes out of range
+    // - Return to spawn location when no players are nearby
+    npc.followNearbyPlayers(range = 15.0, followDistance = 3.0)
+    
+    return npc
+}
+
+/**
+ * Example 7j: Control nearby player following
+ */
+fun NearbyFollowingControlExample(npc: NPC, spawnLocation: Location) {
+    // Set spawn location
+    npc.setSpawnLocation(spawnLocation)
+    
+    // Start following nearby players
+    npc.followNearbyPlayers(range = 10.0, followDistance = 2.0)
+    
+    // Check if following nearby players
+    if (npc.isFollowingNearbyPlayers()) {
+        // NPC is actively searching for and following nearby players
+    }
+    
+    // Get spawn location
+    val spawn = npc.getSpawnLocation()
+    
+    // Stop following nearby players
+    npc.stopFollowingNearbyPlayers()
+}
+
+/**
  * Example 8: NPC that approaches a player
  */
 class FriendlyNPC(private val spawnLocation: Location) {

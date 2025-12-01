@@ -52,6 +52,14 @@ class NPCImpl(
     private var followUpdateInterval = 20 // Ticks between path recalculations (1 second)
     private var followUpdateCounter = 0
     
+    // Nearby player following state
+    private var isFollowingNearbyPlayers = false
+    private var nearbyFollowRange = 10.0 // Range to search for nearby players
+    private var nearbyFollowDistance = 2.0 // Distance to maintain from followed player
+    private var spawnLocation: Location? = null // Spawn location to return to
+    private var nearbyFollowTask: BukkitTask? = null
+    private var nearbyFollowCheckInterval = 20L // Ticks between checking for nearby players (1 second)
+    
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
     private var visibleToPlayers: MutableSet<Player>? = null
@@ -208,8 +216,8 @@ class NPCImpl(
                 return@timer
             }
 
-            // Handle following behavior
-            if (isFollowing) {
+            // Handle following behavior (both direct following and nearby following)
+            if (isFollowing || isFollowingNearbyPlayers) {
                 val targetEntity = followingEntity
                 if (targetEntity == null || !targetEntity.isValid) {
                     // Target entity is invalid, stop following
@@ -353,6 +361,7 @@ class NPCImpl(
         walkingTask = null
     }
     
+    
     /**
      * Cleanup method called when NPC is removed.
      */
@@ -362,6 +371,7 @@ class NPCImpl(
             NPCEventListener.unregisterNPC(entity)
             NPCEventListener.unregisterVisibilityNPC(this)
         }
+        stopFollowingNearbyPlayers()
         stopWalking()
         removeAllEventHandlers()
     }
@@ -476,6 +486,128 @@ class NPCImpl(
 
     override fun getFollowingEntity(): Entity? {
         return if (isFollowingEntity()) followingEntity else null
+    }
+
+    override fun followNearbyPlayers(range: Double, followDistance: Double): Boolean {
+        val npcEntity = getMannequin() as? LivingEntity ?: return false
+        
+        // Stop any existing nearby following
+        if (isFollowingNearbyPlayers) {
+            isFollowingNearbyPlayers = false
+            nearbyFollowTask?.cancel()
+            nearbyFollowTask = null
+            if (isFollowing && followingEntity is Player) {
+                stopFollowing()
+            }
+        }
+        
+        // Stop patrolling if active
+        if (isPatrolling) {
+            stopPatrolling()
+        }
+        
+        // Set spawn location to current location if not already set
+        if (spawnLocation == null) {
+            spawnLocation = npcEntity.location.clone()
+        }
+        
+        // Set following state
+        isFollowingNearbyPlayers = true
+        nearbyFollowRange = range.coerceAtLeast(1.0)
+        nearbyFollowDistance = followDistance.coerceAtLeast(1.0)
+        
+        // Start monitoring task
+        nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
+            if (!isFollowingNearbyPlayers) {
+                nearbyFollowTask?.cancel()
+                nearbyFollowTask = null
+                return@timer
+            }
+            
+            val currentEntity = getMannequin() as? LivingEntity ?: run {
+                stopFollowingNearbyPlayers()
+                return@timer
+            }
+            
+            val currentLoc = currentEntity.location
+            val world = currentLoc.world ?: return@timer
+            
+            // Find nearby players
+            val nearbyPlayers = world.getNearbyEntities(
+                currentLoc,
+                nearbyFollowRange,
+                nearbyFollowRange,
+                nearbyFollowRange
+            ).filterIsInstance<Player>()
+                .filter { it.isValid && it.location.distance(currentLoc) <= nearbyFollowRange }
+            
+            val currentFollowing = followingEntity as? Player
+            
+            // Check if current followed player is still in range
+            if (currentFollowing != null && currentFollowing.isValid) {
+                val distanceToCurrent = currentLoc.distance(currentFollowing.location)
+                if (distanceToCurrent <= nearbyFollowRange) {
+                    // Still in range, continue following
+                    return@timer
+                } else {
+                    // Current player went out of range, stop following them
+                    stopFollowing()
+                }
+            }
+            
+            // Find a new player to follow
+            val targetPlayer = nearbyPlayers.firstOrNull()
+            
+            if (targetPlayer != null) {
+                // Found a nearby player, follow them
+                followEntity(targetPlayer, nearbyFollowDistance)
+            } else {
+                // No nearby players, return to spawn
+                val spawn = spawnLocation ?: return@timer
+                val distanceToSpawn = currentLoc.distance(spawn)
+                
+                if (distanceToSpawn > 1.5) {
+                    // Not at spawn yet, walk to spawn
+                    if (!isWalking || currentTarget == null || currentTarget!!.distance(spawn) > 2.0) {
+                        walkTo(spawn)
+                    }
+                } else {
+                    // At spawn, stop walking
+                    if (isWalking && !isFollowing) {
+                        stopWalking()
+                    }
+                }
+            }
+        }
+        
+        return true
+    }
+
+    override fun stopFollowingNearbyPlayers(): Boolean {
+        if (!isFollowingNearbyPlayers) return false
+        
+        isFollowingNearbyPlayers = false
+        nearbyFollowTask?.cancel()
+        nearbyFollowTask = null
+        
+        // Stop following current entity if it was from nearby following
+        if (isFollowing && followingEntity is Player) {
+            stopFollowing()
+        }
+        
+        return true
+    }
+
+    override fun setSpawnLocation(location: Location) {
+        spawnLocation = location.clone()
+    }
+
+    override fun getSpawnLocation(): Location? {
+        return spawnLocation?.clone()
+    }
+
+    override fun isFollowingNearbyPlayers(): Boolean {
+        return isFollowingNearbyPlayers
     }
 
     /**

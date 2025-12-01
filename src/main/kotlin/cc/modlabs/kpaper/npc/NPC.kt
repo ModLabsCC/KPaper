@@ -414,6 +414,47 @@ interface NPC {
     fun getFollowingEntity(): Entity?
 
     /**
+     * Makes the NPC follow nearby players within a specified range.
+     * The NPC will automatically switch between following different players as they enter/leave range.
+     * If no players are nearby, the NPC will return to its spawn location.
+     * Uses pathfinding for navigation.
+     *
+     * @param range The range in blocks to search for nearby players (default: 10.0).
+     * @param followDistance The minimum distance to maintain from the followed player (default: 2.0).
+     * @return True if nearby following successfully starts, false otherwise.
+     */
+    fun followNearbyPlayers(range: Double = 10.0, followDistance: Double = 2.0): Boolean
+
+    /**
+     * Stops the NPC from following nearby players.
+     *
+     * @return True if nearby following is successfully stopped, false otherwise.
+     */
+    fun stopFollowingNearbyPlayers(): Boolean
+
+    /**
+     * Sets the spawn location for this NPC.
+     * This is the location the NPC will return to when no players are nearby.
+     *
+     * @param location The spawn location.
+     */
+    fun setSpawnLocation(location: Location)
+
+    /**
+     * Gets the spawn location for this NPC.
+     *
+     * @return The spawn location, or null if not set.
+     */
+    fun getSpawnLocation(): Location?
+
+    /**
+     * Checks if the NPC is currently following nearby players.
+     *
+     * @return True if the NPC is following nearby players, false otherwise.
+     */
+    fun isFollowingNearbyPlayers(): Boolean
+
+    /**
      * Sets whether the NPC is visible to all players.
      * When set to true, all players can see the NPC (default behavior).
      * When set to false, the NPC is hidden from all players.
