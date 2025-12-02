@@ -285,16 +285,23 @@ class NPCBuilder(
         // Set gravity
         mannequin.setGravity(gravity)
         
-        // Ensure AI is enabled - even immovable NPCs need AI for looking at players
-        // In MC 1.21.10, setting immovable might disable AI, so we force it on
+        // CRITICAL: Ensure AI is enabled - even immovable NPCs need AI for looking at players
+        // In MC 1.21.10, setting immovable might disable AI, so we force it on multiple times
         mannequin.setAI(true)
         
-        // Schedule a delayed check to ensure AI stays enabled
-        org.bukkit.Bukkit.getScheduler().runTaskLater(cc.modlabs.kpaper.main.PluginInstance, Runnable {
-            if (mannequin.isValid && !mannequin.hasAI()) {
-                mannequin.setAI(true)
-            }
-        }, 1L)
+        // Force enable multiple times to ensure it sticks
+        if (!mannequin.hasAI()) {
+            mannequin.setAI(true)
+        }
+        
+        // Schedule multiple delayed checks to ensure AI stays enabled
+        for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(cc.modlabs.kpaper.main.PluginInstance, Runnable {
+                if (mannequin.isValid && !mannequin.hasAI()) {
+                    mannequin.setAI(true)
+                }
+            }, delay)
+        }
 
         // Apply skin parts DSL block if provided
         skinPartsBlock?.let { block ->

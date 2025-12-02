@@ -62,6 +62,7 @@ class NPCImpl(
     private var spawnLocation: Location? = null // Spawn location to return to
     private var nearbyFollowTask: BukkitTask? = null
     private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
+    private var aiMonitoringTask: BukkitTask? = null // Task to continuously monitor and re-enable AI
 
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -80,14 +81,30 @@ class NPCImpl(
         // If immovable is true, we still need AI for looking at players
         mannequin.setAI(true)
         
-        // Force AI to stay enabled - some versions disable it when immovable is set
-        // Schedule a delayed task to ensure AI stays enabled
-        org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
-            if (mannequin.isValid) {
-                mannequin.setAI(true)
-                logDebug("[NPC] NPCImpl init: Forced AI enabled for '$npcName' after delay")
+        // CRITICAL: Force AI to stay enabled - MC 1.21.10 aggressively disables it
+        // Schedule multiple delayed tasks to ensure AI stays enabled
+        for (delay in listOf(1L, 2L, 3L, 5L, 10L, 20L)) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                if (mannequin.isValid && !mannequin.hasAI()) {
+                    mannequin.setAI(true)
+                    logDebug("[NPC] NPCImpl init: Forced AI enabled for '$npcName' after ${delay} tick(s)")
+                }
+            }, delay)
+        }
+        
+        // Also start a persistent task that checks every tick for the first 2 seconds
+        var checkCount = 0
+        val persistentTask = org.bukkit.Bukkit.getScheduler().runTaskTimer(PluginInstance, Runnable {
+            checkCount++
+            if (checkCount > 40) { // Stop after 40 ticks (2 seconds)
+                it.cancel()
+                return@Runnable
             }
-        }, 1L)
+            if (mannequin.isValid && !mannequin.hasAI()) {
+                mannequin.setAI(true)
+                logDebug("[NPC] NPCImpl init: Persistent check - forced AI enabled for '$npcName' (check $checkCount)")
+            }
+        }, 1L, 1L)
         
         val aiNowEnabled = mannequin.hasAI()
         
@@ -97,6 +114,53 @@ class NPCImpl(
         // Register this NPC for event tracking
         NPCEventListener.registerNPC(mannequin, this)
         logDebug("[NPC] NPCImpl init: Registered NPC '$npcName' for event tracking")
+        
+        // Start continuous AI monitoring task (runs every 20 ticks = 1 second)
+        // This ensures AI stays enabled even if something else disables it
+        startAIMonitoring()
+    }
+    
+    /**
+     * Starts a continuous task that monitors and re-enables AI if it gets disabled.
+     * This is necessary for MC 1.21.10 where AI can be disabled by various systems.
+     */
+    private fun startAIMonitoring() {
+        // Cancel existing task if any
+        aiMonitoringTask?.cancel()
+        
+        aiMonitoringTask = timer(20, "NPCAIMonitor") { // Check every second
+            val entity = getMannequin() as? LivingEntity ?: run {
+                // Entity invalid, stop monitoring
+                aiMonitoringTask?.cancel()
+                aiMonitoringTask = null
+                return@timer
+            }
+            
+            // Only monitor if we need AI (for looking at players or following)
+            val needsAI = lookAtPlayers || isFollowing || isFollowingNearbyPlayers || isWalking
+            
+            if (needsAI && !entity.hasAI()) {
+                logDebug("[NPC] AI Monitoring: AI was disabled for '${entity.customName ?: entity.type.name}', re-enabling")
+                entity.setAI(true)
+                
+                // If still disabled after setting, try again next tick
+                if (!entity.hasAI()) {
+                    org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+                        if (entity.isValid) {
+                            entity.setAI(true)
+                        }
+                    })
+                }
+            }
+        }
+    }
+    
+    /**
+     * Stops the AI monitoring task.
+     */
+    private fun stopAIMonitoring() {
+        aiMonitoringTask?.cancel()
+        aiMonitoringTask = null
     }
 
     override fun getMannequin(): Mannequin? = if (mannequin.isValid) mannequin else null
@@ -464,6 +528,7 @@ class NPCImpl(
         }
         stopFollowingNearbyPlayers()
         stopWalking()
+        stopAIMonitoring()
         removeAllEventHandlers()
     }
 
@@ -621,9 +686,37 @@ class NPCImpl(
             setImmovable(false)
         }
 
-        // Ensure AI is enabled
+        // CRITICAL: Ensure AI is enabled - force it multiple times
         val aiEnabled = npcEntity.hasAI()
         npcEntity.setAI(true)
+        
+        // Force enable multiple times to ensure it sticks
+        if (!npcEntity.hasAI()) {
+            npcEntity.setAI(true)
+        }
+        if (!npcEntity.hasAI()) {
+            // Try one more time
+            npcEntity.setAI(true)
+        }
+        
+        // Schedule immediate check on next tick
+        org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+            if (npcEntity.isValid && !npcEntity.hasAI()) {
+                npcEntity.setAI(true)
+                logDebug("[NPC] followNearbyPlayers: Forced AI enabled on next tick")
+            }
+        })
+        
+        // Schedule multiple delayed checks to ensure AI stays enabled
+        for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                if (npcEntity.isValid && !npcEntity.hasAI()) {
+                    npcEntity.setAI(true)
+                    logDebug("[NPC] followNearbyPlayers: Forced AI enabled after ${delay} tick(s)")
+                }
+            }, delay)
+        }
+        
         logDebug("[NPC] followNearbyPlayers: AI was $aiEnabled, now enabled: ${npcEntity.hasAI()}")
 
         // Stop any existing nearby following
@@ -1121,20 +1214,38 @@ class NPCImpl(
         val entity = getMannequin() ?: return
         val npcName = entity.customName ?: entity.type.name
         val aiBefore = entity.hasAI()
+        
+        // Set immovable state
         entity.isImmovable = immovable
-        // Always ensure AI is enabled - even immovable NPCs need AI for looking at players
-        // In MC 1.21.10, setting immovable might disable AI, so we force it back on
+        
+        // CRITICAL: Always ensure AI is enabled - even immovable NPCs need AI for looking at players
+        // In MC 1.21.10, setting immovable might disable AI, so we force it back on immediately
+        entity.setAI(true)
+        
+        // Force enable multiple times to ensure it sticks
         if (!entity.hasAI()) {
-            logDebug("[NPC] setImmovable: NPC '$npcName' AI was disabled after setting immovable, re-enabling AI")
             entity.setAI(true)
-        }
-        // Also schedule a delayed check to ensure AI stays enabled
-        org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
-            if (entity.isValid && !entity.hasAI()) {
-                entity.setAI(true)
-                logDebug("[NPC] setImmovable: Forced AI enabled for '$npcName' after delay")
+            // Try one more time if still disabled
+            if (!entity.hasAI()) {
+                org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+                    if (entity.isValid) {
+                        entity.setAI(true)
+                        logDebug("[NPC] setImmovable: Forced AI enabled for '$npcName' on next tick")
+                    }
+                })
             }
-        }, 1L)
+        }
+        
+        // Schedule multiple delayed checks to ensure AI stays enabled
+        for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
+            org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                if (entity.isValid && !entity.hasAI()) {
+                    entity.setAI(true)
+                    logDebug("[NPC] setImmovable: Forced AI enabled for '$npcName' after ${delay} tick(s)")
+                }
+            }, delay)
+        }
+        
         val aiAfter = entity.hasAI()
         logDebug("[NPC] setImmovable: NPC '$npcName' immovable=$immovable, AI was $aiBefore, now $aiAfter")
     }
@@ -1293,20 +1404,40 @@ class NPCImpl(
         val entity = getMannequin() ?: return
         val npcName = entity.customName ?: entity.type.name
         val aiBefore = entity.hasAI()
+        
+        // Set AI state
         entity.setAI(enabled)
+        
+        // If enabling AI, force it multiple times to ensure it sticks
+        if (enabled) {
+            // Try multiple times immediately
+            if (!entity.hasAI()) {
+                entity.setAI(true)
+            }
+            if (!entity.hasAI()) {
+                // If still disabled, try on next tick
+                org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+                    if (entity.isValid) {
+                        entity.setAI(true)
+                        logDebug("[NPC] setAI: Forced AI enabled for '$npcName' on next tick")
+                    }
+                })
+            }
+            
+            // Schedule multiple delayed checks to ensure AI stays enabled
+            // This is needed for MC 1.21.10 where AI might get disabled by other systems
+            for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
+                org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                    if (entity.isValid && !entity.hasAI()) {
+                        entity.setAI(true)
+                        logDebug("[NPC] setAI: Forced AI enabled for '$npcName' after ${delay} tick(s)")
+                    }
+                }, delay)
+            }
+        }
+        
         val aiAfter = entity.hasAI()
         logDebug("[NPC] setAI: NPC '$npcName' AI was $aiBefore, now $aiAfter")
-        
-        // If we're enabling AI, schedule a delayed check to ensure it stays enabled
-        // This is needed for MC 1.21.10 where AI might get disabled by other systems
-        if (enabled) {
-            org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
-                if (entity.isValid && !entity.hasAI()) {
-                    entity.setAI(true)
-                    logDebug("[NPC] setAI: Forced AI enabled for '$npcName' after delay")
-                }
-            }, 1L)
-        }
     }
 
     override fun hasAI(): Boolean {

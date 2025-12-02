@@ -213,13 +213,12 @@ object NPCEventListener {
                 if (!entity.isValid) return@forEach
                 
                 val npcLocation = entity.location
-                val world = entity.world ?: return@forEach
                 val range = npc.getProximityRange()
                 
                 // Find nearest player
-                val nearbyPlayers = world.getNearbyEntities(npcLocation, range, range, range)
+                val nearbyPlayers = entity.world.getNearbyEntities(npcLocation, range, range, range)
                     .filterIsInstance<Player>()
-                    .filter { it.isValid && !it.isDead && it.location.distance(npcLocation) <= range }
+                    .filter { it.location.distance(npcLocation) <= range }
                 
                 if (nearbyPlayers.isEmpty()) return@forEach
                 
