@@ -1188,17 +1188,29 @@ class NPCImpl(
     }
 
     override fun setLookAtPlayers(enabled: Boolean) {
+        val entity = getMannequin()
+        val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
+        logDebug("[NPC] setLookAtPlayers: Setting lookAtPlayers=$enabled for NPC '$npcName'")
+        logDebug("[NPC] setLookAtPlayers: Current lookAtPlayers state: $lookAtPlayers")
+        
         lookAtPlayers = enabled
         if (enabled) {
+            logDebug("[NPC] setLookAtPlayers: Registering NPC '$npcName' for proximity monitoring")
             NPCEventListener.registerProximityNPC(this)
+            logDebug("[NPC] setLookAtPlayers: NPC '$npcName' registered for proximity monitoring")
         } else {
             // Only unregister if no proximity event handlers are registered
             val hasProximityHandlers = eventHandlers.containsKey(NPCEventType.PLAYER_SNEAKING_NEARBY) ||
                     eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
+            logDebug("[NPC] setLookAtPlayers: hasProximityHandlers=$hasProximityHandlers")
             if (!hasProximityHandlers) {
+                logDebug("[NPC] setLookAtPlayers: Unregistering NPC '$npcName' from proximity monitoring")
                 NPCEventListener.unregisterProximityNPC(this)
+            } else {
+                logDebug("[NPC] setLookAtPlayers: Keeping NPC '$npcName' registered due to proximity event handlers")
             }
         }
+        logDebug("[NPC] setLookAtPlayers: Final lookAtPlayers state: $lookAtPlayers")
     }
 
     override fun isLookingAtPlayers(): Boolean {
