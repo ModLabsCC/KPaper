@@ -315,6 +315,8 @@ object NPCEventListener {
      */
     fun registerProximityNPC(npc: NPC) {
         proximityNPCs.add(npc)
+        // Ensure the event listener is registered and proximity monitoring is started
+        register()
     }
 
     /**
