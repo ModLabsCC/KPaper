@@ -94,15 +94,17 @@ class NPCImpl(
         
         // Also start a persistent task that checks every tick for the first 2 seconds
         var checkCount = 0
-        val persistentTask = org.bukkit.Bukkit.getScheduler().runTaskTimer(PluginInstance, Runnable {
-            checkCount++
-            if (checkCount > 40) { // Stop after 40 ticks (2 seconds)
-                it.cancel()
-                return@Runnable
-            }
-            if (mannequin.isValid && !mannequin.hasAI()) {
-                mannequin.setAI(true)
-                logDebug("[NPC] NPCImpl init: Persistent check - forced AI enabled for '$npcName' (check $checkCount)")
+        val persistentTask = Bukkit.getScheduler().runTaskTimer(PluginInstance, object : org.bukkit.scheduler.BukkitRunnable() {
+            override fun run() {
+                checkCount++
+                if (checkCount > 40) { // Stop after 40 ticks (2 seconds)
+                    this.cancel()
+                    return
+                }
+                if (mannequin.isValid && !mannequin.hasAI()) {
+                    mannequin.setAI(true)
+                    logDebug("[NPC] NPCImpl init: Persistent check - forced AI enabled for '$npcName' (check $checkCount)")
+                }
             }
         }, 1L, 1L)
         
