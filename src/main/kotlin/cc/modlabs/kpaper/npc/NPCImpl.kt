@@ -68,12 +68,21 @@ class NPCImpl(
     private var visibleToPlayers: MutableSet<Player>? = null
 
     init {
+        val npcName = mannequin.customName ?: mannequin.type.name
+        val npcId = mannequin.uniqueId
+        
         // Enable AI for the mannequin so it can move
         // Mannequin extends LivingEntity, so we can directly enable AI
+        val aiWasEnabled = mannequin.hasAI()
         mannequin.setAI(true)
+        val aiNowEnabled = mannequin.hasAI()
+        
+        logDebug("[NPC] NPCImpl init: Created NPC '$npcName' ($npcId)")
+        logDebug("[NPC] NPCImpl init: AI was $aiWasEnabled, now $aiNowEnabled, immovable=${mannequin.isImmovable}")
 
         // Register this NPC for event tracking
         NPCEventListener.registerNPC(mannequin, this)
+        logDebug("[NPC] NPCImpl init: Registered NPC '$npcName' for event tracking")
     }
 
     override fun getMannequin(): Mannequin? = if (mannequin.isValid) mannequin else null
@@ -1090,7 +1099,16 @@ class NPCImpl(
 
     override fun setImmovable(immovable: Boolean) {
         val entity = getMannequin() ?: return
+        val npcName = entity.customName ?: entity.type.name
+        val aiBefore = entity.hasAI()
         entity.isImmovable = immovable
+        // Ensure AI is enabled when immovable is set to false
+        if (!immovable && !entity.hasAI()) {
+            logDebug("[NPC] setImmovable: NPC '$npcName' immovable set to false but AI was disabled, enabling AI")
+            entity.setAI(true)
+        }
+        val aiAfter = entity.hasAI()
+        logDebug("[NPC] setImmovable: NPC '$npcName' immovable=$immovable, AI was $aiBefore, now $aiAfter")
     }
 
     override fun getEquipment(): org.bukkit.inventory.EntityEquipment {
@@ -1189,9 +1207,23 @@ class NPCImpl(
 
     override fun setLookAtPlayers(enabled: Boolean) {
         val entity = getMannequin()
-        val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
-        logDebug("[NPC] setLookAtPlayers: Setting lookAtPlayers=$enabled for NPC '$npcName'")
-        logDebug("[NPC] setLookAtPlayers: Current lookAtPlayers state: $lookAtPlayers")
+        if (entity == null) {
+            logDebug("[NPC] setLookAtPlayers: ERROR - Cannot get mannequin entity!")
+            return
+        }
+        
+        val npcName = entity.customName ?: entity.type.name
+        val npcId = entity.uniqueId
+        val aiBefore = entity.hasAI()
+        
+        logDebug("[NPC] setLookAtPlayers: Setting lookAtPlayers=$enabled for NPC '$npcName' ($npcId)")
+        logDebug("[NPC] setLookAtPlayers: Current lookAtPlayers state: $lookAtPlayers, AI enabled: $aiBefore")
+        
+        // Ensure AI is enabled for look-at functionality
+        if (!entity.hasAI()) {
+            logDebug("[NPC] setLookAtPlayers: AI was disabled, enabling it for NPC '$npcName'")
+            entity.setAI(true)
+        }
         
         lookAtPlayers = enabled
         if (enabled) {
@@ -1210,7 +1242,9 @@ class NPCImpl(
                 logDebug("[NPC] setLookAtPlayers: Keeping NPC '$npcName' registered due to proximity event handlers")
             }
         }
-        logDebug("[NPC] setLookAtPlayers: Final lookAtPlayers state: $lookAtPlayers")
+        
+        val aiAfter = entity.hasAI()
+        logDebug("[NPC] setLookAtPlayers: Final lookAtPlayers state: $lookAtPlayers, AI enabled: $aiAfter")
     }
 
     override fun isLookingAtPlayers(): Boolean {
@@ -1224,6 +1258,20 @@ class NPCImpl(
 
     override fun hasGravity(): Boolean {
         return mannequin.hasGravity()
+    }
+
+    override fun setAI(enabled: Boolean) {
+        val entity = getMannequin() ?: return
+        val npcName = entity.customName ?: entity.type.name
+        val aiBefore = entity.hasAI()
+        entity.setAI(enabled)
+        val aiAfter = entity.hasAI()
+        logDebug("[NPC] setAI: NPC '$npcName' AI was $aiBefore, now $aiAfter")
+    }
+
+    override fun hasAI(): Boolean {
+        val entity = getMannequin() ?: return false
+        return entity.hasAI()
     }
 
     // Conversation state

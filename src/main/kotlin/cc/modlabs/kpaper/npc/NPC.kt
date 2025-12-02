@@ -338,6 +338,22 @@ interface NPC {
     fun hasGravity(): Boolean
 
     /**
+     * Sets whether the NPC has AI enabled.
+     * When AI is enabled, the NPC can move, look at entities, and perform other AI behaviors.
+     * Default is true.
+     *
+     * @param enabled Whether the NPC should have AI enabled.
+     */
+    fun setAI(enabled: Boolean)
+
+    /**
+     * Gets whether the NPC has AI enabled.
+     *
+     * @return True if the NPC has AI enabled, false otherwise.
+     */
+    fun hasAI(): Boolean
+
+    /**
      * Sets a conversation for this NPC.
      * The conversation will start when a player right-clicks the NPC.
      *
