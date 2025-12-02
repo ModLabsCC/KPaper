@@ -27,6 +27,7 @@ object NPCEventListener {
     private val proximityNPCs = mutableSetOf<NPC>()
     private val visibilityNPCs = mutableSetOf<NPC>()
     private var proximityTask: BukkitTask? = null
+    private var lookAtTask: BukkitTask? = null // Separate task for look-at (runs more frequently)
     private val playerPunchingState = mutableMapOf<Player, Long>() // Player -> last punch time
     private val playerSneakingState = mutableMapOf<Player, Boolean>() // Player -> is sneaking
 
@@ -175,8 +176,74 @@ object NPCEventListener {
         // Start proximity monitoring task
         startProximityMonitoring()
         
+        // Start look-at task (runs more frequently for smooth looking)
+        startLookAtTask()
+        
         // Initialize conversation system
         NPCConversation.initialize()
+    }
+
+    /**
+     * Starts the look-at task that makes NPCs look at nearby players.
+     * This runs more frequently than the proximity task for smooth looking.
+     */
+    private fun startLookAtTask() {
+        // Check if task exists and is still running
+        if (lookAtTask != null && !lookAtTask!!.isCancelled) {
+            logDebug("[NPCEventListener] Look-at task already running, skipping start")
+            return
+        }
+        
+        // Cancel existing task if it's cancelled but still referenced
+        if (lookAtTask != null && lookAtTask!!.isCancelled) {
+            logDebug("[NPCEventListener] Look-at task was cancelled, cleaning up")
+            lookAtTask = null
+        }
+
+        logDebug("[NPCEventListener] Starting look-at task (checks every 5 ticks for smooth looking)")
+        lookAtTask = timer(5, "NPCLookAt") { // Run every 5 ticks for smooth looking
+            val lookAtNPCs = proximityNPCs.filter { it.isLookingAtPlayers() }
+            
+            if (lookAtNPCs.isEmpty()) {
+                return@timer
+            }
+
+            lookAtNPCs.forEach { npc ->
+                val entity = npc.getEntity() as? org.bukkit.entity.LivingEntity ?: return@forEach
+                if (!entity.isValid) return@forEach
+                
+                val npcLocation = entity.location
+                val world = entity.world ?: return@forEach
+                val range = npc.getProximityRange()
+                
+                // Find nearest player
+                val nearbyPlayers = world.getNearbyEntities(npcLocation, range, range, range)
+                    .filterIsInstance<Player>()
+                    .filter { it.isValid && !it.isDead && it.location.distance(npcLocation) <= range }
+                
+                if (nearbyPlayers.isEmpty()) return@forEach
+                
+                // Ensure AI is enabled
+                if (!entity.hasAI()) {
+                    entity.setAI(true)
+                }
+                
+                // Determine which player to look at
+                val npcImpl = npc as? NPCImpl
+                val isFollowing = npcImpl?.isFollowingEntity() ?: false
+                val followedEntity = npcImpl?.getFollowingEntity()
+                
+                val playerToLookAt = if (isFollowing && followedEntity is Player && nearbyPlayers.contains(followedEntity)) {
+                    followedEntity
+                } else {
+                    nearbyPlayers.minByOrNull { it.location.distance(npcLocation) }
+                }
+                
+                if (playerToLookAt != null) {
+                    makeEntityLookAt(entity, playerToLookAt.location)
+                }
+            }
+        }
     }
 
     /**
@@ -195,8 +262,8 @@ object NPCEventListener {
             proximityTask = null
         }
 
-        logDebug("[NPCEventListener] Starting proximity monitoring task (checks every 5 ticks)")
-        proximityTask = timer(5, "NPCProximity") { // Check every 5 ticks
+        logDebug("[NPCEventListener] Starting proximity monitoring task (checks every 10 ticks)")
+        proximityTask = timer(10, "NPCProximity") { // Check every 10 ticks (reduced frequency to avoid performance issues)
             val currentTime = System.currentTimeMillis()
             val proximityNPCsCopy = proximityNPCs.toList() // Copy to avoid concurrent modification
 
@@ -240,59 +307,20 @@ object NPCEventListener {
                     }
                 }
 
-                // Make NPC look at nearest player if enabled
-                // Allow looking at players even when following, but prioritize the followed player
-                if (npc.isLookingAtPlayers() && nearbyPlayers.isNotEmpty() && entity is org.bukkit.entity.LivingEntity) {
-                    val npcImpl = npc as? NPCImpl
-                    val isFollowing = npcImpl?.isFollowingEntity() ?: false
-                    val followedEntity = npcImpl?.getFollowingEntity()
-                    
-                    logDebug("[NPCEventListener] Proximity task: NPC '$npcName' has lookAtPlayers enabled, isFollowing=$isFollowing")
-                    
-                    // Determine which player to look at
-                    val playerToLookAt = if (isFollowing && followedEntity is Player && nearbyPlayers.contains(followedEntity)) {
-                        // Prioritize the followed player if they're nearby
-                        logDebug("[NPCEventListener] Proximity task: NPC '$npcName' prioritizing followed player ${followedEntity.name}")
-                        followedEntity
-                    } else {
-                        // Otherwise, look at the nearest player
-                        // NPCs should look at players even when walking (unless they're following someone else)
-                        val nearest = nearbyPlayers.minByOrNull { it.location.distance(npcLocation) }
-                        if (nearest != null) {
-                            logDebug("[NPCEventListener] Proximity task: NPC '$npcName' will look at nearest player ${nearest.name}")
-                        }
-                        nearest
-                    }
-                    
-                    // Look at the selected player
-                    if (playerToLookAt != null) {
-                        val distance = npcLocation.distance(playerToLookAt.location)
-                        logDebug("[NPCEventListener] Proximity task: Making NPC '$npcName' look at player ${playerToLookAt.name} (distance=${String.format("%.2f", distance)})")
-                        makeEntityLookAt(entity, playerToLookAt.location)
-                    } else {
-                        logDebug("[NPCEventListener] Proximity task: No player selected for NPC '$npcName' to look at")
-                    }
-                } else {
-                    if (!npc.isLookingAtPlayers()) {
-                        logDebug("[NPCEventListener] Proximity task: NPC '$npcName' has lookAtPlayers disabled")
-                    } else if (nearbyPlayers.isEmpty()) {
-                        logDebug("[NPCEventListener] Proximity task: NPC '$npcName' has no nearby players")
-                    } else if (entity !is org.bukkit.entity.LivingEntity) {
-                        logDebug("[NPCEventListener] Proximity task: NPC '$npcName' entity is not a LivingEntity")
-                    }
-                }
+                // Note: Look-at is now handled by a separate, more frequent task (startLookAtTask)
+                // This proximity task focuses on event detection only
 
                 // Process events for each nearby player
                 nearbyPlayers.forEach { player ->
                     val distance = player.location.distance(npcLocation)
                     
-                    // Check for sneaking
+                    // Check for sneaking - trigger event when player starts sneaking
                     val wasSneaking = playerSneakingState[player] ?: false
                     val isSneaking = player.isSneaking
-                    playerSneakingState[player] = isSneaking
-
+                    
                     if (isSneaking && !wasSneaking) {
-                        // Player just started sneaking
+                        // Player just started sneaking - trigger event
+                        logDebug("[NPCEventListener] Proximity task: Player ${player.name} started sneaking near NPC '$npcName'")
                         val sneakingEvent = NPCEvent(
                             npc = npc,
                             player = player,
@@ -304,11 +332,15 @@ object NPCEventListener {
                         )
                         (npc as? NPCImpl)?.triggerEvent(sneakingEvent)
                     }
+                    
+                    // Update sneaking state
+                    playerSneakingState[player] = isSneaking
 
                     // Check for punching (within last 500ms)
                     val lastPunchTime = playerPunchingState[player] ?: 0L
                     if (currentTime - lastPunchTime < 500) {
-                        // Player is punching nearby
+                        // Player is punching nearby - trigger event
+                        logDebug("[NPCEventListener] Proximity task: Player ${player.name} is punching near NPC '$npcName'")
                         val punchingEvent = NPCEvent(
                             npc = npc,
                             player = player,
@@ -319,7 +351,7 @@ object NPCEventListener {
                             )
                         )
                         (npc as? NPCImpl)?.triggerEvent(punchingEvent)
-                        // Remove punch state after triggering
+                        // Remove punch state after triggering to avoid duplicate events
                         playerPunchingState.remove(player)
                     }
                 }
@@ -332,33 +364,47 @@ object NPCEventListener {
 
     /**
      * Makes an entity look at a target location.
+     * Uses teleport to update the look direction, which works even when AI is disabled.
      */
     private fun makeEntityLookAt(entity: org.bukkit.entity.LivingEntity, target: org.bukkit.Location) {
         val entityLoc = entity.location
         val direction = target.toVector().subtract(entityLoc.toVector())
         val distance = direction.length()
         
+        // Don't try to look if too far away or invalid
+        if (distance > 64.0 || !entity.isValid) {
+            return
+        }
+        
         // Calculate yaw (horizontal rotation)
         val yaw = Math.toDegrees(-atan2(direction.x, direction.z)).toFloat()
         
         // Calculate pitch (vertical rotation)
         val horizontalDistance = sqrt(direction.x * direction.x + direction.z * direction.z)
-        val pitch = Math.toDegrees(-atan2(direction.y, horizontalDistance)).toFloat()
+        val pitch = Math.toDegrees(-atan2(direction.y, horizontalDistance)).toFloat().coerceIn(-90f, 90f)
         
         val entityName = entity.customName ?: entity.type.name
         
         logDebug("[NPCEventListener] makeEntityLookAt: Making '$entityName' look at ${target.blockX},${target.blockY},${target.blockZ} (distance=${String.format("%.2f", distance)}, yaw=${String.format("%.2f", yaw)}, pitch=${String.format("%.2f", pitch)})")
         
-        // Apply rotation
+        // Ensure AI is enabled for mannequins to maintain look direction
+        // In MC 1.21.10, mannequins need AI to look at entities properly
+        if (!entity.hasAI()) {
+            entity.setAI(true)
+            logDebug("[NPCEventListener] makeEntityLookAt: Enabled AI for '$entityName' to allow looking")
+        }
+        
+        // Apply rotation using teleport (this works even without AI, but AI helps maintain it)
         val newLocation = entityLoc.clone()
         newLocation.yaw = yaw
         newLocation.pitch = pitch
         
         try {
+            // Use teleport with relative rotation to update look direction
             entity.teleport(newLocation)
-            logDebug("[NPCEventListener] makeEntityLookAt: Successfully teleported '$entityName' to new look direction")
+            logDebug("[NPCEventListener] makeEntityLookAt: Successfully updated '$entityName' look direction")
         } catch (e: Exception) {
-            logDebug("[NPCEventListener] makeEntityLookAt: ERROR teleporting '$entityName' - ${e.message}")
+            logDebug("[NPCEventListener] makeEntityLookAt: ERROR updating '$entityName' look direction - ${e.message}")
             e.printStackTrace()
         }
     }
@@ -400,8 +446,12 @@ object NPCEventListener {
         register()
         // Ensure proximity monitoring task is running (in case it was cancelled or never started)
         startProximityMonitoring()
+        // Ensure look-at task is running if NPC wants to look at players
+        if (npc.isLookingAtPlayers()) {
+            startLookAtTask()
+        }
         
-        logDebug("[NPCEventListener] registerProximityNPC: NPC '$npcName' registered. Task running: ${proximityTask != null && !proximityTask!!.isCancelled}")
+        logDebug("[NPCEventListener] registerProximityNPC: NPC '$npcName' registered. Proximity task running: ${proximityTask != null && !proximityTask!!.isCancelled}, Look-at task running: ${lookAtTask != null && !lookAtTask!!.isCancelled}")
     }
 
     /**
