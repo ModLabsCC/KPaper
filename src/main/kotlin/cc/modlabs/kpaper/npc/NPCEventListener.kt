@@ -195,17 +195,29 @@ object NPCEventListener {
                     .filter { it.location.distance(npcLocation) <= range }
 
                 // Make NPC look at nearest player if enabled
-                // Only look at players if NPC is not currently walking (to avoid conflicts)
+                // Allow looking at players even when following, but prioritize the followed player
                 if (npc.isLookingAtPlayers() && nearbyPlayers.isNotEmpty() && entity is org.bukkit.entity.LivingEntity) {
-                    // Check if NPC is walking
-                    val isWalking = (npc as? NPCImpl)?.isCurrentlyWalking() ?: false
+                    val npcImpl = npc as? NPCImpl
+                    val isFollowing = npcImpl?.isFollowingEntity() ?: false
+                    val followedEntity = npcImpl?.getFollowingEntity()
+                    val isWalking = npcImpl?.isCurrentlyWalking() ?: false
                     
-                    // Only look at players if not walking
-                    if (!isWalking) {
-                        val nearestPlayer = nearbyPlayers.minByOrNull { it.location.distance(npcLocation) }
-                        if (nearestPlayer != null) {
-                            makeEntityLookAt(entity, nearestPlayer.location)
+                    // Determine which player to look at
+                    val playerToLookAt = if (isFollowing && followedEntity is Player && nearbyPlayers.contains(followedEntity)) {
+                        // Prioritize the followed player if they're nearby
+                        followedEntity
+                    } else {
+                        // Otherwise, look at the nearest player (only if not walking, unless following)
+                        if (!isWalking || isFollowing) {
+                            nearbyPlayers.minByOrNull { it.location.distance(npcLocation) }
+                        } else {
+                            null
                         }
+                    }
+                    
+                    // Look at the selected player
+                    if (playerToLookAt != null) {
+                        makeEntityLookAt(entity, playerToLookAt.location)
                     }
                 }
 

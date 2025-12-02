@@ -264,15 +264,33 @@ class NPCImpl(
                 // Check if we're close enough to the target
                 // For nearby player following, always try to maintain followDistance
                 // For direct following, stop moving when close enough
-                if (distanceToTarget <= followDistance && !isFollowingNearbyPlayers) {
-                    logDebug("[NPC] Walking task: Close enough to target (direct following), just looking")
-                    // Close enough, just look at the target (only for direct following)
-                    val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
-                    val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
-                    val newLoc = currentLoc.clone()
-                    newLoc.yaw = yaw
-                    currentEntity.teleport(newLoc)
-                    return@timer
+                if (distanceToTarget <= followDistance) {
+                    if (!isFollowingNearbyPlayers) {
+                        logDebug("[NPC] Walking task: Close enough to target (direct following), just looking")
+                        // Close enough, continuously look at the target (only for direct following)
+                        // Update look direction every tick to track player movement
+                        val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
+                        val horizontalDistance = Math.sqrt(lookDirection.x * lookDirection.x + lookDirection.z * lookDirection.z)
+                        val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
+                        val pitch = Math.toDegrees(-Math.atan2(lookDirection.y, horizontalDistance)).toFloat().coerceIn(-90f, 90f)
+                        val newLoc = currentLoc.clone()
+                        newLoc.yaw = yaw
+                        newLoc.pitch = pitch
+                        currentEntity.teleport(newLoc)
+                        return@timer
+                    } else {
+                        // For nearby following, still look at player when close enough, but continue following
+                        // This ensures the NPC looks at the player even when maintaining distance
+                        val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
+                        val horizontalDistance = Math.sqrt(lookDirection.x * lookDirection.x + lookDirection.z * lookDirection.z)
+                        val yaw = Math.toDegrees(-Math.atan2(lookDirection.x, lookDirection.z)).toFloat()
+                        val pitch = Math.toDegrees(-Math.atan2(lookDirection.y, horizontalDistance)).toFloat().coerceIn(-90f, 90f)
+                        val newLoc = currentLoc.clone()
+                        newLoc.yaw = yaw
+                        newLoc.pitch = pitch
+                        currentEntity.teleport(newLoc)
+                        // Continue with movement logic below to maintain followDistance
+                    }
                 }
 
                 // Update path periodically or if target moved significantly
