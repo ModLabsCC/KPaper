@@ -8,12 +8,20 @@ plugins {
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     kotlin("plugin.serialization") version "2.1.20"
     id("maven-publish")
+    id("org.sonarqube") version "7.0.1.6134"
 }
 
 group = "cc.modlabs"
 
 version = System.getenv("VERSION_OVERRIDE") ?: Calendar.getInstance(TimeZone.getTimeZone("UTC")).run {
     "${get(Calendar.YEAR)}.${get(Calendar.MONTH) + 1}.${get(Calendar.DAY_OF_MONTH)}.${String.format("%02d%02d", get(Calendar.HOUR_OF_DAY), get(Calendar.MINUTE))}"
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "ModLabsCC_KPaper_b16df947-ed31-4251-96c3-810b8516f8cc")
+    property("sonar.projectName", "KPaper")
+  }
 }
 
 repositories {
