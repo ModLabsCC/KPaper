@@ -1318,6 +1318,7 @@ class NPCImpl(
         if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY ||
             eventType == NPCEventType.PLAYER_PUNCHING_NEARBY ||
             lookAtPlayers) {
+            logDebug("Starting Monitoring for ${this}")
             NPCEventListener.registerProximityNPC(this)
         }
     }
@@ -1362,12 +1363,6 @@ class NPCImpl(
         
         logDebug("[NPC] setLookAtPlayers: Setting lookAtPlayers=$enabled for NPC '$npcName' ($npcId)")
         logDebug("[NPC] setLookAtPlayers: Current lookAtPlayers state: $lookAtPlayers, AI enabled: $aiBefore")
-        
-        // Ensure AI is enabled for look-at functionality
-        if (!entity.hasAI()) {
-            logDebug("[NPC] setLookAtPlayers: AI was disabled, enabling it for NPC '$npcName'")
-            entity.setAI(true)
-        }
         
         lookAtPlayers = enabled
         if (enabled) {
