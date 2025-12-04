@@ -24,8 +24,8 @@ import kotlin.math.sqrt
 object NPCEventListener {
     private var isRegistered = false
     private val npcMap = mutableMapOf<UUID, NPC>()
-    private val proximityNPCs = mutableSetOf<NPC>()
-    private val visibilityNPCs = mutableSetOf<NPC>()
+    private val proximityNPCs = mutableMapOf<UUID, NPC>()
+    private val visibilityNPCs = mutableMapOf<UUID, NPC>()
     private var proximityTask: BukkitTask? = null
     private var lookAtTask: BukkitTask? = null // Separate task for look-at (runs more frequently)
     private val playerPunchingState = mutableMapOf<Player, Long>() // Player -> last punch time
@@ -160,7 +160,7 @@ object NPCEventListener {
         // Listen for player join events (for visibility management)
         listen<PlayerJoinEvent> { event ->
             val player = event.player
-            visibilityNPCs.forEach { npc ->
+            visibilityNPCs.values.forEach { npc ->
                 (npc as? NPCImpl)?.onPlayerJoin(player)
             }
         }
@@ -168,7 +168,7 @@ object NPCEventListener {
         // Listen for player quit events (for visibility cleanup)
         listen<PlayerQuitEvent> { event ->
             val player = event.player
-            visibilityNPCs.forEach { npc ->
+            visibilityNPCs.values.forEach { npc ->
                 (npc as? NPCImpl)?.onPlayerQuit(player)
             }
         }
@@ -202,7 +202,7 @@ object NPCEventListener {
 
         logDebug("[NPCEventListener] Starting look-at task (checks every 5 ticks for smooth looking)")
         lookAtTask = timer(5, "NPCLookAt") { // Run every 5 ticks for smooth looking
-            val lookAtNPCs = proximityNPCs.filter { it.isLookingAtPlayers() }
+            val lookAtNPCs = proximityNPCs.values.filter { it.isLookingAtPlayers() }
             
             if (lookAtNPCs.isEmpty()) {
                 return@timer
@@ -264,7 +264,7 @@ object NPCEventListener {
         logDebug("[NPCEventListener] Starting proximity monitoring task (checks every 10 ticks)")
         proximityTask = timer(10, "NPCProximity") { // Check every 10 ticks (reduced frequency to avoid performance issues)
             val currentTime = System.currentTimeMillis()
-            val proximityNPCsCopy = proximityNPCs.toList() // Copy to avoid concurrent modification
+            val proximityNPCsCopy = proximityNPCs.values.toList() // Copy to avoid concurrent modification
 
             // Debug: Log if no NPCs are registered
             if (proximityNPCsCopy.isEmpty()) {
@@ -433,12 +433,12 @@ object NPCEventListener {
     fun registerProximityNPC(npc: NPC) {
         val entity = npc.getEntity()
         val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
-        val npcId = entity?.uniqueId ?: "No Entity"
+        val npcId = npc.getID() ?: return
         
         logDebug("[NPCEventListener] registerProximityNPC: Registering NPC '$npcName' ($npcId) for proximity monitoring")
         logDebug("[NPCEventListener] registerProximityNPC: Current proximityNPCs count: ${proximityNPCs.size}")
         
-        proximityNPCs.add(npc)
+        proximityNPCs[npcId] = npc
         logDebug("[NPCEventListener] registerProximityNPC: Added NPC, new count: ${proximityNPCs.size}")
         
         // Ensure the event listener is registered and proximity monitoring is started
@@ -459,8 +459,9 @@ object NPCEventListener {
     fun unregisterProximityNPC(npc: NPC) {
         val entity = npc.getEntity()
         val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
+        val npcId = npc.getID() ?: return
         logDebug("[NPCEventListener] unregisterProximityNPC: Unregistering NPC '$npcName' from proximity monitoring")
-        proximityNPCs.remove(npc)
+        proximityNPCs.remove(npcId)
         logDebug("[NPCEventListener] unregisterProximityNPC: Removed NPC, new count: ${proximityNPCs.size}")
     }
 
@@ -469,14 +470,18 @@ object NPCEventListener {
      * Called automatically when an NPC has visibility restrictions.
      */
     fun registerVisibilityNPC(npc: NPC) {
-        visibilityNPCs.add(npc)
+        val entity = npc.getEntity()
+        val npcId = npc.getID() ?: return
+        visibilityNPCs[npcId] = npc
     }
 
     /**
      * Unregisters an NPC from visibility management.
      */
     fun unregisterVisibilityNPC(npc: NPC) {
-        visibilityNPCs.remove(npc)
+        val entity = npc.getEntity()
+        val npcId = npc.getID() ?: return
+        visibilityNPCs.remove(npcId)
     }
 }
 

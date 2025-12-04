@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import java.util.UUID
 import kotlin.math.atan2
 
 /**
@@ -168,6 +169,8 @@ class NPCImpl(
     override fun getMannequin(): Mannequin? = if (mannequin.isValid) mannequin else null
 
     override fun getEntity(): Entity? = getMannequin()
+
+    override fun getID(): UUID? = getEntity()?.uniqueId
 
     override fun getLivingEntity(): LivingEntity? = if (mannequin.isValid) mannequin else null
 
@@ -1418,7 +1421,7 @@ class NPCImpl(
             }
             if (!entity.hasAI()) {
                 // If still disabled, try on next tick
-                org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+                Bukkit.getScheduler().runTask(PluginInstance, Runnable {
                     if (entity.isValid) {
                         entity.setAI(true)
                         logDebug("[NPC] setAI: Forced AI enabled for '$npcName' on next tick")
@@ -1429,7 +1432,7 @@ class NPCImpl(
             // Schedule multiple delayed checks to ensure AI stays enabled
             // This is needed for MC 1.21.10 where AI might get disabled by other systems
             for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
-                org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+                Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                     if (entity.isValid && !entity.hasAI()) {
                         entity.setAI(true)
                         logDebug("[NPC] setAI: Forced AI enabled for '$npcName' after ${delay} tick(s)")
@@ -1462,7 +1465,7 @@ class NPCImpl(
         conversationBuilder = null
     }
 
-    override fun startConversation(player: org.bukkit.entity.Player) {
+    override fun startConversation(player: Player) {
         val builder = conversationBuilder ?: return
         val conversation = NPCConversation(this, player)
         conversation.conversation(builder)

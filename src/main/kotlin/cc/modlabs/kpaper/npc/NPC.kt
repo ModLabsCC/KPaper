@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack
 import io.papermc.paper.datacomponent.item.ResolvableProfile
 import com.destroystokyo.paper.SkinParts
 import org.bukkit.inventory.MainHand
+import java.util.UUID
 
 // Type aliases for cleaner API
 typealias MannequinProfile = ResolvableProfile
@@ -107,6 +108,11 @@ interface NPC {
      * @return The underlying entity, or null if the entity is no longer valid.
      */
     fun getEntity(): Entity?
+
+    /**
+     * Gets the UUID of the NPC entity
+     */
+    fun getID(): UUID?
 
     /**
      * Gets the underlying LivingEntity for this NPC.
