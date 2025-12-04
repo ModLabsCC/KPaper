@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.visuals.display
 
+import cc.modlabs.kpaper.util.getLogger
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
@@ -250,6 +251,25 @@ class TextDisplayManager {
      */
     private fun spawnTextDisplay(textDisplay: TextDisplay, viewer: Player) {
         try {
+            // Check if PacketEvents is initialized
+            val api = PacketEvents.getAPI()
+            if (api == null) {
+                getLogger().error("[TextDisplayManager] PacketEvents API is not initialized. Make sure PacketEvents is loaded before creating text displays.")
+                return
+            }
+
+            val playerManager = api.playerManager
+            if (playerManager == null) {
+                getLogger().error("[TextDisplayManager] PacketEvents player manager is not available for player ${viewer.name}")
+                return
+            }
+
+            // Check if player is online
+            if (!viewer.isOnline) {
+                getLogger().warn("[TextDisplayManager] Attempted to spawn text display for offline player ${viewer.name}")
+                return
+            }
+
             // 1. Spawn Entity Packet
             val location = textDisplay.location
             val spawnPacket = WrapperPlayServerSpawnEntity(
@@ -268,11 +288,12 @@ class TextDisplayManager {
             val metadataPacket = createMetadataPacket(textDisplay)
 
             // Send packets
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, spawnPacket)
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
+            playerManager.sendPacket(viewer, spawnPacket)
+            playerManager.sendPacket(viewer, metadataPacket)
+
+            getLogger().debug("[TextDisplayManager] Spawned text display ${textDisplay.entityId} for player ${viewer.name} at ${location.x}, ${location.y}, ${location.z}")
         } catch (e: Exception) {
-            // In case of an error, log it instead of crashing the plugin
-            e.printStackTrace()
+            getLogger().error("[TextDisplayManager] Failed to spawn text display ${textDisplay.entityId} for player ${viewer.name}: ${e.message}", e)
         }
     }
 
@@ -288,10 +309,7 @@ class TextDisplayManager {
         // Billboard mode (index 15)
         metadataList.add(EntityData(15, EntityDataTypes.BYTE, textDisplay.billboard.billboardValue.toByte()))
 
-        // Glow effect (index 22)
-        metadataList.add(EntityData(22, EntityDataTypes.INT, textDisplay.glowingInt()))
-
-        // Text content (index 23)
+        // Text content (index 23) - Must be sent before other text-specific metadata
         metadataList.add(EntityData(23, EntityDataTypes.ADV_COMPONENT, text(textDisplay.text)))
 
         // Text width (index 24)
@@ -300,11 +318,22 @@ class TextDisplayManager {
         // Background color (ARGB) (index 25)
         metadataList.add(EntityData(25, EntityDataTypes.INT, textDisplay.backgroundColor))
 
-        // Opacity (index 26)
-        metadataList.add(EntityData(26, EntityDataTypes.BYTE, textDisplay.opacity.toByte()))
+        // Opacity (index 26) - Clamp to valid range
+        val opacityValue = when {
+            textDisplay.opacity < 0 -> -1.toByte()
+            textDisplay.opacity > 255 -> 255.toByte()
+            else -> textDisplay.opacity.toByte()
+        }
+        metadataList.add(EntityData(26, EntityDataTypes.BYTE, opacityValue.toByte()))
 
         // Display flags (index 27)
         metadataList.add(EntityData(27, EntityDataTypes.BYTE, TextDisplayFlags.calculateBitMask(textDisplay.displayFlags).toByte()))
+
+        // Glow effect (index 22) - Note: This is a general entity metadata field, not display-specific
+        // Only add if glowing is enabled
+        if (textDisplay.glowing) {
+            metadataList.add(EntityData(22, EntityDataTypes.INT, textDisplay.glowingInt()))
+        }
 
         return WrapperPlayServerEntityMetadata(textDisplay.entityId, metadataList)
     }

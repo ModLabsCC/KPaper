@@ -1,7 +1,6 @@
 package cc.modlabs.kpaper.npc
 
 import cc.modlabs.kpaper.extensions.timer
-import cc.modlabs.kpaper.util.logDebug
 import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
 import cc.modlabs.kpaper.main.PluginInstance
@@ -91,7 +90,6 @@ class NPCImpl(
             org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                 if (mannequin.isValid && !mannequin.hasAI()) {
                     mannequin.setAI(true)
-                    logDebug("[NPC] NPCImpl init: Forced AI enabled for '$npcName' after ${delay} tick(s)")
                 }
             }, delay)
         }
@@ -107,19 +105,14 @@ class NPCImpl(
                 }
                 if (mannequin.isValid && !mannequin.hasAI()) {
                     mannequin.setAI(true)
-                    logDebug("[NPC] NPCImpl init: Persistent check - forced AI enabled for '$npcName' (check $checkCount)")
                 }
             }
         }.runTaskTimer(PluginInstance, 1L, 1L)
         
         val aiNowEnabled = mannequin.hasAI()
-        
-        logDebug("[NPC] NPCImpl init: Created NPC '$npcName' ($npcId)")
-        logDebug("[NPC] NPCImpl init: AI was $aiWasEnabled, now $aiNowEnabled, immovable=${mannequin.isImmovable}")
 
         // Register this NPC for event tracking
         NPCEventListener.registerNPC(mannequin, this)
-        logDebug("[NPC] NPCImpl init: Registered NPC '$npcName' for event tracking")
         
         // Start continuous AI monitoring task (runs every 20 ticks = 1 second)
         // This ensures AI stays enabled even if something else disables it
@@ -146,7 +139,6 @@ class NPCImpl(
             val needsAI = lookAtPlayers || isFollowing || isFollowingNearbyPlayers || isWalking
             
             if (needsAI && !entity.hasAI()) {
-                logDebug("[NPC] AI Monitoring: AI was disabled for '${entity.customName ?: entity.type.name}', re-enabling")
                 entity.setAI(true)
                 
                 // If still disabled after setting, try again next tick
@@ -201,7 +193,6 @@ class NPCImpl(
             val foundEntity = world.getEntities().firstOrNull { it.uniqueId == npcUUID && it.isValid } as? LivingEntity
             if (foundEntity != null) {
                 // Update npcMap with the found entity to keep references in sync
-                logDebug("[NPC] getEntityByUUID: Found entity by UUID search, updating npcMap (UUID: $npcUUID)")
                 NPCEventListener.registerNPC(foundEntity, this)
                 return foundEntity
             }
@@ -323,26 +314,21 @@ class NPCImpl(
     }
 
     override fun startWalking(): Boolean {
-        logDebug("[NPC] startWalking called")
         val entity = getEntityByUUID() ?: run {
-            logDebug("[NPC] startWalking failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
         // Enable AI if not already enabled
         val aiWasEnabled = entity.hasAI()
         entity.setAI(true)
-        logDebug("[NPC] startWalking: AI was $aiWasEnabled, now enabled: ${entity.hasAI()}, immovable: ${isImmovable()}")
 
         // If already walking, don't start again
         if (isWalking && walkingTask != null) {
-            logDebug("[NPC] startWalking: Already walking, skipping")
             return true
         }
 
         isWalking = true
         isPaused = false
-        logDebug("[NPC] startWalking: Starting walking task - isWalking=$isWalking, isPaused=$isPaused, isFollowing=$isFollowing, isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
 
         // Start the walking task - run every 2 ticks to reduce performance impact
         walkingTask = timer(2, "NPCWalking") {
@@ -350,13 +336,11 @@ class NPCImpl(
             val shouldPause = if (isPatrolling) isPatrolPaused else isPaused
             if (!isWalking || shouldPause) {
                 if (shouldPause) {
-                    logDebug("[NPC] Walking task: Paused")
                 }
                 return@timer
             }
 
             val currentEntity = getEntityByUUID() ?: run {
-                logDebug("[NPC] Walking task: Entity invalid (UUID: $npcUUID), stopping")
                 stopWalking()
                 return@timer
             }
@@ -364,13 +348,11 @@ class NPCImpl(
             // Ensure entity can move - immovable entities cannot move
             val mannequin = currentEntity as? Mannequin
             if (mannequin != null && mannequin.isImmovable) {
-                logDebug("[NPC] Walking task: Entity is immovable, setting to false")
                 mannequin.isImmovable = false
             }
             
             // Ensure AI is enabled - it might get disabled by other systems
             if (!currentEntity.hasAI()) {
-                logDebug("[NPC] Walking task: AI was disabled, re-enabling")
                 currentEntity.setAI(true)
             }
 
@@ -380,7 +362,6 @@ class NPCImpl(
                 // In that case, the nearby follow task will handle finding players
                 // The walking task should just wait - nearby follow task will call followEntity when it finds a player
                 if (isFollowingNearbyPlayers && followingEntity == null) {
-                    logDebug("[NPC] Walking task: Nearby following active but no followingEntity yet - waiting for nearby follow task to find player")
                     // Just wait - nearby follow task will handle everything
                     // Don't try to go to spawn here, let the nearby follow task handle it
                     return@timer
@@ -388,7 +369,6 @@ class NPCImpl(
 
                 val targetEntity = followingEntity
                 if (targetEntity == null || !targetEntity.isValid) {
-                    logDebug("[NPC] Walking task: Target entity is null or invalid")
                     // Target entity is invalid
                     if (isFollowing) {
                         stopFollowing()
@@ -400,14 +380,12 @@ class NPCImpl(
                 val currentLoc = currentEntity.location
                 val distanceToTarget = currentLoc.distance(targetLoc)
 
-                logDebug("[NPC] Walking task: Following - distanceToTarget=$distanceToTarget, followDistance=$followDistance, isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
 
                 // Check if we're close enough to the target
                 // For nearby player following, always try to maintain followDistance
                 // For direct following, stop moving when close enough
                 if (distanceToTarget <= followDistance) {
                     if (!isFollowingNearbyPlayers) {
-                        logDebug("[NPC] Walking task: Close enough to target (direct following), just looking")
                         // Close enough, continuously look at the target (only for direct following)
                         // Update look direction every tick to track player movement
                         val lookDirection = targetLoc.toVector().subtract(currentLoc.toVector())
@@ -443,7 +421,6 @@ class NPCImpl(
                         (currentTarget != null && currentTarget!!.distance(targetLoc) > (if (isFollowingNearbyPlayers) 1.5 else 3.0))
 
                 if (shouldUpdatePath) {
-                    logDebug("[NPC] Walking task: Updating path - followUpdateCounter=$followUpdateCounter, updateInterval=$updateInterval")
                     followUpdateCounter = 0
                     // Recalculate path to target entity
                     updateFollowingPath(currentEntity, targetLoc)
@@ -453,23 +430,17 @@ class NPCImpl(
                 val target = currentTarget ?: targetLoc
                 val distance = currentLoc.distance(target)
 
-                logDebug("[NPC] Walking task: Moving - currentTarget=${currentTarget?.blockX},${currentTarget?.blockY},${currentTarget?.blockZ}, distance=$distance, arrivalThreshold=$arrivalThreshold, pathQueue.size=${pathQueue.size}")
-
                 // Check if we've arrived at the current waypoint
                 if (distance <= arrivalThreshold) {
-                    logDebug("[NPC] Walking task: Arrived at waypoint")
                     // Arrived at waypoint, get next one or recalculate
                     if (pathQueue.isEmpty()) {
-                        logDebug("[NPC] Walking task: No more waypoints, recalculating path")
                         // No more waypoints, recalculate path
                         updateFollowingPath(currentEntity, targetLoc)
                     } else {
                         currentTarget = pathQueue.removeAt(0)
-                        logDebug("[NPC] Walking task: Next waypoint set to ${currentTarget?.blockX},${currentTarget?.blockY},${currentTarget?.blockZ}")
                     }
                 } else {
                     // Move towards current waypoint
-                    logDebug("[NPC] Walking task: Calling moveTowards - target=${target.blockX},${target.blockY},${target.blockZ}, speed=$walkSpeed")
                     moveTowards(currentEntity, target, walkSpeed)
                 }
                 return@timer
@@ -636,31 +607,25 @@ class NPCImpl(
     }
 
     override fun followEntity(entity: Entity, followDistance: Double): Boolean {
-        logDebug("[NPC] followEntity called: entity=${entity.type}, followDistance=$followDistance")
 
         if (!entity.isValid) {
-            logDebug("[NPC] followEntity failed: entity is invalid")
             return false
         }
         val npcEntity = getEntityByUUID() ?: run {
-            logDebug("[NPC] followEntity failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
         // Ensure entity can move
         if (isImmovable()) {
-            logDebug("[NPC] followEntity: Setting immovable to false")
             setImmovable(false)
         }
 
         // Ensure AI is enabled
         val aiEnabled = npcEntity.hasAI()
         npcEntity.setAI(true)
-        logDebug("[NPC] followEntity: AI was $aiEnabled, now enabled: ${npcEntity.hasAI()}")
 
         // Stop any existing walking/patrolling
         if (isPatrolling) {
-            logDebug("[NPC] followEntity: Stopping patrolling")
             stopPatrolling()
         }
 
@@ -669,26 +634,19 @@ class NPCImpl(
         followingEntity = entity
         this.followDistance = followDistance.coerceAtLeast(1.0) // Minimum 1 block
         followUpdateCounter = 0
-        logDebug("[NPC] followEntity: Following state set - isFollowing=$isFollowing, followDistance=${this.followDistance}")
 
         // Calculate initial path
         val currentLoc = npcEntity.location
         val targetLoc = entity.location
         val distance = currentLoc.distance(targetLoc)
-        logDebug("[NPC] followEntity: Current location=${currentLoc.blockX},${currentLoc.blockY},${currentLoc.blockZ}, Target location=${targetLoc.blockX},${targetLoc.blockY},${targetLoc.blockZ}, Distance=$distance")
 
         updateFollowingPath(npcEntity, targetLoc)
-        logDebug("[NPC] followEntity: Path calculated - pathQueue.size=${pathQueue.size}, currentTarget=${currentTarget?.blockX},${currentTarget?.blockY},${currentTarget?.blockZ}")
 
         // Start walking if not already walking
         if (!isWalking) {
-            logDebug("[NPC] followEntity: Starting walking task")
             startWalking()
-        } else {
-            logDebug("[NPC] followEntity: Walking task already running")
         }
 
-        logDebug("[NPC] followEntity: Successfully started following")
         return true
     }
 
@@ -722,15 +680,12 @@ class NPCImpl(
     }
 
     override fun followNearbyPlayers(range: Double, followDistance: Double): Boolean {
-        logDebug("[NPC] followNearbyPlayers called: range=$range, followDistance=$followDistance")
         val npcEntity = getEntityByUUID() ?: run {
-            logDebug("[NPC] followNearbyPlayers failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
         // Ensure entity can move
         if (isImmovable()) {
-            logDebug("[NPC] followNearbyPlayers: Setting immovable to false")
             setImmovable(false)
         }
 
@@ -748,28 +703,24 @@ class NPCImpl(
         }
         
         // Schedule immediate check on next tick
-        org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
+        Bukkit.getScheduler().runTask(PluginInstance, Runnable {
             if (npcEntity.isValid && !npcEntity.hasAI()) {
                 npcEntity.setAI(true)
-                logDebug("[NPC] followNearbyPlayers: Forced AI enabled on next tick")
             }
         })
         
         // Schedule multiple delayed checks to ensure AI stays enabled
         for (delay in listOf(1L, 2L, 3L, 5L, 10L)) {
-            org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
+            Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                 if (npcEntity.isValid && !npcEntity.hasAI()) {
                     npcEntity.setAI(true)
-                    logDebug("[NPC] followNearbyPlayers: Forced AI enabled after ${delay} tick(s)")
                 }
             }, delay)
         }
-        
-        logDebug("[NPC] followNearbyPlayers: AI was $aiEnabled, now enabled: ${npcEntity.hasAI()}")
+
 
         // Stop any existing nearby following
         if (isFollowingNearbyPlayers) {
-            logDebug("[NPC] followNearbyPlayers: Stopping existing nearby following")
             isFollowingNearbyPlayers = false
             nearbyFollowTask?.cancel()
             nearbyFollowTask = null
@@ -780,21 +731,18 @@ class NPCImpl(
 
         // Stop patrolling if active
         if (isPatrolling) {
-            logDebug("[NPC] followNearbyPlayers: Stopping patrolling")
             stopPatrolling()
         }
 
         // Set spawn location to current location if not already set
         if (spawnLocation == null) {
             spawnLocation = npcEntity.location.clone()
-            logDebug("[NPC] followNearbyPlayers: Set spawn location to ${spawnLocation?.blockX},${spawnLocation?.blockY},${spawnLocation?.blockZ}")
         }
 
         // Set following state
         isFollowingNearbyPlayers = true
         nearbyFollowRange = range.coerceAtLeast(1.0)
         nearbyFollowDistance = followDistance.coerceAtLeast(1.0)
-        logDebug("[NPC] followNearbyPlayers: State set - range=$nearbyFollowRange, followDistance=$nearbyFollowDistance")
 
         // Immediately check for nearby players before starting the timer
         val currentLoc = npcEntity.location
@@ -808,34 +756,23 @@ class NPCImpl(
             ).filterIsInstance<Player>()
                 .filter { it.isValid && it.location.distance(currentLoc) <= nearbyFollowRange }
 
-            logDebug("[NPC] followNearbyPlayers: Found ${nearbyPlayers.size} nearby players")
-
             val targetPlayer = nearbyPlayers.firstOrNull()
             if (targetPlayer != null) {
                 // Found a nearby player immediately, start following
-                logDebug("[NPC] followNearbyPlayers: Found player ${targetPlayer.name}, starting to follow")
                 followEntity(targetPlayer, nearbyFollowDistance)
             } else {
                 // No nearby players, go to spawn
                 val spawn = spawnLocation ?: currentLoc.clone()
-                logDebug("[NPC] followNearbyPlayers: No players found, going to spawn at ${spawn.blockX},${spawn.blockY},${spawn.blockZ}")
                 walkTo(spawn)
             }
-        } else {
-            logDebug("[NPC] followNearbyPlayers: World is null!")
         }
 
         // Start monitoring task - this will run continuously every nearbyFollowCheckInterval ticks
-        logDebug("[NPC] followNearbyPlayers: Starting monitoring task with interval=$nearbyFollowCheckInterval ticks (${nearbyFollowCheckInterval * 50}ms)")
         nearbyFollowTask = timer(nearbyFollowCheckInterval, "NPCNearbyFollow") {
-            // Log every tick to confirm task is running
-            logDebug("[NPC] NearbyFollow task: [TICK START] isFollowingNearbyPlayers=$isFollowingNearbyPlayers")
-
             // Wrap everything in try-catch to ensure task never stops on error
             try {
                 // Only cancel if explicitly stopped
                 if (!isFollowingNearbyPlayers) {
-                    logDebug("[NPC] NearbyFollow task: isFollowingNearbyPlayers=false, canceling task")
                     nearbyFollowTask?.cancel()
                     nearbyFollowTask = null
                     return@timer
@@ -843,7 +780,6 @@ class NPCImpl(
 
                 val currentEntity = getEntityByUUID()
                 if (currentEntity == null || !currentEntity.isValid) {
-                    logDebug("[NPC] NearbyFollow task: Entity invalid (UUID: $npcUUID), but continuing to check")
                     // Don't stop the task, just skip this tick
                     return@timer
                 }
@@ -851,12 +787,9 @@ class NPCImpl(
                 val npcLocation = currentEntity.location
                 val npcWorld = npcLocation.world
                 if (npcWorld == null) {
-                    logDebug("[NPC] NearbyFollow task: World is null, but continuing to check")
                     // Don't stop the task, just skip this tick
                     return@timer
                 }
-
-                logDebug("[NPC] NearbyFollow task: [TICK] Checking for players at ${npcLocation.blockX},${npcLocation.blockY},${npcLocation.blockZ}, range=$nearbyFollowRange")
 
                 // Find nearby players - check ALL online players in the world, not just nearby entities
                 // This ensures we detect players that just joined or moved into range
@@ -864,14 +797,12 @@ class NPCImpl(
 
                 // Method 1: Check nearby entities (faster for large worlds)
                 val allNearbyEntities = npcWorld.getNearbyEntities(npcLocation, nearbyFollowRange, nearbyFollowRange, nearbyFollowRange)
-                logDebug("[NPC] NearbyFollow task: Found ${allNearbyEntities.size} total entities nearby")
 
                 for (entity in allNearbyEntities) {
                     if (entity is Player && entity.isValid && !entity.isDead) {
                         val distance = entity.location.distance(npcLocation)
                         if (distance <= nearbyFollowRange) {
                             nearbyPlayers.add(entity)
-                            logDebug("[NPC] NearbyFollow task: Found nearby player ${entity.name} at distance=$distance")
                         }
                     }
                 }
@@ -885,21 +816,17 @@ class NPCImpl(
                             if (distance <= nearbyFollowRange) {
                                 if (!nearbyPlayers.contains(player)) {
                                     nearbyPlayers.add(player)
-                                    logDebug("[NPC] NearbyFollow task: Found player ${player.name} via online check at distance=$distance")
                                 }
                             }
                         }
                     }
                 }
 
-                logDebug("[NPC] NearbyFollow task: Found ${nearbyPlayers.size} valid players within range")
-
                 val currentFollowing = followingEntity as? Player
 
                 // Check if current followed player is still in range
                 if (currentFollowing != null && currentFollowing.isValid && !currentFollowing.isDead) {
                     val distanceToCurrent = npcLocation.distance(currentFollowing.location)
-                    logDebug("[NPC] NearbyFollow task: Currently following ${currentFollowing.name}, distance=$distanceToCurrent, range=$nearbyFollowRange")
 
                     if (distanceToCurrent <= nearbyFollowRange) {
                         // Still in range, but check if there's a closer player
@@ -908,18 +835,15 @@ class NPCImpl(
                             val distanceToCloser = npcLocation.distance(closerPlayer.location)
                             // Switch to closer player if they're significantly closer (at least 2 blocks)
                             if (distanceToCloser < distanceToCurrent - 2.0) {
-                                logDebug("[NPC] NearbyFollow task: Found closer player ${closerPlayer.name} (distance=$distanceToCloser vs $distanceToCurrent), switching")
                                 stopFollowing()
                                 followEntity(closerPlayer, nearbyFollowDistance)
                                 return@timer
                             }
                         }
                         // Still in range, continue following - task will check again next tick
-                        logDebug("[NPC] NearbyFollow task: Player still in range, continuing to follow")
                         return@timer
                     } else {
                         // Current player went out of range, stop following them
-                        logDebug("[NPC] NearbyFollow task: Player went out of range, stopping follow")
                         stopFollowing()
                     }
                 }
@@ -929,72 +853,41 @@ class NPCImpl(
 
                 if (targetPlayer != null) {
                     // Found a nearby player, follow them
-                    val distance = npcLocation.distance(targetPlayer.location)
-                    logDebug("[NPC] NearbyFollow task: Found new player ${targetPlayer.name} at distance=$distance, starting to follow")
                     followEntity(targetPlayer, nearbyFollowDistance)
                 } else {
                     // No nearby players, return to spawn
                     val spawn = spawnLocation
                     if (spawn == null) {
-                        logDebug("[NPC] NearbyFollow task: No spawn location set, waiting for players")
                         // Don't return - let task continue checking
                         return@timer
                     }
 
                     val distanceToSpawn = npcLocation.distance(spawn)
-                    logDebug("[NPC] NearbyFollow task: No players found, distance to spawn=$distanceToSpawn")
 
                     // Stop following current entity if we were following one
                     if (isFollowing && followingEntity != null) {
-                        logDebug("[NPC] NearbyFollow task: No players nearby, stopping current follow")
                         stopFollowing()
                     }
 
                     if (distanceToSpawn > 1.5) {
                         // Not at spawn yet, walk to spawn
-                        logDebug("[NPC] NearbyFollow task: Walking to spawn")
                         if (!isWalking || currentTarget == null || currentTarget!!.distance(spawn) > 2.0) {
                             walkTo(spawn)
                         }
                     } else {
                         // At spawn - keep task running to detect players
-                        logDebug("[NPC] NearbyFollow task: At spawn, waiting for players (task continues checking)")
                         // Ensure walking task is running so we can respond immediately when a player comes
                         if (!isWalking) {
-                            logDebug("[NPC] NearbyFollow task: Starting walking task to be ready for players")
                             startWalking()
                         }
                     }
                 }
 
-                // Task will automatically continue to next tick - timer handles scheduling
-                logDebug("[NPC] NearbyFollow task: [TICK COMPLETE] Will check again in ${nearbyFollowCheckInterval} ticks")
-
             } catch (e: Exception) {
                 // Log error but don't stop the task - it will continue checking
-                logDebug("[NPC] NearbyFollow task: ERROR in tick - ${e.message}, but task will continue")
                 e.printStackTrace()
                 // Task continues to next tick automatically
             }
-
-            // Explicitly log that we're returning and the task should continue
-            // The timer will automatically schedule the next run
-        }
-
-        // Verify the task was created
-        if (nearbyFollowTask == null) {
-            logDebug("[NPC] followNearbyPlayers: ERROR - Task was not created!")
-        } else {
-            logDebug("[NPC] followNearbyPlayers: Monitoring task started successfully, taskId=${nearbyFollowTask?.taskId}, will run every ${nearbyFollowCheckInterval} ticks")
-
-            // Add a verification log after a short delay to confirm it's still running
-            Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
-                if (nearbyFollowTask?.isCancelled == true) {
-                    logDebug("[NPC] followNearbyPlayers: WARNING - Task was canceled after ${nearbyFollowCheckInterval * 2} ticks!")
-                } else {
-                    logDebug("[NPC] followNearbyPlayers: Task is still active after ${nearbyFollowCheckInterval * 2} ticks")
-                }
-            }, nearbyFollowCheckInterval * 2)
         }
 
         return true
@@ -1033,7 +926,6 @@ class NPCImpl(
      */
     private fun updateFollowingPath(npcEntity: LivingEntity, targetLoc: Location) {
         val currentLoc = npcEntity.location
-        logDebug("[NPC] updateFollowingPath: from=${currentLoc.blockX},${currentLoc.blockY},${currentLoc.blockZ} to=${targetLoc.blockX},${targetLoc.blockY},${targetLoc.blockZ}, usePathfinding=$usePathfinding")
 
         // Clear existing path
         pathQueue.clear()
@@ -1043,7 +935,6 @@ class NPCImpl(
         // Use pathfinding if enabled
         if (usePathfinding) {
             val path = Pathfinder.findPath(currentLoc, targetLoc)
-            logDebug("[NPC] updateFollowingPath: Pathfinding returned ${path.size} waypoints")
             if (path.isNotEmpty()) {
                 // Add all waypoints except the first (current position) to the queue
                 currentPath.addAll(path)
@@ -1052,14 +943,11 @@ class NPCImpl(
                 } else {
                     pathQueue.add(targetLoc.clone())
                 }
-                logDebug("[NPC] updateFollowingPath: Added ${pathQueue.size} waypoints to queue")
             } else {
-                logDebug("[NPC] updateFollowingPath: Pathfinding failed, using direct path")
                 // Pathfinding failed, use direct path
                 pathQueue.add(targetLoc.clone())
             }
         } else {
-            logDebug("[NPC] updateFollowingPath: Pathfinding disabled, using direct path")
             // Direct path without pathfinding
             pathQueue.add(targetLoc.clone())
         }
@@ -1067,10 +955,8 @@ class NPCImpl(
         // Set first location as target
         if (pathQueue.isNotEmpty()) {
             currentTarget = pathQueue.removeAt(0)
-            logDebug("[NPC] updateFollowingPath: Set currentTarget to ${currentTarget?.blockX},${currentTarget?.blockY},${currentTarget?.blockZ}, remaining waypoints=${pathQueue.size}")
         } else {
             currentTarget = targetLoc.clone()
-            logDebug("[NPC] updateFollowingPath: No waypoints, set currentTarget to target location")
         }
     }
 
@@ -1079,11 +965,8 @@ class NPCImpl(
         val direction = target.toVector().subtract(currentLoc.toVector())
         val distance = direction.length()
 
-        logDebug("[NPC] moveTowards: current=${currentLoc.blockX},${currentLoc.blockY},${currentLoc.blockZ}, target=${target.blockX},${target.blockY},${target.blockZ}, distance=$distance, speed=$speed")
-
         // If very close, just look at target
         if (distance < 0.1) {
-            logDebug("[NPC] moveTowards: Very close (<0.1), just rotating")
             val lookDirection = direction.normalize()
             val yaw = Math.toDegrees(-atan2(lookDirection.x, lookDirection.z)).toFloat()
             val newLoc = currentLoc.clone()
@@ -1110,13 +993,11 @@ class NPCImpl(
 
         // Handle vertical positioning
         if (needsJump) {
-            logDebug("[NPC] moveTowards: Needs to jump, adding jump height")
             // Jump: move up from current position
             newPosition.y = currentLoc.y + 0.42
         } else {
             val heightDiff = target.y - currentLoc.y
             if (heightDiff > 0.1 && heightDiff <= 0.5) {
-                logDebug("[NPC] moveTowards: Small step up (heightDiff=$heightDiff), adding step height")
                 // Small step up
                 newPosition.y = currentLoc.y + 0.2
             } else if (groundY != null) {
@@ -1127,20 +1008,16 @@ class NPCImpl(
                     // Gravity: 0.08 blocks per tick (1.6 blocks per second)
                     val fallDistance = 0.08.coerceAtMost(distanceToGround - 0.1)
                     newPosition.y = currentLoc.y - fallDistance
-                    logDebug("[NPC] moveTowards: Falling - distanceToGround=$distanceToGround, fallDistance=$fallDistance, newY=${newPosition.y}")
                 } else if (distanceToGround < -0.1) {
                     // We're below ground - place on ground
                     newPosition.y = groundY
-                    logDebug("[NPC] moveTowards: Below ground, placed on ground at Y=$groundY")
                 } else {
                     // We're on ground - stay there
                     newPosition.y = currentLoc.y
-                    logDebug("[NPC] moveTowards: On ground, maintaining Y=${newPosition.y}")
                 }
             } else {
                 // No ground found - keep current Y (might be in air, let it fall naturally if gravity is enabled)
                 newPosition.y = currentLoc.y
-                logDebug("[NPC] moveTowards: No ground found, keeping current Y=${newPosition.y}")
             }
         }
 
@@ -1155,22 +1032,18 @@ class NPCImpl(
         // Ensure entity is not immovable before teleporting
         val mannequin = entity as? Mannequin
         if (mannequin != null && mannequin.isImmovable) {
-            logDebug("[NPC] moveTowards: WARNING - Entity is immovable, setting to false before teleport")
             mannequin.isImmovable = false
         }
         
         // Ensure AI is enabled
         if (!entity.hasAI()) {
-            logDebug("[NPC] moveTowards: WARNING - Entity AI is disabled, enabling before teleport")
             entity.setAI(true)
         }
 
         // Teleport to new position
         try {
             entity.teleport(newPosition)
-            logDebug("[NPC] moveTowards: Successfully teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
         } catch (e: Exception) {
-            logDebug("[NPC] moveTowards: ERROR teleporting - ${e.message}")
             e.printStackTrace()
         }
     }
@@ -1297,7 +1170,6 @@ class NPCImpl(
                 org.bukkit.Bukkit.getScheduler().runTask(PluginInstance, Runnable {
                     if (entity.isValid) {
                         entity.setAI(true)
-                        logDebug("[NPC] setImmovable: Forced AI enabled for '$npcName' on next tick")
                     }
                 })
             }
@@ -1308,13 +1180,9 @@ class NPCImpl(
             org.bukkit.Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                 if (entity.isValid && !entity.hasAI()) {
                     entity.setAI(true)
-                    logDebug("[NPC] setImmovable: Forced AI enabled for '$npcName' after ${delay} tick(s)")
                 }
             }, delay)
         }
-        
-        val aiAfter = entity.hasAI()
-        logDebug("[NPC] setImmovable: NPC '$npcName' immovable=$immovable, AI was $aiBefore, now $aiAfter")
     }
 
     override fun getEquipment(): org.bukkit.inventory.EntityEquipment {
@@ -1380,7 +1248,6 @@ class NPCImpl(
         if (eventType == NPCEventType.PLAYER_SNEAKING_NEARBY ||
             eventType == NPCEventType.PLAYER_PUNCHING_NEARBY ||
             lookAtPlayers) {
-            logDebug("Starting Monitoring for ${this}")
             NPCEventListener.registerProximityNPC(this)
         }
     }
@@ -1415,38 +1282,21 @@ class NPCImpl(
     override fun setLookAtPlayers(enabled: Boolean) {
         val entity = getMannequin()
         if (entity == null) {
-            logDebug("[NPC] setLookAtPlayers: ERROR - Cannot get mannequin entity!")
             return
         }
         
-        val npcName = entity.customName ?: entity.type.name
-        val npcId = entity.uniqueId
-        val aiBefore = entity.hasAI()
-        
-        logDebug("[NPC] setLookAtPlayers: Setting lookAtPlayers=$enabled for NPC '$npcName' ($npcId)")
-        logDebug("[NPC] setLookAtPlayers: Current lookAtPlayers state: $lookAtPlayers, AI enabled: $aiBefore")
-        
         lookAtPlayers = enabled
         if (enabled) {
-            logDebug("[NPC] setLookAtPlayers: Registering NPC '$npcName' for proximity monitoring")
             NPCEventListener.registerProximityNPC(this)
             // The registerProximityNPC will start the look-at task if needed
-            logDebug("[NPC] setLookAtPlayers: NPC '$npcName' registered for proximity monitoring")
         } else {
             // Only unregister if no proximity event handlers are registered
             val hasProximityHandlers = eventHandlers.containsKey(NPCEventType.PLAYER_SNEAKING_NEARBY) ||
                     eventHandlers.containsKey(NPCEventType.PLAYER_PUNCHING_NEARBY)
-            logDebug("[NPC] setLookAtPlayers: hasProximityHandlers=$hasProximityHandlers")
             if (!hasProximityHandlers) {
-                logDebug("[NPC] setLookAtPlayers: Unregistering NPC '$npcName' from proximity monitoring")
                 NPCEventListener.unregisterProximityNPC(this)
-            } else {
-                logDebug("[NPC] setLookAtPlayers: Keeping NPC '$npcName' registered due to proximity event handlers")
             }
         }
-        
-        val aiAfter = entity.hasAI()
-        logDebug("[NPC] setLookAtPlayers: Final lookAtPlayers state: $lookAtPlayers, AI enabled: $aiAfter")
     }
 
     override fun isLookingAtPlayers(): Boolean {
@@ -1481,7 +1331,6 @@ class NPCImpl(
                 Bukkit.getScheduler().runTask(PluginInstance, Runnable {
                     if (entity.isValid) {
                         entity.setAI(true)
-                        logDebug("[NPC] setAI: Forced AI enabled for '$npcName' on next tick")
                     }
                 })
             }
@@ -1492,14 +1341,10 @@ class NPCImpl(
                 Bukkit.getScheduler().runTaskLater(PluginInstance, Runnable {
                     if (entity.isValid && !entity.hasAI()) {
                         entity.setAI(true)
-                        logDebug("[NPC] setAI: Forced AI enabled for '$npcName' after ${delay} tick(s)")
                     }
                 }, delay)
             }
         }
-        
-        val aiAfter = entity.hasAI()
-        logDebug("[NPC] setAI: NPC '$npcName' AI was $aiBefore, now $aiAfter")
     }
 
     override fun hasAI(): Boolean {
