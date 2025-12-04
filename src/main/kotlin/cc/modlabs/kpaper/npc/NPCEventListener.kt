@@ -4,6 +4,8 @@ import cc.modlabs.kpaper.event.listen
 import cc.modlabs.kpaper.extensions.timer
 import cc.modlabs.kpaper.util.getLogger
 import cc.modlabs.kpaper.util.logDebug
+import dev.fruxz.stacked.extension.asPlainString
+import dev.fruxz.stacked.extension.asString
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerAnimationEvent
@@ -13,6 +15,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import org.bukkit.Bukkit
 import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.sqrt
@@ -30,6 +33,35 @@ object NPCEventListener {
     private var lookAtTask: BukkitTask? = null // Separate task for look-at (runs more frequently)
     private val playerPunchingState = mutableMapOf<Player, Long>() // Player -> last punch time
     private val playerSneakingState = mutableMapOf<Player, Boolean>() // Player -> is sneaking
+
+    /**
+     * Gets the entity for an NPC by UUID, trying multiple methods.
+     * First tries npc.getEntity(), then looks up by UUID from npcMap, then searches all worlds.
+     */
+    private fun getEntityByUUID(npc: NPC, npcId: UUID): org.bukkit.entity.Entity? {
+        // First try the NPC's getEntity() method
+        val entity = npc.getEntity()
+        if (entity != null && entity.isValid) {
+            return entity
+        }
+        
+        // If that fails, try to get it from npcMap (which should have the current entity)
+        val npcFromMap = npcMap[npcId]
+        val entityFromMap = npcFromMap?.getEntity()
+        if (entityFromMap != null && entityFromMap.isValid) {
+            return entityFromMap
+        }
+        
+        // Last resort: search all worlds for the entity with this UUID
+        for (world in Bukkit.getWorlds()) {
+            val foundEntity = world.getEntities().firstOrNull { it.uniqueId == npcId && it.isValid }
+            if (foundEntity != null) {
+                return foundEntity
+            }
+        }
+        
+        return null
+    }
 
     /**
      * Registers the global event listener.
@@ -202,14 +234,14 @@ object NPCEventListener {
 
         logDebug("[NPCEventListener] Starting look-at task (checks every 5 ticks for smooth looking)")
         lookAtTask = timer(5, "NPCLookAt") { // Run every 5 ticks for smooth looking
-            val lookAtNPCs = proximityNPCs.values.filter { it.isLookingAtPlayers() }
+            val lookAtNPCs = proximityNPCs.entries.filter { it.value.isLookingAtPlayers() }
             
             if (lookAtNPCs.isEmpty()) {
                 return@timer
             }
 
-            lookAtNPCs.forEach { npc ->
-                val entity = npc.getEntity() as? org.bukkit.entity.LivingEntity ?: return@forEach
+            lookAtNPCs.forEach { (npcId, npc) ->
+                val entity = getEntityByUUID(npc, npcId) as? org.bukkit.entity.LivingEntity ?: return@forEach
                 if (!entity.isValid) return@forEach
                 
                 val npcLocation = entity.location
@@ -264,7 +296,7 @@ object NPCEventListener {
         logDebug("[NPCEventListener] Starting proximity monitoring task (checks every 10 ticks)")
         proximityTask = timer(10, "NPCProximity") { // Check every 10 ticks (reduced frequency to avoid performance issues)
             val currentTime = System.currentTimeMillis()
-            val proximityNPCsCopy = proximityNPCs.values.toList() // Copy to avoid concurrent modification
+            val proximityNPCsCopy = proximityNPCs.entries.toList() // Copy to avoid concurrent modification
 
             // Debug: Log if no NPCs are registered
             if (proximityNPCsCopy.isEmpty()) {
@@ -274,10 +306,10 @@ object NPCEventListener {
 
             logDebug("[NPCEventListener] Proximity task tick: Checking ${proximityNPCsCopy.size} NPC(s)")
 
-            proximityNPCsCopy.forEach { npc ->
-                val entity = npc.getEntity()
-                if (entity == null) {
-                    logDebug("[NPCEventListener] Proximity task: NPC entity is null, skipping")
+            proximityNPCsCopy.forEach { (npcId, npc) ->
+                val entity = getEntityByUUID(npc, npcId)
+                if (entity == null || !entity.isValid) {
+                    logDebug("[NPCEventListener] Proximity task: NPC entity is null or invalid (ID: $npcId), skipping")
                     return@forEach
                 }
                 

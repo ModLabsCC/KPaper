@@ -31,6 +31,9 @@ class NPCImpl(
     private val mannequin: Mannequin
 ) : NPC {
 
+    // Store UUID at creation time - it never changes even if mannequin is replaced
+    private val npcUUID: UUID = mannequin.uniqueId
+
     private var currentTarget: Location? = null
     private val pathQueue = mutableListOf<Location>()
     private var walkingTask: BukkitTask? = null
@@ -170,7 +173,7 @@ class NPCImpl(
 
     override fun getEntity(): Entity? = getMannequin()
 
-    override fun getID(): UUID? = getEntity()?.uniqueId
+    override fun getID(): UUID? = npcUUID
 
     override fun getLivingEntity(): LivingEntity? = if (mannequin.isValid) mannequin else null
 
