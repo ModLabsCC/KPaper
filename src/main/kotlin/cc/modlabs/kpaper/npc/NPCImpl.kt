@@ -211,7 +211,7 @@ class NPCImpl(
     }
 
     override fun walkTo(location: Location): Boolean {
-        val entity = getMannequin() as? LivingEntity ?: return false
+        val entity = getEntityByUUID() ?: return false
 
         // Clear existing path
         pathQueue.clear()
@@ -260,7 +260,7 @@ class NPCImpl(
 
     override fun walkPath(locations: List<Location>): Boolean {
         if (locations.isEmpty()) return false
-        val entity = getMannequin() as? LivingEntity ?: return false
+        val entity = getEntityByUUID() ?: return false
 
         // Clear existing path
         pathQueue.clear()
@@ -324,8 +324,8 @@ class NPCImpl(
 
     override fun startWalking(): Boolean {
         logDebug("[NPC] startWalking called")
-        val entity = getMannequin() as? LivingEntity ?: run {
-            logDebug("[NPC] startWalking failed: cannot get LivingEntity")
+        val entity = getEntityByUUID() ?: run {
+            logDebug("[NPC] startWalking failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
@@ -582,7 +582,7 @@ class NPCImpl(
 
     override fun startPatrolling(locations: List<Location>): Boolean {
         if (locations.isEmpty()) return false
-        val entity = getMannequin() as? LivingEntity ?: return false
+        val entity = getEntityByUUID() ?: return false
 
         // Stop any existing walking/patrolling
         stopWalking()
@@ -642,8 +642,8 @@ class NPCImpl(
             logDebug("[NPC] followEntity failed: entity is invalid")
             return false
         }
-        val npcEntity = getMannequin() as? LivingEntity ?: run {
-            logDebug("[NPC] followEntity failed: cannot get LivingEntity")
+        val npcEntity = getEntityByUUID() ?: run {
+            logDebug("[NPC] followEntity failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
@@ -723,8 +723,8 @@ class NPCImpl(
 
     override fun followNearbyPlayers(range: Double, followDistance: Double): Boolean {
         logDebug("[NPC] followNearbyPlayers called: range=$range, followDistance=$followDistance")
-        val npcEntity = getMannequin() as? LivingEntity ?: run {
-            logDebug("[NPC] followNearbyPlayers failed: cannot get LivingEntity")
+        val npcEntity = getEntityByUUID() ?: run {
+            logDebug("[NPC] followNearbyPlayers failed: cannot get LivingEntity (UUID: $npcUUID)")
             return false
         }
 
