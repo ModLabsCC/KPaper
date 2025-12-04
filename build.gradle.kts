@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.20"
     `java-library`
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.serialization") version "2.1.20"
     id("maven-publish")
 }
 
@@ -30,7 +30,7 @@ dependencies {
 
     api("dev.fruxz:stacked:2024.1.1")
 
-    api("cc.modlabs:KlassicX:2025.11.27.2152")
+    api("cc.modlabs:KlassicX:2025.12.4.1200")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
