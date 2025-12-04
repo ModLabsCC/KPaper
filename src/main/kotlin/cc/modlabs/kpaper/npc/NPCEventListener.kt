@@ -449,6 +449,14 @@ object NPCEventListener {
     }
 
     /**
+     * Gets an NPC by UUID.
+     * Used internally to look up NPCs when entity references become invalid.
+     */
+    fun getNPCByUUID(uuid: UUID): NPC? {
+        return npcMap[uuid]
+    }
+
+    /**
      * Unregisters an NPC entity from event tracking.
      * Called automatically when an NPC is removed.
      */

@@ -135,7 +135,7 @@ class NPCImpl(
         aiMonitoringTask?.cancel()
         
         aiMonitoringTask = timer(20, "NPCAIMonitor") { // Check every second
-            val entity = getMannequin() as? LivingEntity ?: run {
+            val entity = getEntityByUUID() ?: run {
                 // Entity invalid, stop monitoring
                 aiMonitoringTask?.cancel()
                 aiMonitoringTask = null
@@ -176,6 +176,35 @@ class NPCImpl(
     override fun getID(): UUID? = npcUUID
 
     override fun getLivingEntity(): LivingEntity? = if (mannequin.isValid) mannequin else null
+
+    /**
+     * Gets the entity by UUID, trying multiple methods.
+     * First tries getMannequin(), then looks up from npcMap, then searches all worlds.
+     */
+    private fun getEntityByUUID(): LivingEntity? {
+        // First try the stored mannequin reference
+        val entity = getMannequin() as? LivingEntity
+        if (entity != null && entity.isValid) {
+            return entity
+        }
+        
+        // If that fails, try to get it from npcMap (which should have the current entity)
+        val npcFromMap = NPCEventListener.getNPCByUUID(npcUUID)
+        val entityFromMap = npcFromMap?.getEntity() as? LivingEntity
+        if (entityFromMap != null && entityFromMap.isValid) {
+            return entityFromMap
+        }
+        
+        // Last resort: search all worlds for the entity with this UUID
+        for (world in Bukkit.getWorlds()) {
+            val foundEntity = world.getEntities().firstOrNull { it.uniqueId == npcUUID && it.isValid } as? LivingEntity
+            if (foundEntity != null) {
+                return foundEntity
+            }
+        }
+        
+        return null
+    }
 
     override fun walkTo(location: Location): Boolean {
         val entity = getMannequin() as? LivingEntity ?: return false
@@ -322,8 +351,8 @@ class NPCImpl(
                 return@timer
             }
 
-            val currentEntity = getMannequin() as? LivingEntity ?: run {
-                logDebug("[NPC] Walking task: Entity invalid, stopping")
+            val currentEntity = getEntityByUUID() ?: run {
+                logDebug("[NPC] Walking task: Entity invalid (UUID: $npcUUID), stopping")
                 stopWalking()
                 return@timer
             }
@@ -801,9 +830,9 @@ class NPCImpl(
                     return@timer
                 }
 
-                val currentEntity = getMannequin() as? LivingEntity
+                val currentEntity = getEntityByUUID()
                 if (currentEntity == null || !currentEntity.isValid) {
-                    logDebug("[NPC] NearbyFollow task: Entity invalid, but continuing to check")
+                    logDebug("[NPC] NearbyFollow task: Entity invalid (UUID: $npcUUID), but continuing to check")
                     // Don't stop the task, just skip this tick
                     return@timer
                 }
