@@ -2,21 +2,12 @@ package cc.modlabs.kpaper.npc
 
 import cc.modlabs.kpaper.event.listen
 import cc.modlabs.kpaper.extensions.timer
-import cc.modlabs.kpaper.util.getLogger
-import cc.modlabs.kpaper.util.logDebug
-import dev.fruxz.stacked.extension.asPlainString
-import dev.fruxz.stacked.extension.asString
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.player.PlayerAnimationEvent
-import org.bukkit.event.player.PlayerInteractAtEntityEvent
-import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import org.bukkit.scheduler.BukkitTask
-import org.bukkit.util.Vector
-import org.bukkit.Bukkit
-import java.util.UUID
+import java.util.*
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -69,10 +60,8 @@ object NPCEventListener {
      */
     fun register() {
         if (isRegistered) {
-            logDebug("[NPCEventListener] register: Already registered, skipping")
             return
         }
-        logDebug("[NPCEventListener] register: Registering global event listener")
         isRegistered = true
 
         // Listen for player right-click on entities
@@ -222,17 +211,14 @@ object NPCEventListener {
     private fun startLookAtTask() {
         // Check if task exists and is still running
         if (lookAtTask != null && !lookAtTask!!.isCancelled) {
-            logDebug("[NPCEventListener] Look-at task already running, skipping start")
             return
         }
         
         // Cancel existing task if it's cancelled but still referenced
         if (lookAtTask != null && lookAtTask!!.isCancelled) {
-            logDebug("[NPCEventListener] Look-at task was cancelled, cleaning up")
             lookAtTask = null
         }
 
-        logDebug("[NPCEventListener] Starting look-at task (checks every 5 ticks for smooth looking)")
         lookAtTask = timer(5, "NPCLookAt") { // Run every 5 ticks for smooth looking
             val lookAtNPCs = proximityNPCs.entries.filter { it.value.isLookingAtPlayers() }
             
@@ -283,46 +269,37 @@ object NPCEventListener {
     private fun startProximityMonitoring() {
         // Check if task exists and is still running
         if (proximityTask != null && !proximityTask!!.isCancelled) {
-            logDebug("[NPCEventListener] Proximity monitoring task already running, skipping start")
             return
         }
         
         // Cancel existing task if it's cancelled but still referenced
         if (proximityTask != null && proximityTask!!.isCancelled) {
-            logDebug("[NPCEventListener] Proximity monitoring task was cancelled, cleaning up")
             proximityTask = null
         }
 
-        logDebug("[NPCEventListener] Starting proximity monitoring task (checks every 10 ticks)")
         proximityTask = timer(10, "NPCProximity") { // Check every 10 ticks (reduced frequency to avoid performance issues)
             val currentTime = System.currentTimeMillis()
             val proximityNPCsCopy = proximityNPCs.entries.toList() // Copy to avoid concurrent modification
 
             // Debug: Log if no NPCs are registered
             if (proximityNPCsCopy.isEmpty()) {
-                logDebug("[NPCEventListener] Proximity task tick: No NPCs registered for proximity monitoring")
                 return@timer
             }
-
-            logDebug("[NPCEventListener] Proximity task tick: Checking ${proximityNPCsCopy.size} NPC(s)")
 
             proximityNPCsCopy.forEach { (npcId, npc) ->
                 val entity = getEntityByUUID(npc, npcId)
                 if (entity == null || !entity.isValid) {
-                    logDebug("[NPCEventListener] Proximity task: NPC entity is null or invalid (ID: $npcId), skipping")
                     return@forEach
                 }
                 
                 val npcLocation = entity.location
                 val world = entity.world
                 if (world == null) {
-                    logDebug("[NPCEventListener] Proximity task: NPC world is null for entity ${entity.uniqueId}, skipping")
                     return@forEach
                 }
                 
                 val range = npc.getProximityRange()
                 val npcName = entity.customName ?: entity.type.name
-                logDebug("[NPCEventListener] Proximity task: Checking NPC '$npcName' (${entity.uniqueId}) at ${npcLocation.blockX},${npcLocation.blockY},${npcLocation.blockZ}, range=$range, lookAtPlayers=${npc.isLookingAtPlayers()}")
 
                 // Get all nearby players
                 val allNearbyEntities = world.getNearbyEntities(npcLocation, range, range, range)
@@ -330,11 +307,9 @@ object NPCEventListener {
                     .filterIsInstance<Player>()
                     .filter { it.isValid && !it.isDead && it.location.distance(npcLocation) <= range }
 
-                logDebug("[NPCEventListener] Proximity task: Found ${nearbyPlayers.size} nearby player(s) for NPC '$npcName'")
                 if (nearbyPlayers.isNotEmpty()) {
                     nearbyPlayers.forEach { player ->
                         val distance = player.location.distance(npcLocation)
-                        logDebug("[NPCEventListener] Proximity task: Player ${player.name} is ${String.format("%.2f", distance)} blocks away from NPC '$npcName'")
                     }
                 }
 
@@ -351,7 +326,6 @@ object NPCEventListener {
                     
                     if (isSneaking && !wasSneaking) {
                         // Player just started sneaking - trigger event
-                        logDebug("[NPCEventListener] Proximity task: Player ${player.name} started sneaking near NPC '$npcName'")
                         val sneakingEvent = NPCEvent(
                             npc = npc,
                             player = player,
@@ -371,7 +345,6 @@ object NPCEventListener {
                     val lastPunchTime = playerPunchingState[player] ?: 0L
                     if (currentTime - lastPunchTime < 500) {
                         // Player is punching nearby - trigger event
-                        logDebug("[NPCEventListener] Proximity task: Player ${player.name} is punching near NPC '$npcName'")
                         val punchingEvent = NPCEvent(
                             npc = npc,
                             player = player,
@@ -416,13 +389,10 @@ object NPCEventListener {
         
         val entityName = entity.customName ?: entity.type.name
         
-        logDebug("[NPCEventListener] makeEntityLookAt: Making '$entityName' look at ${target.blockX},${target.blockY},${target.blockZ} (distance=${String.format("%.2f", distance)}, yaw=${String.format("%.2f", yaw)}, pitch=${String.format("%.2f", pitch)})")
-        
         // Ensure AI is enabled for mannequins to maintain look direction
         // In MC 1.21.10, mannequins need AI to look at entities properly
         if (!entity.hasAI()) {
             entity.setAI(true)
-            logDebug("[NPCEventListener] makeEntityLookAt: Enabled AI for '$entityName' to allow looking")
         }
         
         // Apply rotation using teleport (this works even without AI, but AI helps maintain it)
@@ -433,9 +403,7 @@ object NPCEventListener {
         try {
             // Use teleport with relative rotation to update look direction
             entity.teleport(newLocation)
-            logDebug("[NPCEventListener] makeEntityLookAt: Successfully updated '$entityName' look direction")
         } catch (e: Exception) {
-            logDebug("[NPCEventListener] makeEntityLookAt: ERROR updating '$entityName' look direction - ${e.message}")
             e.printStackTrace()
         }
     }
@@ -474,12 +442,8 @@ object NPCEventListener {
         val entity = npc.getEntity()
         val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
         val npcId = npc.getID() ?: return
-        
-        logDebug("[NPCEventListener] registerProximityNPC: Registering NPC '$npcName' ($npcId) for proximity monitoring")
-        logDebug("[NPCEventListener] registerProximityNPC: Current proximityNPCs count: ${proximityNPCs.size}")
-        
+
         proximityNPCs[npcId] = npc
-        logDebug("[NPCEventListener] registerProximityNPC: Added NPC, new count: ${proximityNPCs.size}")
         
         // Ensure the event listener is registered and proximity monitoring is started
         register()
@@ -489,20 +453,14 @@ object NPCEventListener {
         if (npc.isLookingAtPlayers()) {
             startLookAtTask()
         }
-        
-        logDebug("[NPCEventListener] registerProximityNPC: NPC '$npcName' registered. Proximity task running: ${proximityTask != null && !proximityTask!!.isCancelled}, Look-at task running: ${lookAtTask != null && !lookAtTask!!.isCancelled}")
     }
 
     /**
      * Unregisters an NPC from proximity event monitoring.
      */
     fun unregisterProximityNPC(npc: NPC) {
-        val entity = npc.getEntity()
-        val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
         val npcId = npc.getID() ?: return
-        logDebug("[NPCEventListener] unregisterProximityNPC: Unregistering NPC '$npcName' from proximity monitoring")
         proximityNPCs.remove(npcId)
-        logDebug("[NPCEventListener] unregisterProximityNPC: Removed NPC, new count: ${proximityNPCs.size}")
     }
 
     /**
@@ -510,7 +468,6 @@ object NPCEventListener {
      * Called automatically when an NPC has visibility restrictions.
      */
     fun registerVisibilityNPC(npc: NPC) {
-        val entity = npc.getEntity()
         val npcId = npc.getID() ?: return
         visibilityNPCs[npcId] = npc
     }
@@ -519,7 +476,6 @@ object NPCEventListener {
      * Unregisters an NPC from visibility management.
      */
     fun unregisterVisibilityNPC(npc: NPC) {
-        val entity = npc.getEntity()
         val npcId = npc.getID() ?: return
         visibilityNPCs.remove(npcId)
     }
