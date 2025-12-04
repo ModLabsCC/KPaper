@@ -180,6 +180,7 @@ class NPCImpl(
     /**
      * Gets the entity by UUID, trying multiple methods.
      * First tries getMannequin(), then looks up from npcMap, then searches all worlds.
+     * If found from world search, updates npcMap to keep references in sync.
      */
     private fun getEntityByUUID(): LivingEntity? {
         // First try the stored mannequin reference
@@ -199,6 +200,9 @@ class NPCImpl(
         for (world in Bukkit.getWorlds()) {
             val foundEntity = world.getEntities().firstOrNull { it.uniqueId == npcUUID && it.isValid } as? LivingEntity
             if (foundEntity != null) {
+                // Update npcMap with the found entity to keep references in sync
+                logDebug("[NPC] getEntityByUUID: Found entity by UUID search, updating npcMap (UUID: $npcUUID)")
+                NPCEventListener.registerNPC(foundEntity, this)
                 return foundEntity
             }
         }
@@ -355,6 +359,13 @@ class NPCImpl(
                 logDebug("[NPC] Walking task: Entity invalid (UUID: $npcUUID), stopping")
                 stopWalking()
                 return@timer
+            }
+            
+            // Ensure entity can move - immovable entities cannot move
+            val mannequin = currentEntity as? Mannequin
+            if (mannequin != null && mannequin.isImmovable) {
+                logDebug("[NPC] Walking task: Entity is immovable, setting to false")
+                mannequin.isImmovable = false
             }
             
             // Ensure AI is enabled - it might get disabled by other systems
@@ -1141,9 +1152,27 @@ class NPCImpl(
         newPosition.yaw = yaw
         newPosition.pitch = pitch.coerceIn(-90f, 90f)
 
+        // Ensure entity is not immovable before teleporting
+        val mannequin = entity as? Mannequin
+        if (mannequin != null && mannequin.isImmovable) {
+            logDebug("[NPC] moveTowards: WARNING - Entity is immovable, setting to false before teleport")
+            mannequin.isImmovable = false
+        }
+        
+        // Ensure AI is enabled
+        if (!entity.hasAI()) {
+            logDebug("[NPC] moveTowards: WARNING - Entity AI is disabled, enabling before teleport")
+            entity.setAI(true)
+        }
+
         // Teleport to new position
-        entity.teleport(newPosition)
-        logDebug("[NPC] moveTowards: Teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
+        try {
+            entity.teleport(newPosition)
+            logDebug("[NPC] moveTowards: Successfully teleported to ${newPosition.blockX},${newPosition.blockY},${newPosition.blockZ}, yaw=$yaw, pitch=$pitch")
+        } catch (e: Exception) {
+            logDebug("[NPC] moveTowards: ERROR teleporting - ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -1244,11 +1273,12 @@ class NPCImpl(
     }
 
     override fun isImmovable(): Boolean {
-        return mannequin.isImmovable
+        val entity = getEntityByUUID() as? Mannequin ?: return mannequin.isImmovable
+        return entity.isImmovable
     }
 
     override fun setImmovable(immovable: Boolean) {
-        val entity = getMannequin() ?: return
+        val entity = getEntityByUUID() as? Mannequin ?: return
         val npcName = entity.customName ?: entity.type.name
         val aiBefore = entity.hasAI()
         
