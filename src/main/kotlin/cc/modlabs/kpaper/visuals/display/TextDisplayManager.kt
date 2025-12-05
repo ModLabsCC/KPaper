@@ -14,7 +14,6 @@ import com.github.retrooper.packetevents.util.Vector3f
 import dev.fruxz.stacked.text
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.joml.Quaternionf
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -75,10 +74,15 @@ class TextDisplayManager {
         opacity: Int,
         displayFlags: List<TextDisplayFlags>,
         backgroundColor: Int,
+        scale: Vector3f = Vector3f(1f, 1f, 1f),
+        viewRange: Float = 1f,
+        translation: Vector3f = Vector3f(0f, 0f, 0f),
+        leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
     ): TextDisplay {
         val entityId = nextEntityId.getAndIncrement()
         val textDisplay = TextDisplay(
-            entityId, text, location.clone(), mutableSetOf(viewer), billboard, glow, opacity, displayFlags, backgroundColor
+            entityId, text, location.clone(), mutableSetOf(viewer), billboard, glow, opacity, displayFlags, backgroundColor, scale, viewRange, translation, leftRotation, rightRotation
         )
 
         spawnTextDisplay(textDisplay, viewer)
@@ -109,10 +113,15 @@ class TextDisplayManager {
         opacity: Int,
         displayFlags: List<TextDisplayFlags>,
         backgroundColor: Int,
+        scale: Vector3f = Vector3f(1f, 1f, 1f),
+        viewRange: Float = 1f,
+        translation: Vector3f = Vector3f(0f, 0f, 0f),
+        leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
     ): TextDisplay {
         val entityId = nextEntityId.getAndIncrement()
         val textDisplay = TextDisplay(
-            entityId, text, location.clone(), viewers.toMutableSet(), billboard, glow, opacity, displayFlags, backgroundColor
+            entityId, text, location.clone(), viewers.toMutableSet(), billboard, glow, opacity, displayFlags, backgroundColor, scale, viewRange, translation, leftRotation, rightRotation
         )
 
         for (viewer in viewers) {
