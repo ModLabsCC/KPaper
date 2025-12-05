@@ -79,10 +79,29 @@ class TextDisplayManager {
         translation: Vector3f = Vector3f(0f, 0f, 0f),
         leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
         rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        interpolationDelay: Int = 0,
+        transformationInterpolationDuration: Int = 0,
+        positionRotationInterpolationDuration: Int = 0
     ): TextDisplay {
         val entityId = nextEntityId.getAndIncrement()
         val textDisplay = TextDisplay(
-            entityId, text, location.clone(), mutableSetOf(viewer), billboard, glow, opacity, displayFlags, backgroundColor, scale, viewRange, translation, leftRotation, rightRotation
+            entityId,
+            text,
+            location.clone(),
+            mutableSetOf(viewer),
+            billboard,
+            glow,
+            opacity,
+            displayFlags,
+            backgroundColor,
+            scale,
+            viewRange,
+            translation,
+            leftRotation,
+            rightRotation,
+            interpolationDelay,
+            transformationInterpolationDuration,
+            positionRotationInterpolationDuration
         )
 
         spawnTextDisplay(textDisplay, viewer)
@@ -118,10 +137,29 @@ class TextDisplayManager {
         translation: Vector3f = Vector3f(0f, 0f, 0f),
         leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
         rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        interpolationDelay: Int = 0,
+        transformationInterpolationDuration: Int = 0,
+        positionRotationInterpolationDuration: Int = 0
     ): TextDisplay {
         val entityId = nextEntityId.getAndIncrement()
         val textDisplay = TextDisplay(
-            entityId, text, location.clone(), viewers.toMutableSet(), billboard, glow, opacity, displayFlags, backgroundColor, scale, viewRange, translation, leftRotation, rightRotation
+            entityId,
+            text,
+            location.clone(),
+            viewers.toMutableSet(),
+            billboard,
+            glow,
+            opacity,
+            displayFlags,
+            backgroundColor,
+            scale,
+            viewRange,
+            translation,
+            leftRotation,
+            rightRotation,
+            interpolationDelay,
+            transformationInterpolationDuration,
+            positionRotationInterpolationDuration
         )
 
         for (viewer in viewers) {
@@ -305,7 +343,10 @@ class TextDisplayManager {
 
             getLogger().debug("[TextDisplayManager] Spawned text display ${textDisplay.entityId} for player ${viewer.name} at ${location.x}, ${location.y}, ${location.z}")
         } catch (e: Exception) {
-            getLogger().error("[TextDisplayManager] Failed to spawn text display ${textDisplay.entityId} for player ${viewer.name}: ${e.message}", e)
+            getLogger().error(
+                "[TextDisplayManager] Failed to spawn text display ${textDisplay.entityId} for player ${viewer.name}: ${e.message}",
+                e
+            )
         }
     }
 
@@ -317,6 +358,15 @@ class TextDisplayManager {
      */
     private fun createMetadataPacket(textDisplay: TextDisplay): WrapperPlayServerEntityMetadata {
         val metadataList = ArrayList<EntityData<*>>()
+
+        // interpolation delay
+        metadataList.add(EntityData(8, EntityDataTypes.INT, textDisplay.interpolationDelay))
+
+        // transformation interpolation duration
+        metadataList.add(EntityData(9, EntityDataTypes.INT, textDisplay.transformationInterpolationDuration))
+
+        // position rotation interpolation duration
+        metadataList.add(EntityData(10, EntityDataTypes.INT, textDisplay.positionRotationInterpolationDuration))
 
         // translation
         metadataList.add(EntityData(11, EntityDataTypes.VECTOR3F, textDisplay.translation))
@@ -354,7 +404,13 @@ class TextDisplayManager {
         metadataList.add(EntityData(26, EntityDataTypes.BYTE, opacityValue.toByte()))
 
         // Display flags (index 27)
-        metadataList.add(EntityData(27, EntityDataTypes.BYTE, TextDisplayFlags.calculateBitMask(textDisplay.displayFlags).toByte()))
+        metadataList.add(
+            EntityData(
+                27,
+                EntityDataTypes.BYTE,
+                TextDisplayFlags.calculateBitMask(textDisplay.displayFlags).toByte()
+            )
+        )
 
         // Glow effect (index 22) - Note: This is a general entity metadata field, not display-specific
         // Only add if glowing is enabled
@@ -433,6 +489,9 @@ class TextDisplayManager {
         val translation: Vector3f = Vector3f(0f, 0f, 0f),
         val leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
         val rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        val interpolationDelay: Int = 0,
+        val transformationInterpolationDuration: Int = 0,
+        val positionRotationInterpolationDuration: Int = 0,
     ) {
         /**
          * Vertical offset from the base location.
