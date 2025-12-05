@@ -5,13 +5,16 @@ import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
+import com.github.retrooper.packetevents.util.Quaternion4f
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
 import com.github.retrooper.packetevents.util.Vector3d
+import com.github.retrooper.packetevents.util.Vector3f
 import dev.fruxz.stacked.text
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.joml.Quaternionf
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -277,9 +280,9 @@ class TextDisplayManager {
                 Optional.of(UUID.randomUUID()),
                 EntityTypes.TEXT_DISPLAY,
                 Vector3d(location.x, location.y + textDisplay.yOffset, location.z),
-                location.pitch.toFloat(),
-                location.yaw.toFloat(),
-                location.yaw.toFloat(),
+                location.pitch,
+                location.yaw,
+                location.yaw,
                 0,
                 Optional.of(Vector3d(0.0, 0.0, 0.0))
             )
@@ -306,8 +309,23 @@ class TextDisplayManager {
     private fun createMetadataPacket(textDisplay: TextDisplay): WrapperPlayServerEntityMetadata {
         val metadataList = ArrayList<EntityData<*>>()
 
+        // translation
+        metadataList.add(EntityData(11, EntityDataTypes.VECTOR3F, textDisplay.translation))
+
+        // scale
+        metadataList.add(EntityData(12, EntityDataTypes.VECTOR3F, textDisplay.scale))
+
+        // rotation left
+        metadataList.add(EntityData(13, EntityDataTypes.QUATERNION, textDisplay.leftRotation))
+
+        // rotation right
+        metadataList.add(EntityData(14, EntityDataTypes.QUATERNION, textDisplay.rightRotation))
+
         // Billboard mode (index 15)
         metadataList.add(EntityData(15, EntityDataTypes.BYTE, textDisplay.billboard.billboardValue.toByte()))
+
+        // view range
+        metadataList.add(EntityData(17, EntityDataTypes.FLOAT, textDisplay.viewRange))
 
         // Text content (index 23) - Must be sent before other text-specific metadata
         metadataList.add(EntityData(23, EntityDataTypes.ADV_COMPONENT, text(textDisplay.text)))
@@ -400,7 +418,12 @@ class TextDisplayManager {
         val glowing: Boolean = false,
         val opacity: Int = -1,
         val displayFlags: List<TextDisplayFlags>,
-        val backgroundColor: Int = 0x00000000
+        val backgroundColor: Int = 0x00000000,
+        val scale: Vector3f = Vector3f(1f, 1f, 1f),
+        val viewRange: Float = 1f,
+        val translation: Vector3f = Vector3f(0f, 0f, 0f),
+        val leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        val rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
     ) {
         /**
          * Vertical offset from the base location.
