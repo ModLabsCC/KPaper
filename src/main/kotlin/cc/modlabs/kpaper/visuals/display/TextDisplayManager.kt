@@ -1,5 +1,7 @@
 package cc.modlabs.kpaper.visuals.display
 
+import cc.modlabs.kpaper.extensions.timer
+import cc.modlabs.kpaper.main.PluginInstance
 import cc.modlabs.kpaper.util.getLogger
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
@@ -14,9 +16,12 @@ import com.github.retrooper.packetevents.util.Vector3f
 import dev.fruxz.stacked.text
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.scheduler.BukkitTask
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * A manager class for creating and managing packet-based Text Display entities in Minecraft.
@@ -223,6 +228,98 @@ class TextDisplayManager {
     }
 
     /**
+     * Updates the transformation of an existing Text Display.
+     * This includes scale, translation, rotation, and interpolation settings.
+     *
+     * @param textDisplay The TextDisplay to update
+     */
+    fun updateTransformation(textDisplay: TextDisplay) {
+        // Send metadata update for all viewers
+        val metadataPacket = createMetadataPacket(textDisplay)
+        for (viewer in textDisplay.viewers) {
+            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
+        }
+    }
+
+    /**
+     * Starts continuous rotation around the Y-axis for a Text Display.
+     * The display will rotate smoothly using interpolation.
+     *
+     * This is similar to PaperMC's transformation matrix rotation, but uses quaternions
+     * for packet-based entities.
+     *
+     * @param textDisplay The TextDisplay to rotate
+     * @param durationTicks The duration of half a revolution in ticks (default: 100 ticks = 5 seconds)
+     * @param scale The scale multiplier for the display during rotation (default: 1.0 = no scaling)
+     */
+    fun startRotation(
+        textDisplay: TextDisplay,
+        durationTicks: Int = 100,
+        scale: Float = 1.0f
+    ) {
+        // Stop any existing rotation
+        stopRotation(textDisplay)
+
+        // Apply scale if specified
+        if (scale != 1.0f) {
+            textDisplay.scale = Vector3f(scale, scale, scale)
+        }
+
+        // Initialize rotation angle to 180 degrees + small offset (to prevent reverse interpolation)
+        textDisplay.currentRotationAngle = Math.toRadians(180.0 + 0.1).toFloat()
+
+        // Calculate rotation increment per tick
+        // Rotate 180 degrees over the duration (half revolution)
+        val radiansPerTick = Math.toRadians(180.0 / durationTicks).toFloat()
+
+        // Set interpolation duration for smooth rotation
+        textDisplay.transformationInterpolationDuration = durationTicks
+        textDisplay.interpolationDelay = 0
+
+        // Delay initial transformation by one tick (as per PaperMC example)
+        var isFirstUpdate = true
+
+        // Start rotation task - update every tick
+        textDisplay.rotationTask = timer(1, "TextDisplayRotation-${textDisplay.entityId}") {
+            // Check if display is still valid and has viewers
+            if (textDisplay.viewers.isEmpty() || !activeDisplays.containsKey(textDisplay.entityId)) {
+                stopRotation(textDisplay)
+                return@timer
+            }
+
+            // Skip first tick (delay initial transformation by one tick)
+            if (isFirstUpdate) {
+                isFirstUpdate = false
+                return@timer
+            }
+
+            // Update rotation angle
+            textDisplay.currentRotationAngle += radiansPerTick
+
+            // Create quaternion for Y-axis rotation
+            // Quaternion for rotation around Y-axis: (0, sin(angle/2), 0, cos(angle/2))
+            val halfAngle = textDisplay.currentRotationAngle / 2f
+            val quaternionY = sin(halfAngle)
+            val quaternionW = cos(halfAngle)
+
+            // Update left rotation (this rotates the display around Y-axis)
+            textDisplay.leftRotation = Quaternion4f(0f, quaternionY, 0f, quaternionW)
+
+            // Update transformation with new rotation
+            updateTransformation(textDisplay)
+        }
+    }
+
+    /**
+     * Stops the continuous rotation for a Text Display.
+     *
+     * @param textDisplay The TextDisplay to stop rotating
+     */
+    fun stopRotation(textDisplay: TextDisplay) {
+        textDisplay.stopRotation()
+    }
+
+    /**
      * Updates the position of an existing Text Display.
      *
      * Note: This requires respawning the entity for all viewers, which may cause a brief flicker.
@@ -246,6 +343,9 @@ class TextDisplayManager {
      * @param textDisplay The TextDisplay to remove
      */
     fun removeTextDisplay(textDisplay: TextDisplay) {
+        // Stop any rotation task
+        stopRotation(textDisplay)
+
         activeDisplays.remove(textDisplay.entityId)
 
         for (viewer in textDisplay.viewers.toSet()) {
@@ -484,15 +584,24 @@ class TextDisplayManager {
         val opacity: Int = -1,
         val displayFlags: List<TextDisplayFlags>,
         val backgroundColor: Int = 0x00000000,
-        val scale: Vector3f = Vector3f(1f, 1f, 1f),
-        val viewRange: Float = 1f,
-        val translation: Vector3f = Vector3f(0f, 0f, 0f),
-        val leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
-        val rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
-        val interpolationDelay: Int = 0,
-        val transformationInterpolationDuration: Int = 0,
-        val positionRotationInterpolationDuration: Int = 0,
+        var scale: Vector3f = Vector3f(1f, 1f, 1f),
+        var viewRange: Float = 1f,
+        var translation: Vector3f = Vector3f(0f, 0f, 0f),
+        var leftRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        var rightRotation: Quaternion4f = Quaternion4f(0f, 0f, 0f, 1f),
+        var interpolationDelay: Int = 0,
+        var transformationInterpolationDuration: Int = 0,
+        var positionRotationInterpolationDuration: Int = 0,
     ) {
+        /**
+         * Task for continuous rotation (if active).
+         */
+        internal var rotationTask: BukkitTask? = null
+        
+        /**
+         * Current rotation angle in radians for continuous rotation.
+         */
+        internal var currentRotationAngle: Float = 0f
         /**
          * Vertical offset from the base location.
          * How far above the ground/position the display should appear.
@@ -582,6 +691,40 @@ class TextDisplayManager {
          */
         fun isVisibleTo(player: Player): Boolean {
             return player in viewers
+        }
+
+        /**
+         * Starts continuous rotation around the Y-axis.
+         * Shortcut for [TextDisplayManager.startRotation].
+         *
+         * @param manager The manager instance to use
+         * @param durationTicks The duration of half a revolution in ticks (default: 100 ticks = 5 seconds)
+         * @param scale The scale multiplier for the display during rotation (default: 1.0 = no scaling)
+         */
+        fun startRotation(
+            manager: TextDisplayManager,
+            durationTicks: Int = 100,
+            scale: Float = 1.0f
+        ) {
+            manager.startRotation(this, durationTicks, scale)
+        }
+
+        /**
+         * Stops the continuous rotation.
+         * Shortcut for [TextDisplayManager.stopRotation].
+         *
+         * @param manager The manager instance to use
+         */
+        fun stopRotation(manager: TextDisplayManager) {
+            manager.stopRotation(this)
+        }
+
+        /**
+         * Stops any active rotation task (internal use).
+         */
+        internal fun stopRotation() {
+            rotationTask?.cancel()
+            rotationTask = null
         }
     }
 }
