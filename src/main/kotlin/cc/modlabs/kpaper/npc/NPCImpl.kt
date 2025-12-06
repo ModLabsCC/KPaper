@@ -4,6 +4,11 @@ import cc.modlabs.kpaper.extensions.timer
 import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
 import cc.modlabs.kpaper.main.PluginInstance
+import cc.modlabs.kpaper.util.getLogger
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -17,6 +22,8 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MainHand
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
+import java.util.ArrayList
+import java.util.Optional
 import java.util.UUID
 import kotlin.math.atan2
 
@@ -66,6 +73,9 @@ class NPCImpl(
     private var nearbyFollowTask: BukkitTask? = null
     private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
     private var aiMonitoringTask: BukkitTask? = null // Task to continuously monitor and re-enable AI
+
+    private val api = PacketEvents.getAPI()
+    private val playerManager = api.playerManager
 
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -1499,6 +1509,32 @@ class NPCImpl(
 
         // Hide entity from this player
         player.hideEntity(PluginInstance, entity)
+    }
+
+    override fun overrideCustomName(customName: String, viewer: Player) {
+        val metadataList = ArrayList<EntityData<*>>()
+
+        val entity = this.getEntity() ?: return
+
+        val component = Component.text(customName)
+
+        metadataList.add(EntityData(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(component)))
+
+        val customNamePacket = WrapperPlayServerEntityMetadata(entity.entityId, metadataList)
+        playerManager.sendPacket(viewer, customNamePacket)
+    }
+
+    override fun overrideDescription(description: String, viewer: Player) {
+        val metadataList = ArrayList<EntityData<*>>()
+
+        val entity = this.getEntity() ?: return
+
+        val component = Component.text(description)
+
+        metadataList.add(EntityData(19, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(component)))
+
+        val customNamePacket = WrapperPlayServerEntityMetadata(entity.entityId, metadataList)
+        playerManager.sendPacket(viewer, customNamePacket)
     }
 
     override fun getVisiblePlayers(): Set<Player>? {

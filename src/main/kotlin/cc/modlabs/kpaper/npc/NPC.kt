@@ -510,6 +510,10 @@ interface NPC {
      */
     fun removeVisiblePlayer(player: Player)
 
+    fun overrideCustomName(customName: String, viewer: Player)
+
+    fun overrideDescription(description: String, viewer: Player)
+
     /**
      * Gets the set of players who can see this NPC.
      * Returns null if the NPC is visible to all players.
