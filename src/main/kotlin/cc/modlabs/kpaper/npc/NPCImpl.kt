@@ -173,9 +173,9 @@ class NPCImpl(
 
     override fun getMannequin(): Mannequin? = if (mannequin.isValid) mannequin else null
 
-    override fun getEntity(): Entity? = getMannequin()
+    override fun getEntity(): Entity? = Bukkit.getEntity(npcUUID)
 
-    override fun getID(): UUID? = npcUUID
+    override fun getID(): UUID = npcUUID
 
     override fun getLivingEntity(): LivingEntity? = if (mannequin.isValid) mannequin else null
 
