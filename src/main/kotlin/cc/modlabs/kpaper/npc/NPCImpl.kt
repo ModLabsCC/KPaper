@@ -1514,19 +1514,15 @@ class NPCImpl(
 
     override fun overrideCustomName(customName: String, viewer: Player) {
         val metadataList = ArrayList<EntityData<*>>()
-        getLogger().info("Overriding npc - ${this.getID()}")
-        val entityID = this.getID()
 
-        val entity = Bukkit.getEntity(entityID) ?: return
-
-        getLogger().info("start override for entity ${entity.name}")
+        val entity = this.getEntity() ?: return
 
         val fruxzComponent = text(customName)
 
         metadataList.add(EntityData(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(fruxzComponent)))
 
         val customNamePacket = WrapperPlayServerEntityMetadata(entity.entityId, metadataList)
-        getLogger().info("custom name: ${customNamePacket.nativePacketId}")
+
         playerManager.sendPacket(viewer, customNamePacket)
     }
 
