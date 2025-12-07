@@ -1516,7 +1516,7 @@ class NPCImpl(
 
         val entity = this.getEntity() ?: return
 
-        val component = Component.text(customName)
+        val component = text(customName)
 
         metadataList.add(EntityData(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(component)))
 
@@ -1529,7 +1529,7 @@ class NPCImpl(
 
         val entity = this.getEntity() ?: return
 
-        val component = Component.text(description)
+        val component = text(description)
 
         metadataList.add(EntityData(19, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(component)))
 
