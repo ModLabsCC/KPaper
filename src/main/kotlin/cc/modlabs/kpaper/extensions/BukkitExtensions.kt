@@ -5,6 +5,7 @@ import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
+import org.bukkit.OfflinePlayer
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -76,3 +77,24 @@ val Double.minecraftTicks: Duration
 
 val Float.minecraftTicks: Duration
     get() = (this * 50F).toDouble().milliseconds
+
+/**
+ * Paper-specific improvement: tries cached offline profile first (doesn't hit Mojang),
+ * falls back to Bukkit.getOfflinePlayer which may block/do IO depending on server config.
+ */
+fun Bukkit.resolveOfflinePlayer(name: String): OfflinePlayer? {
+    // Online always wins
+    Bukkit.getPlayerExact(name)?.let { return it }
+
+    // If on Paper: getOfflinePlayerIfCached exists, but keep this safe if you ever compile on Spigot.
+    val cached = runCatching {
+        Bukkit::class.java.getMethod("getOfflinePlayerIfCached", String::class.java)
+            .invoke(null, name) as? OfflinePlayer
+    }.getOrNull()
+
+    if (cached != null && (cached.hasPlayedBefore() || cached.isOnline)) return cached
+
+    // Fallback
+    val offline = Bukkit.getOfflinePlayer(name)
+    return if (offline.hasPlayedBefore() || offline.isOnline) offline else null
+}
