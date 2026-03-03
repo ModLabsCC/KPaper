@@ -82,7 +82,7 @@ val Float.minecraftTicks: Duration
  * Paper-specific improvement: tries cached offline profile first (doesn't hit Mojang),
  * falls back to Bukkit.getOfflinePlayer which may block/do IO depending on server config.
  */
-fun Bukkit.resolveOfflinePlayer(name: String): OfflinePlayer? {
+fun resolveOfflinePlayer(name: String): OfflinePlayer? {
     // Online always wins
     Bukkit.getPlayerExact(name)?.let { return it }
 
