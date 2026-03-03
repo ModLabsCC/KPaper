@@ -1,3 +1,5 @@
+@file:kotlin.jvm.JvmName("BlockExtensionKt")
+
 package cc.modlabs.kpaper.extensions
 
 import org.bukkit.Material

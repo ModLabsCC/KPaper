@@ -9,6 +9,34 @@ Other snippets are guidance/patterns and may require your own implementations.
 
 KPaper provides extensive utility functions and Kotlin extensions that make common Minecraft development tasks more intuitive and efficient.
 
+## Preferred Naming Migration
+
+Use the newer, explicit extension names in new code:
+
+| Old API | Preferred API |
+|---|---|
+| `sendEmtpyLine()` | `sendEmptyLine()` |
+| `str2Loc(serialized)` | `parseLocation(serialized)` |
+| `loc2Str(location)` | `locationToString(location)` |
+| `loc2BlockStr(location)` | `locationToBlockString(location)` |
+| `toSaveAbleString()` | `toSavableString()` |
+| `toSaveAbleBlockString()` | `toSavableBlockString()` |
+| `toSaveAbleDirectionalString()` | `toSavableDirectionalString()` |
+
+```kotlin
+import cc.modlabs.kpaper.extensions.*
+
+// Before
+sender.sendEmtpyLine()
+val location = str2Loc(serialized)
+val raw = loc2Str(location)
+
+// After
+sender.sendEmptyLine()
+val location = parseLocation(serialized)
+val raw = locationToString(location)
+```
+
 ## Utility Functions
 
 ### Console and Logging

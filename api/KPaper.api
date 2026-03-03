@@ -1,0 +1,2439 @@
+public abstract interface class cc/modlabs/kpaper/command/CommandBuilder {
+	public abstract fun getAliases ()Ljava/util/List;
+	public abstract fun getDescription ()Ljava/lang/String;
+	public abstract fun register ()Lcom/mojang/brigadier/tree/LiteralCommandNode;
+}
+
+public final class cc/modlabs/kpaper/command/CommandBuilder$DefaultImpls {
+	public static fun getAliases (Lcc/modlabs/kpaper/command/CommandBuilder;)Ljava/util/List;
+	public static fun getDescription (Lcc/modlabs/kpaper/command/CommandBuilder;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/command/arguments/PlayerArgument : io/papermc/paper/command/brigadier/argument/CustomArgumentType {
+	public fun <init> ()V
+	public fun getExamples ()Ljava/util/Collection;
+	public fun getNativeType ()Lcom/mojang/brigadier/arguments/ArgumentType;
+	public fun listSuggestions (Lcom/mojang/brigadier/context/CommandContext;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;
+	public synthetic fun parse (Lcom/mojang/brigadier/StringReader;)Ljava/lang/Object;
+	public fun parse (Lcom/mojang/brigadier/StringReader;)Lorg/bukkit/entity/Player;
+}
+
+public final class cc/modlabs/kpaper/coroutines/AsyncCoroutineDispatcher : kotlinx/coroutines/CoroutineDispatcher {
+	public static final field INSTANCE Lcc/modlabs/kpaper/coroutines/AsyncCoroutineDispatcher;
+	public fun dispatch (Lkotlin/coroutines/CoroutineContext;Ljava/lang/Runnable;)V
+}
+
+public final class cc/modlabs/kpaper/coroutines/CoroutinesKt {
+	public static final fun async (Lkotlin/jvm/functions/Function0;)V
+	public static final fun getAsync (Lkotlinx/coroutines/Dispatchers;)Lkotlin/coroutines/CoroutineContext;
+	public static final fun getGlobalPool ()Ljava/util/concurrent/ExecutorService;
+	public static final fun getMc (Lkotlinx/coroutines/Dispatchers;)Lkotlin/coroutines/CoroutineContext;
+	public static final fun mcasync (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun mcasyncBlocking (Lkotlin/jvm/functions/Function1;)V
+	public static final fun mcroutine (Lkotlin/jvm/functions/Function1;)V
+	public static final fun sync (Lkotlin/jvm/functions/Function0;)V
+}
+
+public final class cc/modlabs/kpaper/coroutines/MinecraftCoroutineDispatcher : kotlinx/coroutines/CoroutineDispatcher {
+	public static final field INSTANCE Lcc/modlabs/kpaper/coroutines/MinecraftCoroutineDispatcher;
+	public fun dispatch (Lkotlin/coroutines/CoroutineContext;Ljava/lang/Runnable;)V
+}
+
+public final class cc/modlabs/kpaper/coroutines/PaperRunnableKt {
+	public static final fun taskRun (ZLkotlin/jvm/functions/Function0;)V
+	public static synthetic fun taskRun$default (ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun taskRunLater (JZLkotlin/jvm/functions/Function0;)V
+	public static synthetic fun taskRunLater$default (JZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/event/CustomEventListener : cc/modlabs/kpaper/event/EventHandler {
+	public static final field INSTANCE Lcc/modlabs/kpaper/event/CustomEventListener;
+	public fun load ()V
+	public fun unload ()V
+}
+
+public abstract class cc/modlabs/kpaper/event/EventHandler {
+	public fun <init> ()V
+	public abstract fun load ()V
+	public abstract fun unload ()V
+}
+
+public abstract class cc/modlabs/kpaper/event/KEvent : org/bukkit/event/Event, org/bukkit/event/Cancellable {
+	public static final field Companion Lcc/modlabs/kpaper/event/KEvent$Companion;
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+	public fun isCancelled ()Z
+	public fun setCancelled (Z)V
+}
+
+public final class cc/modlabs/kpaper/event/KEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/event/ListenersKt {
+	public static final fun unregister (Lorg/bukkit/event/Listener;)V
+}
+
+public final class cc/modlabs/kpaper/event/ListenersKt$sam$i$org_bukkit_plugin_EventExecutor$0 : org/bukkit/plugin/EventExecutor {
+	public fun <init> (Lkotlin/jvm/functions/Function2;)V
+	public final synthetic fun execute (Lorg/bukkit/event/Listener;Lorg/bukkit/event/Event;)V
+}
+
+public abstract class cc/modlabs/kpaper/event/SingleListener : org/bukkit/event/Listener {
+	public fun <init> (Lorg/bukkit/event/EventPriority;Z)V
+	public final fun getIgnoreCancelled ()Z
+	public final fun getPriority ()Lorg/bukkit/event/EventPriority;
+	public abstract fun onEvent (Lorg/bukkit/event/Event;)V
+}
+
+public abstract class cc/modlabs/kpaper/event/custom/BooleanStatusChangeEvent : cc/modlabs/kpaper/event/KEvent {
+	public fun <init> (ZZ)V
+	public synthetic fun <init> (ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getNewValue ()Z
+	public final fun setNewValue (Z)V
+}
+
+public final class cc/modlabs/kpaper/event/custom/PlayerDamageByPlayerEvent : cc/modlabs/kpaper/event/KEvent {
+	public fun <init> (Lorg/bukkit/entity/Player;Lorg/bukkit/entity/Player;D)V
+	public final fun getDamage ()D
+	public final fun getDamager ()Lorg/bukkit/entity/Player;
+	public final fun getVictim ()Lorg/bukkit/entity/Player;
+	public final fun setDamage (D)V
+}
+
+public final class cc/modlabs/kpaper/event/custom/PlayerInteractAtBlockEvent : cc/modlabs/kpaper/event/KEvent {
+	public fun <init> (Lorg/bukkit/entity/Player;Lorg/bukkit/block/Block;)V
+	public final fun getBlock ()Lorg/bukkit/block/Block;
+	public final fun getPlayer ()Lorg/bukkit/entity/Player;
+}
+
+public final class cc/modlabs/kpaper/extensions/Beat {
+	public fun <init> (Ljava/util/List;)V
+	public final fun play (Lorg/bukkit/Location;)V
+	public final fun play (Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/extensions/BlockExtensionKt {
+	public static final fun asQuantity (Lorg/bukkit/Material;I)Lorg/bukkit/inventory/ItemStack;
+	public static final fun getConnectedStorageContainers (Lorg/bukkit/block/Block;)Lkotlin/sequences/Sequence;
+	public static final fun getYaw (Lorg/bukkit/block/BlockFace;)F
+}
+
+public final class cc/modlabs/kpaper/extensions/BukkitExtensionsKt {
+	public static final fun broadcast (Ljava/lang/String;)I
+	public static final fun broadcast (Lnet/kyori/adventure/text/Component;)I
+	public static final fun getConsole ()Lorg/bukkit/command/ConsoleCommandSender;
+	public static final fun getMinecraftTicks (D)J
+	public static final fun getMinecraftTicks (F)J
+	public static final fun getMinecraftTicks (I)J
+	public static final fun getMinecraftTicks (J)J
+	public static final fun getOnlinePlayers ()Ljava/util/Collection;
+	public static final fun getOnlineSenders ()Ljava/util/Collection;
+	public static final fun getPluginManager ()Lorg/bukkit/plugin/PluginManager;
+	public static final fun getServer ()Lorg/bukkit/Server;
+	public static final fun getWorlds ()Ljava/util/List;
+	public static final fun pluginKey (Ljava/lang/String;)Lorg/bukkit/NamespacedKey;
+	public static final fun resolveOfflinePlayer (Ljava/lang/String;)Lorg/bukkit/OfflinePlayer;
+}
+
+public final class cc/modlabs/kpaper/extensions/ExecutionPolicyKt {
+	public static final field estEventsPerTick J
+	public static final field nanosPerEvent J
+	public static final field nanosPerTick J
+	public static final fun allowPrimaryBlock ()V
+	public static final fun denyPrimaryBlock ()V
+	public static final fun getEnableTimingAnalysis ()Z
+	public static final fun requireAsync (Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun setEnableTimingAnalysis (Z)V
+	public static final fun taskRunTimer (JLjava/lang/String;Lkotlin/jvm/functions/Function0;)Lorg/bukkit/scheduler/BukkitTask;
+	public static synthetic fun taskRunTimer$default (JLjava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lorg/bukkit/scheduler/BukkitTask;
+	public static final fun timeIt (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun timeLimit (JLjava/lang/String;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun timeLimit$default (JLjava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun timer (JLjava/lang/String;Lkotlin/jvm/functions/Function0;)Lorg/bukkit/scheduler/BukkitTask;
+	public static synthetic fun timer$default (JLjava/lang/String;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lorg/bukkit/scheduler/BukkitTask;
+}
+
+public final class cc/modlabs/kpaper/extensions/InventoryExtensionsKt {
+	public static final fun addCustomString (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Lorg/bukkit/inventory/ItemStack;
+	public static final fun addItemSafely (Lorg/bukkit/inventory/Inventory;[Lorg/bukkit/inventory/ItemStack;)Ljava/util/List;
+	public static final fun arrangeItemsAround (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun availableSpace (Lorg/bukkit/inventory/Inventory;)I
+	public static final fun canFit (Lorg/bukkit/inventory/PlayerInventory;Lorg/bukkit/inventory/ItemStack;)Z
+	public static final fun canItemFitInInventory (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)Z
+	public static final fun canItemFitInInventorySimulated (Lorg/bukkit/inventory/PlayerInventory;Lorg/bukkit/inventory/ItemStack;)Z
+	public static final fun clearItems (Lorg/bukkit/inventory/Inventory;[Lorg/bukkit/Material;)V
+	public static final fun clone (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/InventoryHolder;Z)Lorg/bukkit/inventory/Inventory;
+	public static synthetic fun clone$default (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/InventoryHolder;ZILjava/lang/Object;)Lorg/bukkit/inventory/Inventory;
+	public static final fun cloneCompat (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/InventoryHolder;Z)Lorg/bukkit/inventory/Inventory;
+	public static synthetic fun cloneCompat$default (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/InventoryHolder;ZILjava/lang/Object;)Lorg/bukkit/inventory/Inventory;
+	public static final fun compress (Lorg/bukkit/inventory/Inventory;)V
+	public static final fun containsExact (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)Z
+	public static final fun countItems (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/Material;)I
+	public static final fun displayName (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Lorg/bukkit/inventory/ItemStack;
+	public static final fun fillBorder (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun fillEmpty (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;)V
+	public static synthetic fun fillEmpty$default (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;ILjava/lang/Object;)V
+	public static final fun fillEmptyAndOpenInventory (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;)V
+	public static final fun fillEmptyAndOpenInventory (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;)V
+	public static synthetic fun fillEmptyAndOpenInventory$default (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;ILjava/lang/Object;)V
+	public static synthetic fun fillEmptyAndOpenInventory$default (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;ILjava/lang/Object;)V
+	public static final fun fillEmptyInventory (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;)V
+	public static synthetic fun fillEmptyInventory$default (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;[Ljava/util/Map;Ljava/util/List;ILjava/lang/Object;)V
+	public static final fun fillSlots (Lorg/bukkit/inventory/Inventory;Ljava/util/Collection;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun findItems (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/Material;)Ljava/util/List;
+	public static final fun getAvailableSlots (Lorg/bukkit/inventory/Inventory;)Ljava/util/List;
+	public static final fun getCustomStrings (Lorg/bukkit/inventory/ItemStack;)Ljava/util/List;
+	public static final fun getEmptySlot (Lorg/bukkit/inventory/Inventory;)I
+	public static final fun getGUI_IDENTIFIER_KEY ()Lorg/bukkit/NamespacedKey;
+	public static final fun getGridSlots (Lorg/bukkit/inventory/Inventory;I)Ljava/util/Set;
+	public static final fun getITEM_IDENTIFIER_KEY ()Lorg/bukkit/NamespacedKey;
+	public static final fun getIdentifier (Lorg/bukkit/inventory/Inventory;)Ljava/lang/String;
+	public static final fun getIdentifier (Lorg/bukkit/inventory/ItemStack;)Ljava/lang/String;
+	public static final fun getInventorySlot (II)I
+	public static final fun getKey (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/NamespacedKey;)Ljava/lang/String;
+	public static final fun getKey (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/NamespacedKey;Lorg/bukkit/persistence/PersistentDataType;)Ljava/lang/Object;
+	public static final fun getMiddleSlot (Lorg/bukkit/inventory/Inventory;)I
+	public static final fun getNAMESPACE_GUI_IDENTIFIER ()Lorg/bukkit/NamespacedKey;
+	public static final fun getNAMESPACE_ITEM_IDENTIFIER ()Lorg/bukkit/NamespacedKey;
+	public static final fun getPLACEHOLDER_GRAY ()Lorg/bukkit/inventory/ItemStack;
+	public static final fun getSpaceFor (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)I
+	public static final fun hasCustomString (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Z
+	public static final fun hasItems (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/Material;I)Z
+	public static final fun hasKey (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Z
+	public static final fun hasKey (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/NamespacedKey;)Z
+	public static final fun hasKey (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/NamespacedKey;Lorg/bukkit/persistence/PersistentDataType;)Z
+	public static final fun hasSpace (Lorg/bukkit/inventory/Inventory;)Z
+	public static final fun identifier (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/NamespacedKey;)Ljava/lang/String;
+	public static final fun identifier (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/NamespacedKey;)Ljava/lang/String;
+	public static final fun identify (Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Lorg/bukkit/inventory/ItemStack;)V
+	public static synthetic fun identify$default (Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Lorg/bukkit/inventory/ItemStack;ILjava/lang/Object;)V
+	public static final fun isIdentifiedAs (Lorg/bukkit/inventory/Inventory;Ljava/lang/String;)Z
+	public static final fun isIdentifiedAs (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Z
+	public static final fun item (Lorg/bukkit/Material;ILkotlin/jvm/functions/Function1;)Lorg/bukkit/inventory/ItemStack;
+	public static synthetic fun item$default (Lorg/bukkit/Material;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/bukkit/inventory/ItemStack;
+	public static final fun lastEmpty (Lorg/bukkit/inventory/Inventory;)I
+	public static final fun lore (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;)Lorg/bukkit/inventory/ItemStack;
+	public static final fun lore (Lorg/bukkit/inventory/ItemStack;Ljava/util/List;)Lorg/bukkit/inventory/ItemStack;
+	public static final fun openWithIdentifier (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Lorg/bukkit/inventory/ItemStack;)V
+	public static synthetic fun openWithIdentifier$default (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Ljava/lang/String;[Ljava/util/Map;Lorg/bukkit/inventory/ItemStack;ILjava/lang/Object;)V
+	public static final fun ownedBy (Lorg/bukkit/entity/Item;Ljava/util/UUID;J)Lorg/bukkit/entity/Item;
+	public static synthetic fun ownedBy$default (Lorg/bukkit/entity/Item;Ljava/util/UUID;JILjava/lang/Object;)Lorg/bukkit/entity/Item;
+	public static final fun removeItem (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/Material;I)V
+	public static final fun replaceItems (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/Material;Lorg/bukkit/Material;)V
+	public static final fun setItem (Lorg/bukkit/inventory/Inventory;Lkotlin/ranges/IntProgression;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setItemInMiddle (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setItemToGridSlot (Lorg/bukkit/inventory/Inventory;ILorg/bukkit/inventory/ItemStack;)V
+	public static final fun setLeftLowerCorner (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setLeftUpperCorner (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setLowerMiddle (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setMiddleLeft (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setMiddleRight (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setRightLowerCorner (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setRightUpperCorner (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun setUpperMiddle (Lorg/bukkit/inventory/Inventory;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun shuffle (Lorg/bukkit/inventory/Inventory;)V
+	public static final fun sort (Lorg/bukkit/inventory/Inventory;)V
+	public static final fun swapItems (Lorg/bukkit/inventory/Inventory;IILorg/bukkit/inventory/ItemStack;)V
+}
+
+public final class cc/modlabs/kpaper/extensions/JDKExtensionsKt {
+	public static final fun getInternalKPaperLogger ()Lorg/slf4j/Logger;
+	public static final fun getLogger ()Lorg/slf4j/Logger;
+}
+
+public final class cc/modlabs/kpaper/extensions/LocationExtensionKt {
+	public static final fun asSafeLocation (Lorg/bukkit/Location;)Lorg/bukkit/Location;
+	public static final fun asSafeLocationOrNull (Lorg/bukkit/Location;)Lorg/bukkit/Location;
+	public static final fun component1 (Lorg/bukkit/Location;)D
+	public static final fun component1 (Lorg/bukkit/block/Block;)I
+	public static final fun component2 (Lorg/bukkit/Location;)D
+	public static final fun component2 (Lorg/bukkit/block/Block;)I
+	public static final fun component3 (Lorg/bukkit/Location;)D
+	public static final fun component3 (Lorg/bukkit/block/Block;)I
+	public static final fun component4 (Lorg/bukkit/Location;)F
+	public static final fun component5 (Lorg/bukkit/Location;)F
+	public static final fun dropItem (Lorg/bukkit/Location;Lorg/bukkit/inventory/ItemStack;)Lorg/bukkit/entity/Item;
+	public static final fun dropItemNaturally (Lorg/bukkit/Location;Lorg/bukkit/inventory/ItemStack;)Lorg/bukkit/entity/Item;
+	public static final fun eqType (Lorg/bukkit/block/Block;Lorg/bukkit/Material;)Z
+	public static final fun eqType (Lorg/bukkit/block/Block;Lorg/bukkit/block/Block;)Z
+	public static final fun generateTree (Lorg/bukkit/Location;Lorg/bukkit/TreeType;)Z
+	public static final fun generateTree (Lorg/bukkit/Location;Lorg/bukkit/TreeType;Lorg/bukkit/BlockChangeDelegate;)Z
+	public static final fun inWorld (Lorg/bukkit/Location;Ljava/lang/String;)Lorg/bukkit/Location;
+	public static final fun inWorld (Lorg/bukkit/Location;Lorg/bukkit/World;)Lorg/bukkit/Location;
+	public static final fun isInRadius (Lorg/bukkit/Location;Lorg/bukkit/Location;I)Z
+	public static final fun loc2BlockStr (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun loc2Str (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun locationToBlockString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun locationToString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun parseLocation (Ljava/lang/String;)Lorg/bukkit/Location;
+	public static final fun playEffect (Lorg/bukkit/Location;Lorg/bukkit/Effect;I)V
+	public static final fun playEffect (Lorg/bukkit/Location;Lorg/bukkit/Effect;II)V
+	public static final fun playEffect (Lorg/bukkit/Location;Lorg/bukkit/Effect;Ljava/lang/Object;)V
+	public static final fun playEffect (Lorg/bukkit/Location;Lorg/bukkit/Effect;Ljava/lang/Object;I)V
+	public static final fun playSound (Lorg/bukkit/Location;Lorg/bukkit/Sound;FF)V
+	public static final fun spawnArrow (Lorg/bukkit/Location;Lorg/bukkit/util/Vector;FF)Lorg/bukkit/entity/Arrow;
+	public static final fun str2Loc (Ljava/lang/String;)Lorg/bukkit/Location;
+	public static final fun strikeLightning (Lorg/bukkit/Location;)Lorg/bukkit/entity/LightningStrike;
+	public static final fun strikeLightningEffect (Lorg/bukkit/Location;)Lorg/bukkit/entity/LightningStrike;
+	public static final fun surroundings (Lorg/bukkit/Location;)Ljava/util/List;
+	public static final fun toCoords (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toLocation (Ljava/lang/String;)Lorg/bukkit/Location;
+	public static final fun toNorth (Lorg/bukkit/Location;)Lorg/bukkit/Location;
+	public static final fun toSavableBlockString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toSavableDirectionalString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toSavableString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toSaveAbleBlockString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toSaveAbleDirectionalString (Lorg/bukkit/Location;)Ljava/lang/String;
+	public static final fun toSaveAbleString (Lorg/bukkit/Location;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/extensions/Melody {
+	public fun <init> (JJILjava/util/List;)V
+	public synthetic fun <init> (JJILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDelayPerBeat-UwyO8pc ()J
+	public final fun getDelayPerSound-UwyO8pc ()J
+	public final fun getRepetitions ()I
+	public final fun play (Lorg/bukkit/Location;)Lkotlinx/coroutines/Job;
+	public final fun play (Lorg/bukkit/entity/Player;)Lkotlinx/coroutines/Job;
+	public final fun setDelayPerBeat-LRDsOJo (J)V
+	public final fun setDelayPerSound-LRDsOJo (J)V
+	public final fun setRepetitions (I)V
+}
+
+public final class cc/modlabs/kpaper/extensions/MelodyBuilder {
+	public fun <init> ()V
+	public final fun beat ([Lcc/modlabs/kpaper/extensions/SoundEffect;)V
+	public final fun build ()Lcc/modlabs/kpaper/extensions/Melody;
+	public final fun delayPerBeat-LRDsOJo (J)V
+	public final fun delayPerSound-LRDsOJo (J)V
+	public final fun repeat (I)V
+}
+
+public final class cc/modlabs/kpaper/extensions/PlayerExtensionsKt {
+	public static final fun actionBar (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public static final fun broadcastActionbar (Lnet/kyori/adventure/text/Component;)V
+	public static final fun clearInventory (Lorg/bukkit/entity/Player;)V
+	public static final fun getAsPlayer (Ljava/lang/String;)Lorg/bukkit/entity/Player;
+	public static final fun getPacketHandler (Lorg/bukkit/entity/Player;)Lnet/minecraft/server/network/ServerGamePacketListenerImpl;
+	public static final fun getSender (Lcom/mojang/brigadier/context/CommandContext;)Lorg/bukkit/command/CommandSender;
+	public static final fun getStandingOn (Lorg/bukkit/entity/Player;)Lorg/bukkit/block/Block;
+	public static final fun giveItem (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/ItemStack;)V
+	public static final fun hasItem (Lorg/bukkit/entity/Player;Lorg/bukkit/Material;I)Z
+	public static final fun hasSpace (Lorg/bukkit/entity/Player;)Z
+	public static final fun maxOutHealth (Lorg/bukkit/entity/Player;)V
+	public static final fun removeItem (Lorg/bukkit/entity/Player;Lorg/bukkit/Material;I)V
+	public static final fun send (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public static final fun sendDeniedSound (Lorg/bukkit/entity/Player;)V
+	public static final fun sendEmptyLine (Lorg/bukkit/command/CommandSender;)V
+	public static final fun sendEmtpyLine (Lorg/bukkit/command/CommandSender;)V
+	public static final fun sendMessageBlock (Lorg/bukkit/command/CommandSender;[Ljava/lang/String;)V
+	public static final fun sendMessagePlain (Ljava/util/Collection;Ljava/lang/String;)V
+	public static final fun sendMessagePlain (Ljava/util/Collection;Lnet/kyori/adventure/text/Component;)V
+	public static final fun sendMessagePlain (Lorg/bukkit/command/CommandSender;Ljava/lang/String;)V
+	public static final fun sendMessagePlain (Lorg/bukkit/command/CommandSender;Lnet/kyori/adventure/text/Component;)V
+	public static final fun sendOpenSound (Lorg/bukkit/entity/Player;)V
+	public static final fun sendSuccessSound (Lorg/bukkit/entity/Player;)V
+	public static final fun sendTeleportSound (Lorg/bukkit/entity/Player;)V
+	public static final fun soundExecution (Lorg/bukkit/entity/Player;)V
+	public static final fun title (Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/lang/String;III)V
+	public static synthetic fun title$default (Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/lang/String;IIIILjava/lang/Object;)V
+	public static final fun toOfflinePlayer (Ljava/lang/String;)Lorg/bukkit/OfflinePlayer;
+	public static final fun toOfflinePlayer (Ljava/util/UUID;)Lorg/bukkit/OfflinePlayer;
+	public static final fun toOfflinePlayer (Lorg/bukkit/entity/Player;)Lorg/bukkit/OfflinePlayer;
+	public static final fun toOfflinePlayerIfCached (Ljava/lang/String;)Lorg/bukkit/OfflinePlayer;
+	public static final fun toPlayer (Ljava/util/UUID;)Lorg/bukkit/entity/Player;
+	public static final fun toUUID (Ljava/lang/String;)Ljava/util/UUID;
+}
+
+public final class cc/modlabs/kpaper/extensions/SoundEffect {
+	public fun <init> (Ljava/lang/String;FF)V
+	public synthetic fun <init> (Ljava/lang/String;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/bukkit/Sound;FF)V
+	public synthetic fun <init> (Lorg/bukkit/Sound;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun copy (Ljava/lang/String;FF)Lcc/modlabs/kpaper/extensions/SoundEffect;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/extensions/SoundEffect;Ljava/lang/String;FFILjava/lang/Object;)Lcc/modlabs/kpaper/extensions/SoundEffect;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPitch ()F
+	public final fun getSound ()Ljava/lang/String;
+	public final fun getVolume ()F
+	public fun hashCode ()I
+	public final fun play (Lorg/bukkit/Location;)V
+	public final fun play (Lorg/bukkit/entity/Player;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/extensions/TranslationExtensionKt {
+	public static final fun getMinecraftTranslated (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun getUnknownTranslation (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun toMinecraftTranslated (Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+	public static final fun toTranslated (Ljava/lang/String;Lorg/bukkit/command/CommandSender;Ljava/util/Map;)Ljava/lang/String;
+	public static final fun toTranslated (Ljava/lang/String;Lorg/bukkit/entity/Player;Ljava/util/Map;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun toTranslated$default (Ljava/lang/String;Lorg/bukkit/command/CommandSender;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun toTranslated$default (Ljava/lang/String;Lorg/bukkit/entity/Player;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun translate (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public static final fun translate (Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public static synthetic fun translate$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun translate$default (Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/extensions/UXExtensionKt {
+	public static final fun PotionEffect (Lorg/bukkit/potion/PotionEffectType;IIZZZ)Lorg/bukkit/potion/PotionEffect;
+	public static synthetic fun PotionEffect$default (Lorg/bukkit/potion/PotionEffectType;IIZZZILjava/lang/Object;)Lorg/bukkit/potion/PotionEffect;
+	public static final fun PotionEffect-NcHsxvU (Lorg/bukkit/potion/PotionEffectType;JIZZZ)Lorg/bukkit/potion/PotionEffect;
+	public static synthetic fun PotionEffect-NcHsxvU$default (Lorg/bukkit/potion/PotionEffectType;JIZZZILjava/lang/Object;)Lorg/bukkit/potion/PotionEffect;
+	public static final fun buildMelody (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/extensions/Melody;
+	public static final fun buildParticle (Lorg/bukkit/Particle;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/visuals/effect/ParticleData;
+	public static final fun buildPotionEffect-nRVORKE (Lorg/bukkit/potion/PotionEffectType;JIZZZLkotlin/jvm/functions/Function1;)Lorg/bukkit/potion/PotionEffect;
+	public static synthetic fun buildPotionEffect-nRVORKE$default (Lorg/bukkit/potion/PotionEffectType;JIZZZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/bukkit/potion/PotionEffect;
+	public static final fun copy (Lcom/destroystokyo/paper/ParticleBuilder;Lorg/bukkit/Particle;Ljava/util/List;Lorg/bukkit/entity/Player;Lorg/bukkit/Location;IDDDDLjava/lang/Object;Z)Lcom/destroystokyo/paper/ParticleBuilder;
+	public static synthetic fun copy$default (Lcom/destroystokyo/paper/ParticleBuilder;Lorg/bukkit/Particle;Ljava/util/List;Lorg/bukkit/entity/Player;Lorg/bukkit/Location;IDDDDLjava/lang/Object;ZILjava/lang/Object;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public static final fun createParticle (Lorg/bukkit/Location;Lorg/bukkit/Location;Lorg/bukkit/Color;Lorg/bukkit/Location;I)V
+	public static final fun generateBlockEdgePoints (Lorg/bukkit/Location;D)Ljava/util/List;
+	public static synthetic fun generateBlockEdgePoints$default (Lorg/bukkit/Location;DILjava/lang/Object;)Ljava/util/List;
+	public static final fun generateParticlesAroundSpace (Lorg/bukkit/Location;Lorg/bukkit/Location;Lorg/bukkit/Color;)V
+	public static final fun getAlphaInRadians (Lorg/bukkit/Location;)D
+	public static final fun getBoundingBoxBlockFaceMiddleLocation (Lorg/bukkit/Location;Lorg/bukkit/block/BlockFace;)Lorg/bukkit/Location;
+	public static final fun getDifferenceLocation (Lorg/bukkit/Location;Lorg/bukkit/Location;)Lorg/bukkit/Location;
+	public static final fun getLocationWithWorld (Lorg/bukkit/Location;D)Lorg/bukkit/Location;
+	public static final fun location (Lcom/destroystokyo/paper/ParticleBuilder;Lorg/bukkit/Location;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public static final fun offset (Lcom/destroystokyo/paper/ParticleBuilder;Ljava/lang/Number;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public static final fun offset (Lcom/destroystokyo/paper/ParticleBuilder;Ljava/lang/Number;Ljava/lang/Number;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public static final fun particleOf (Lorg/bukkit/Particle;)Lcc/modlabs/kpaper/visuals/effect/ParticleData;
+	public static final fun playParticleEffect (Lcom/destroystokyo/paper/ParticleBuilder;)V
+	public static final fun playParticleEffect (Lcom/destroystokyo/paper/ParticleBuilder;D)V
+	public static final fun playParticleEffect (Lcom/destroystokyo/paper/ParticleBuilder;Ljava/lang/Number;)V
+	public static synthetic fun playParticleEffect$default (Lcom/destroystokyo/paper/ParticleBuilder;DILjava/lang/Object;)V
+	public static synthetic fun playParticleEffect$default (Lcom/destroystokyo/paper/ParticleBuilder;Ljava/lang/Number;ILjava/lang/Object;)V
+	public static final fun soundOf (Lorg/bukkit/Sound;FF)Lcc/modlabs/kpaper/extensions/SoundEffect;
+	public static synthetic fun soundOf$default (Lorg/bukkit/Sound;FFILjava/lang/Object;)Lcc/modlabs/kpaper/extensions/SoundEffect;
+	public static final fun spawnBlockOutline (Lorg/bukkit/Location;Lorg/bukkit/Color;)V
+	public static final fun spawnColoredParticle (Lorg/bukkit/Location;Lorg/bukkit/Color;)V
+	public static synthetic fun spawnColoredParticle$default (Lorg/bukkit/Location;Lorg/bukkit/Color;ILjava/lang/Object;)V
+	public static final fun spawnParticle (Lorg/bukkit/Location;Lorg/bukkit/Particle;IDDDDLorg/bukkit/Particle$DustOptions;)V
+	public static final fun spawnParticleLine (Lorg/bukkit/Location;Lorg/bukkit/Location;Lorg/bukkit/block/BlockFace;Lorg/bukkit/Color;)V
+}
+
+public final class cc/modlabs/kpaper/extensions/WorldExtensionsKt {
+	public static final fun broadcastSound (Lorg/bukkit/Sound;FF)V
+	public static synthetic fun broadcastSound$default (Lorg/bukkit/Sound;FFILjava/lang/Object;)V
+	public static final fun chunk (Lorg/bukkit/World;II)Lorg/bukkit/Chunk;
+	public static final fun chunk (Lorg/bukkit/block/Block;)Lorg/bukkit/Chunk;
+	public static final fun mainWorld ()Lorg/bukkit/World;
+	public static final fun matches (Lorg/bukkit/Location;III)Z
+	public static final fun setSpawnLocation (Lorg/bukkit/World;Lorg/bukkit/block/Block;)Z
+}
+
+public class cc/modlabs/kpaper/file/BaseTempStorage {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun deleteTempFile (Ljava/lang/String;)Z
+	public final fun getTempFile (Ljava/lang/String;)Ljava/io/File;
+	public final fun getTempFiles (Ljava/lang/String;)Ljava/util/List;
+	public final fun readTempFile (Ljava/lang/String;)[B
+	public final fun readTempFileAsString (Ljava/io/File;)Ljava/lang/String;
+	public final fun readTempFileAsString (Ljava/lang/String;)Ljava/lang/String;
+	public final fun readTempFileAsStringOrNull (Ljava/lang/String;)Ljava/lang/String;
+	public final fun saveTempFile (Ljava/lang/String;Ljava/io/File;)V
+	public final fun saveTempFile (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun saveTempFile (Ljava/lang/String;[B)V
+}
+
+public final class cc/modlabs/kpaper/file/TempStorage : cc/modlabs/kpaper/file/BaseTempStorage {
+	public static final field INSTANCE Lcc/modlabs/kpaper/file/TempStorage;
+}
+
+public abstract class cc/modlabs/kpaper/file/config/FileJsonConfig {
+	public static final field Companion Lcc/modlabs/kpaper/file/config/FileJsonConfig$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun clearConfig ()V
+	public final fun containsKey (Ljava/lang/String;)Z
+	public final fun deleteConfig ()V
+	public final fun get (Ljava/lang/String;)Lcom/google/gson/JsonElement;
+	public final fun getBoolean (Ljava/lang/String;)Ljava/lang/Boolean;
+	public final fun getBooleanList (Ljava/lang/String;)Ljava/util/List;
+	public final fun getDouble (Ljava/lang/String;)Ljava/lang/Double;
+	public final fun getDoubleList (Ljava/lang/String;)Ljava/util/List;
+	public final fun getFile ()Ljava/io/File;
+	public final fun getFloat (Ljava/lang/String;)Ljava/lang/Float;
+	public final fun getFloatList (Ljava/lang/String;)Ljava/util/List;
+	public final fun getInt (Ljava/lang/String;)Ljava/lang/Integer;
+	public final fun getIntList (Ljava/lang/String;)Ljava/util/List;
+	public final fun getJson ()Lcom/google/gson/JsonObject;
+	public final fun getJsonArray (Ljava/lang/String;)Lcom/google/gson/JsonArray;
+	public final fun getJsonObject (Ljava/lang/String;)Lcom/google/gson/JsonObject;
+	public final fun getLong (Ljava/lang/String;)Ljava/lang/Long;
+	public final fun getLongList (Ljava/lang/String;)Ljava/util/List;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getString (Ljava/lang/String;)Ljava/lang/String;
+	public final fun getStringList (Ljava/lang/String;)Ljava/util/List;
+	public final fun reloadConfig ()V
+	public final fun remove (Ljava/lang/String;)V
+	public final fun resolvePath (Ljava/lang/String;)Lcom/google/gson/JsonElement;
+	public final fun saveConfig ()V
+	public final fun set (Ljava/lang/String;Lcom/google/gson/JsonElement;)V
+	public final fun setJson (Lcom/google/gson/JsonObject;)V
+	public final fun setPath (Ljava/lang/String;)V
+	public final fun setStringList (Ljava/lang/String;Ljava/util/List;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/FileJsonConfig$Companion {
+	public final fun getGson ()Lcom/google/gson/Gson;
+}
+
+public abstract class cc/modlabs/kpaper/file/config/FileYamlConfig : org/bukkit/configuration/file/YamlConfiguration {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun deleteConfig ()V
+	public final fun getFile ()Ljava/io/File;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun saveConfig ()V
+	public final fun setPath (Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/PluginConfig : cc/modlabs/kpaper/file/config/FileYamlConfig {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/PluginJsonConfig : cc/modlabs/kpaper/file/config/FileJsonConfig {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/WorldConfig : cc/modlabs/kpaper/file/config/FileYamlConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/WorldJsonConfig : cc/modlabs/kpaper/file/config/FileJsonConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class cc/modlabs/kpaper/file/gson/ItemStackTypeAdapter : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lorg/bukkit/inventory/ItemStack;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lorg/bukkit/inventory/ItemStack;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class cc/modlabs/kpaper/file/gson/LocationTypeAdapter : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
+	public fun <init> ()V
+	public synthetic fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Ljava/lang/Object;
+	public fun deserialize (Lcom/google/gson/JsonElement;Ljava/lang/reflect/Type;Lcom/google/gson/JsonDeserializationContext;)Lorg/bukkit/Location;
+	public synthetic fun serialize (Ljava/lang/Object;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+	public fun serialize (Lorg/bukkit/Location;Ljava/lang/reflect/Type;Lcom/google/gson/JsonSerializationContext;)Lcom/google/gson/JsonElement;
+}
+
+public final class cc/modlabs/kpaper/file/gson/MaterialTypeAdapter : com/google/gson/TypeAdapter {
+	public fun <init> ()V
+	public synthetic fun read (Lcom/google/gson/stream/JsonReader;)Ljava/lang/Object;
+	public fun read (Lcom/google/gson/stream/JsonReader;)Lorg/bukkit/Material;
+	public synthetic fun write (Lcom/google/gson/stream/JsonWriter;Ljava/lang/Object;)V
+	public fun write (Lcom/google/gson/stream/JsonWriter;Lorg/bukkit/Material;)V
+}
+
+public abstract interface class cc/modlabs/kpaper/game/GamePlayers {
+	public abstract fun getLivingPlayers ()Ljava/util/List;
+	public abstract fun getSpectators ()Ljava/util/List;
+	public abstract fun setLivingPlayers (Ljava/util/List;)V
+	public abstract fun setSpectators (Ljava/util/List;)V
+}
+
+public abstract class cc/modlabs/kpaper/game/countdown/Countdown {
+	public field countdown Lorg/bukkit/scheduler/BukkitTask;
+	public fun <init> (Lcc/modlabs/kpaper/game/GamePlayers;I)V
+	public final fun getCountdown ()Lorg/bukkit/scheduler/BukkitTask;
+	public final fun getDefaultDuration ()I
+	public final fun getDuration ()I
+	public final fun getGame ()Lcc/modlabs/kpaper/game/GamePlayers;
+	public final fun setCountdown (Lorg/bukkit/scheduler/BukkitTask;)V
+	public final fun setDuration (I)V
+	public abstract fun start ()V
+	public abstract fun stop ()V
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion;
+	public fun <init> ()V
+	public final fun getNoCost ()Z
+	public final fun getOnClose ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnComplete ()Lkotlin/jvm/functions/Function2;
+	public final fun getSlotConfigs ()Ljava/util/Map;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun setNoCost (Z)V
+	public final fun setOnClose (Lkotlin/jvm/functions/Function1;)V
+	public final fun setOnComplete (Lkotlin/jvm/functions/Function2;)V
+	public final fun setTitle (Ljava/lang/String;)V
+	public final fun slot (Lcc/modlabs/kpaper/inventory/AnvilSlot;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion {
+	public final fun builder ()Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ClickSnapshot {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getText ()Ljava/lang/String;
+}
+
+public abstract class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction$Companion;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction$Close : cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction$Close;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction$Companion {
+	public final fun close ()Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction;
+	public final fun replaceInputText (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction$ReplaceInputText : cc/modlabs/kpaper/inventory/AnvilGUI$Companion$ResponseAction {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getText ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot : java/lang/Enum {
+	public static final field LEFT Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot;
+	public static final field OUTPUT Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot;
+	public static final field RIGHT Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot;
+	public static fun values ()[Lcc/modlabs/kpaper/inventory/AnvilGUI$Companion$Slot;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUIBuilder {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder$Companion;
+	public fun <init> ()V
+	public final fun itemLeft (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+	public final fun itemRight (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+	public final fun noCost (Z)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+	public final fun onClick (Lkotlin/jvm/functions/Function2;)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+	public final fun open (Lorg/bukkit/entity/Player;)Lorg/bukkit/inventory/InventoryView;
+	public final fun plugin (Lorg/bukkit/plugin/Plugin;)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+	public final fun title (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/AnvilGUIBuilder;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUIBuilder$Companion {
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilGUIKt {
+	public static final fun openAnvilGUI (Lorg/bukkit/entity/Player;Lkotlin/jvm/functions/Function1;)Lorg/bukkit/inventory/InventoryView;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilSlot : java/lang/Enum {
+	public static final field INPUT_LEFT Lcc/modlabs/kpaper/inventory/AnvilSlot;
+	public static final field INPUT_RIGHT Lcc/modlabs/kpaper/inventory/AnvilSlot;
+	public static final field OUTPUT Lcc/modlabs/kpaper/inventory/AnvilSlot;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getIndex ()I
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/AnvilSlot;
+	public static fun values ()[Lcc/modlabs/kpaper/inventory/AnvilSlot;
+}
+
+public final class cc/modlabs/kpaper/inventory/AnvilTextSnapshot {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getText ()Ljava/lang/String;
+}
+
+public abstract interface class cc/modlabs/kpaper/inventory/GUI {
+	public abstract fun handle (Lorg/bukkit/entity/Player;Lorg/bukkit/event/inventory/InventoryClickEvent;)V
+	public abstract fun open (Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/GUIBuilder {
+	public final fun fill (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun fillBorder (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun item (ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function0;)V
+	public final fun item (ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun item$default (Lcc/modlabs/kpaper/inventory/GUIBuilder;ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/GUIBuilderKt {
+	public static final fun GUI (Ljava/lang/String;ILkotlin/jvm/functions/Function1;)Lorg/bukkit/inventory/Inventory;
+}
+
+public abstract interface class cc/modlabs/kpaper/inventory/ISerializer {
+	public abstract fun deserializeInventories (Ljava/io/InputStream;)Ljava/util/List;
+	public abstract fun serialize (Ljava/util/List;Ljava/io/OutputStream;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/InventoryBuilder {
+	public fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;)V
+	public synthetic fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun build ()Lorg/bukkit/inventory/Inventory;
+	public final fun fill (Lcc/modlabs/kpaper/inventory/InventoryItem;)Lcc/modlabs/kpaper/inventory/InventoryBuilder;
+	public final fun getInventory ()Lorg/bukkit/inventory/Inventory;
+	public final fun open (Lorg/bukkit/entity/Player;)V
+	public final fun setItem (ILcc/modlabs/kpaper/inventory/InventoryItem;)Lcc/modlabs/kpaper/inventory/InventoryBuilder;
+	public final fun setItem (ILorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/inventory/InventoryBuilder;
+}
+
+public final class cc/modlabs/kpaper/inventory/InventoryItem {
+	public fun <init> (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getItemStack ()Lorg/bukkit/inventory/ItemStack;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function1;
+}
+
+public final class cc/modlabs/kpaper/inventory/InventorySerializer : cc/modlabs/kpaper/inventory/ISerializer {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/InventorySerializer$Companion;
+	public fun <init> ()V
+	public fun deserializeInventories (Ljava/io/InputStream;)Ljava/util/List;
+	public fun serialize (Ljava/util/List;Ljava/io/OutputStream;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/InventorySerializer$Companion {
+	public final fun deserialize (Ljava/lang/String;)Lorg/bukkit/inventory/Inventory;
+	public final fun deserializeFromBytes ([B)Lorg/bukkit/inventory/Inventory;
+	public final fun deserializeInventoriesFromBytes ([B)Ljava/util/List;
+	public final fun serialize (Lorg/bukkit/inventory/Inventory;)Ljava/lang/String;
+	public final fun serializeInventoriesToBytes (Ljava/util/List;)[B
+	public final fun serializeToBytes (Lorg/bukkit/inventory/Inventory;)[B
+}
+
+public final class cc/modlabs/kpaper/inventory/ItemBuilder {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/ItemBuilder$Companion;
+	public fun <init> (Lorg/bukkit/Material;ILkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lorg/bukkit/Material;ILkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addCustomString (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun addLore ([Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun addPersistentData (Lorg/bukkit/NamespacedKey;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun addPersistentData (Lorg/bukkit/NamespacedKey;Lorg/bukkit/persistence/PersistentDataType;Ljava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun addPersistentDataIf (Lorg/bukkit/NamespacedKey;Ljava/lang/String;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun addPersistentDataIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Lorg/bukkit/NamespacedKey;Ljava/lang/String;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun amount (I)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun build ()Lorg/bukkit/inventory/ItemStack;
+	public final fun clearDisplay ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearDisplayIf (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun clearDisplayIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearEnchants ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearEnchantsIf (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun clearEnchantsIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearFlags ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearFlagsIf (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun clearFlagsIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearLore ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clearLoreIf (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun clearLoreIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun clone ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun condition (ZLcc/modlabs/kpaper/inventory/ItemBuilder$Performer;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun consumable (FLio/papermc/paper/datacomponent/item/consumable/ItemUseAnimation;Lnet/kyori/adventure/key/Key;ZLjava/util/List;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun consumable$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;FLio/papermc/paper/datacomponent/item/consumable/ItemUseAnimation;Lnet/kyori/adventure/key/Key;ZLjava/util/List;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun customModelData (I)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun customModelDataComponents (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun customModelDataComponents$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun display (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun displayIf (Ljava/lang/String;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun displayIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/lang/String;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun enchant (Ljava/util/Map;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun enchantIf (Ljava/util/Map;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun enchantIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/util/Map;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun equippable (Lorg/bukkit/inventory/EquipmentSlot;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun flag ([Lorg/bukkit/inventory/ItemFlag;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun getCustomStrings ()Ljava/util/List;
+	public final fun getItemStack ()Lorg/bukkit/inventory/ItemStack;
+	public final fun glinting (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun glinting (ZZ)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun glinting$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun glowing (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun glowing$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun hideAttributes ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun hideEnchants ()Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun isExact (Lorg/bukkit/inventory/ItemStack;Z)Z
+	public static synthetic fun isExact$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Lorg/bukkit/inventory/ItemStack;ZILjava/lang/Object;)Z
+	public final fun lore ([Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun loreIf ([Ljava/lang/String;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun loreIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;[Ljava/lang/String;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun meta (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun name (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun onClick (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun onClick (Lkotlin/jvm/functions/Function2;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun owner (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun owner (Ljava/util/UUID;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun owner (Lorg/bukkit/OfflinePlayer;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun profile (Lcom/destroystokyo/paper/profile/PlayerProfile;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun profile (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun profile (Ljava/util/UUID;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun profile (Lorg/bukkit/OfflinePlayer;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun rarity (Lorg/bukkit/inventory/ItemRarity;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun removePersistantDataIf (Lorg/bukkit/NamespacedKey;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun removePersistantDataIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Lorg/bukkit/NamespacedKey;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun removePersistentDataIf (Lorg/bukkit/NamespacedKey;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun removePersistentDataIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Lorg/bukkit/NamespacedKey;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun setItemStack (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun skullOwner (Lorg/bukkit/entity/Player;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun texture (Ljava/lang/String;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun texture$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/lang/String;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun textureFromBase64 (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun textureFromMineSkin (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun textureFromSkinTexture (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun textureFromTextureData (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun textureFromTextureData$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun type (Lorg/bukkit/Material;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun typeIf (Lorg/bukkit/Material;Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun typeIf$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;Lorg/bukkit/Material;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun unbreakable (Z)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun unbreakable$default (Lcc/modlabs/kpaper/inventory/ItemBuilder;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+}
+
+public final class cc/modlabs/kpaper/inventory/ItemBuilder$Companion {
+	public final fun fromItemStack (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public final fun getInvalidMaterials ()Ljava/util/ArrayList;
+}
+
+public abstract interface class cc/modlabs/kpaper/inventory/ItemBuilder$Performer {
+	public abstract fun perform (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class cc/modlabs/kpaper/inventory/ItemBuilderKt {
+	public static final fun changeNameForTime (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;JLjava/util/concurrent/TimeUnit;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun changeNameForTime$default (Lorg/bukkit/inventory/ItemStack;Ljava/lang/String;JLjava/util/concurrent/TimeUnit;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static final fun nbt (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/lang/String;I)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static final fun nbt (Lcc/modlabs/kpaper/inventory/ItemBuilder;Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static final fun toItemBuilder (Lorg/bukkit/Material;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static final fun toItemBuilder (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun toItemBuilder$default (Lorg/bukkit/Material;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+	public static synthetic fun toItemBuilder$default (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/ItemBuilder;
+}
+
+public final class cc/modlabs/kpaper/inventory/ItemStackConverter {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/ItemStackConverter;
+	public final fun fromBase64 (Ljava/lang/String;)Lorg/bukkit/inventory/Inventory;
+	public final fun itemStackArrayFromBase64 (Ljava/lang/String;)[Lorg/bukkit/inventory/ItemStack;
+	public final fun itemStackArrayToBase64 ([Lorg/bukkit/inventory/ItemStack;)Ljava/lang/String;
+	public final fun itemStackFromBase64 (Ljava/lang/String;)Lorg/bukkit/inventory/ItemStack;
+	public final fun itemStackToBase64 (Lorg/bukkit/inventory/ItemStack;)Ljava/lang/String;
+	public final fun playerInventoryToBase64 (Lorg/bukkit/inventory/PlayerInventory;)[Ljava/lang/String;
+	public final fun toBase64 (Lorg/bukkit/inventory/Inventory;)Ljava/lang/String;
+}
+
+public abstract class cc/modlabs/kpaper/inventory/KGUI {
+	public fun <init> ()V
+	protected abstract fun build (Lorg/bukkit/entity/Player;)Lorg/bukkit/inventory/Inventory;
+	protected abstract fun getSize ()I
+	protected abstract fun getTitle ()Ljava/lang/String;
+	public final fun open (Lorg/bukkit/entity/Player;)V
+	public final fun refresh (Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/Serializer {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/Serializer;
+	public final fun deserializeInventories (Ljava/lang/String;)Ljava/util/List;
+	public final fun deserializeInventoriesFromBytes ([B)Ljava/util/List;
+	public final fun exportDataContainerToBlob (Lcom/google/gson/JsonObject;)[B
+	public final fun importDataContainerFromBlob ([B)Lcom/google/gson/JsonObject;
+	public final fun serialize (Ljava/util/List;)Ljava/lang/String;
+	public final fun serializeToBytes (Ljava/util/List;)[B
+}
+
+public final class cc/modlabs/kpaper/inventory/SlotBuilder {
+	public fun <init> ()V
+	public final fun getConsumeItem ()Z
+	public final fun getItem ()Lorg/bukkit/inventory/ItemStack;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function2;
+	public final fun setConsumeItem (Z)V
+	public final fun setItem (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun setOnClick (Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/SlotConfig {
+	public fun <init> ()V
+	public fun <init> (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function2;Z)V
+	public synthetic fun <init> (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function2;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/bukkit/inventory/ItemStack;
+	public final fun component2 ()Lkotlin/jvm/functions/Function2;
+	public final fun component3 ()Z
+	public final fun copy (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function2;Z)Lcc/modlabs/kpaper/inventory/SlotConfig;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/SlotConfig;Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function2;ZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/SlotConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConsumeItem ()Z
+	public final fun getItem ()Lorg/bukkit/inventory/ItemStack;
+	public final fun getOnClick ()Lkotlin/jvm/functions/Function2;
+	public fun hashCode ()I
+	public final fun setConsumeItem (Z)V
+	public final fun setItem (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun setOnClick (Lkotlin/jvm/functions/Function2;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/internal/AnvilListener : org/bukkit/event/Listener {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/internal/AnvilListener;
+	public final fun onInventoryClick (Lorg/bukkit/event/inventory/InventoryClickEvent;)V
+	public final fun onInventoryClose (Lorg/bukkit/event/inventory/InventoryCloseEvent;)V
+	public final fun onPrepareAnvil (Lorg/bukkit/event/inventory/PrepareAnvilEvent;)V
+	public final fun registerGUI (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Lcc/modlabs/kpaper/inventory/AnvilGUI;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/internal/ItemClickListener : cc/modlabs/kpaper/event/EventHandler {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/internal/ItemClickListener;
+	public fun load ()V
+	public final fun registerInventory (Lorg/bukkit/entity/Player;Lorg/bukkit/inventory/Inventory;Ljava/util/Map;)V
+	public final fun registerItemClickEvent (Lorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;)V
+	public fun unload ()V
+}
+
+public final class cc/modlabs/kpaper/inventory/internal/ItemClickListener$RegisteredInventory {
+	public fun <init> (Lorg/bukkit/inventory/Inventory;Ljava/util/Map;)V
+	public final fun component1 ()Lorg/bukkit/inventory/Inventory;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Lorg/bukkit/inventory/Inventory;Ljava/util/Map;)Lcc/modlabs/kpaper/inventory/internal/ItemClickListener$RegisteredInventory;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/internal/ItemClickListener$RegisteredInventory;Lorg/bukkit/inventory/Inventory;Ljava/util/Map;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/internal/ItemClickListener$RegisteredInventory;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInventory ()Lorg/bukkit/inventory/Inventory;
+	public final fun getItems ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/After {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/After;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAfter ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinBaseResponse {
+	public fun <init> (ZLjava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Ljava/util/List;
+	public final fun component6 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public final fun copy (ZLjava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinBaseResponse;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinBaseResponse;ZLjava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinBaseResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLinks ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public final fun getMessages ()Ljava/util/List;
+	public final fun getPagination ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;
+	public final fun getSkins ()Ljava/util/List;
+	public final fun getSuccess ()Z
+	public final fun getWarnings ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinFetcher {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/MineSkinFetcher;
+	public final fun fetchSkinSignature (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;
+	public final fun fetchTexture (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator {
+	public fun <init> (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()I
+	public final fun copy (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAccount ()Ljava/lang/String;
+	public final fun getDuration ()I
+	public final fun getServer ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+	public final fun getVersion ()Ljava/lang/String;
+	public final fun getWorker ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinHash {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCape ()Ljava/lang/String;
+	public final fun getSkin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinLinks {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNext ()Ljava/lang/String;
+	public final fun getSelf ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinPagination {
+	public fun <init> ()V
+	public fun <init> (Lcc/modlabs/kpaper/inventory/mineskin/After;Lcc/modlabs/kpaper/inventory/mineskin/After;)V
+	public synthetic fun <init> (Lcc/modlabs/kpaper/inventory/mineskin/After;Lcc/modlabs/kpaper/inventory/mineskin/After;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public final fun component2 ()Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public final fun copy (Lcc/modlabs/kpaper/inventory/mineskin/After;Lcc/modlabs/kpaper/inventory/mineskin/After;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;Lcc/modlabs/kpaper/inventory/mineskin/After;Lcc/modlabs/kpaper/inventory/mineskin/After;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinPagination;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCurrent ()Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public final fun getNext ()Lcc/modlabs/kpaper/inventory/mineskin/After;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinRawSkinResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinRawSkinResponse;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinRawSkinResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinRawSkinResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTexture ()Ljava/lang/String;
+	public final fun getTimestamp ()J
+	public final fun getUuid ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinResponse {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;Ljava/util/List;IZ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;
+	public final fun component7 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;
+	public final fun component8 ()Ljava/util/List;
+	public final fun component9 ()I
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;Ljava/util/List;IZ)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;Ljava/util/List;IZILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuplicate ()Z
+	public final fun getGenerator ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinGenerator;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getShortId ()Ljava/lang/String;
+	public final fun getTags ()Ljava/util/List;
+	public final fun getTexture ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;
+	public final fun getUuid ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public final fun getViews ()I
+	public final fun getVisibility ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinSingleSkinResponse {
+	public fun <init> (ZLcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;)V
+	public synthetic fun <init> (ZLcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Ljava/util/List;
+	public final fun component5 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public final fun copy (ZLcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinSingleSkinResponse;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinSingleSkinResponse;ZLcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;Ljava/util/List;Ljava/util/List;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinSingleSkinResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLinks ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinLinks;
+	public final fun getMessages ()Ljava/util/List;
+	public final fun getSkin ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinResponse;
+	public final fun getSuccess ()Z
+	public final fun getWarnings ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinTags {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTags;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTags;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTags;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTag ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinTexture {
+	public fun <init> (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;
+	public final fun component2 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;
+	public final fun component3 ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;
+	public final fun copy (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTexture;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;
+	public final fun getHash ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinHash;
+	public final fun getUrl ()Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinTextureData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSignature ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinUrls {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinUrls;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSkin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MineSkinWarning {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinWarning;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MineSkinWarning;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MineSkinWarning;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/inventory/mineskin/Textures;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/inventory/mineskin/Textures;
+	public final fun copy (Lcc/modlabs/kpaper/inventory/mineskin/Textures;)Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;Lcc/modlabs/kpaper/inventory/mineskin/Textures;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTextures ()Lcc/modlabs/kpaper/inventory/mineskin/Textures;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/SKIN {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/mineskin/SKIN$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/SKIN;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class cc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/SKIN;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/SKIN$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/SkinAliasesKt {
+	public static final fun getSkin (Lcc/modlabs/kpaper/inventory/mineskin/Textures;)Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/Texture {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/Urls;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/Urls;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lcc/modlabs/kpaper/inventory/mineskin/Urls;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/Urls;Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/Texture;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/Texture;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/inventory/mineskin/Urls;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/Texture;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSignature ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getUrls ()Lcc/modlabs/kpaper/inventory/mineskin/Urls;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/Textures {
+	public static final field Companion Lcc/modlabs/kpaper/inventory/mineskin/Textures$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/inventory/mineskin/SKIN;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+	public final fun copy (Lcc/modlabs/kpaper/inventory/mineskin/SKIN;)Lcc/modlabs/kpaper/inventory/mineskin/Textures;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/Textures;Lcc/modlabs/kpaper/inventory/mineskin/SKIN;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/Textures;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSKIN ()Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public synthetic class cc/modlabs/kpaper/inventory/mineskin/Textures$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/Textures$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/Textures;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/Textures;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/Textures$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class cc/modlabs/kpaper/inventory/mineskin/Urls {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcc/modlabs/kpaper/inventory/mineskin/Urls;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/inventory/mineskin/Urls;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/inventory/mineskin/Urls;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSkin ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class cc/modlabs/kpaper/inventory/simple/SimpleGUI : org/bukkit/inventory/InventoryHolder {
+	public abstract fun handle (Lorg/bukkit/event/inventory/InventoryClickEvent;)V
+	public abstract fun onClose (Lorg/bukkit/event/inventory/InventoryCloseEvent;)V
+	public abstract fun onDrag (Lorg/bukkit/event/inventory/InventoryDragEvent;)V
+	public abstract fun open ()V
+}
+
+public final class cc/modlabs/kpaper/inventory/simple/SimpleGUI$DefaultImpls {
+	public static fun handle (Lcc/modlabs/kpaper/inventory/simple/SimpleGUI;Lorg/bukkit/event/inventory/InventoryClickEvent;)V
+	public static fun onClose (Lcc/modlabs/kpaper/inventory/simple/SimpleGUI;Lorg/bukkit/event/inventory/InventoryCloseEvent;)V
+	public static fun onDrag (Lcc/modlabs/kpaper/inventory/simple/SimpleGUI;Lorg/bukkit/event/inventory/InventoryDragEvent;)V
+	public static fun open (Lcc/modlabs/kpaper/inventory/simple/SimpleGUI;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/simple/SimpleGuiBuilder {
+	public final fun fillBorder (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun item (ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function0;)V
+	public final fun item (ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun item$default (Lcc/modlabs/kpaper/inventory/simple/SimpleGuiBuilder;ILorg/bukkit/inventory/ItemStack;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/inventory/simple/SimpleGuiFactoryKt {
+	public static final fun simpleGUI (Ljava/lang/String;ILkotlin/jvm/functions/Function1;)Lorg/bukkit/inventory/Inventory;
+}
+
+public final class cc/modlabs/kpaper/main/Feature : java/lang/Enum {
+	public static final field COMMANDS Lcc/modlabs/kpaper/main/Feature;
+	public static final field COROUTINES Lcc/modlabs/kpaper/main/Feature;
+	public static final field CUSTOM_EVENTS Lcc/modlabs/kpaper/main/Feature;
+	public static final field FILES Lcc/modlabs/kpaper/main/Feature;
+	public static final field GAME Lcc/modlabs/kpaper/main/Feature;
+	public static final field INVENTORY Lcc/modlabs/kpaper/main/Feature;
+	public static final field ITEM_CLICK Lcc/modlabs/kpaper/main/Feature;
+	public static final field MESSAGE Lcc/modlabs/kpaper/main/Feature;
+	public static final field UTIL Lcc/modlabs/kpaper/main/Feature;
+	public static final field VISUALS Lcc/modlabs/kpaper/main/Feature;
+	public static final field WORLD Lcc/modlabs/kpaper/main/Feature;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/main/Feature;
+	public static fun values ()[Lcc/modlabs/kpaper/main/Feature;
+}
+
+public final class cc/modlabs/kpaper/main/FeatureConfig {
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lcc/modlabs/kpaper/main/FeatureConfig;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/main/FeatureConfig;Ljava/util/Map;ILjava/lang/Object;)Lcc/modlabs/kpaper/main/FeatureConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFlags ()Ljava/util/Map;
+	public fun hashCode ()I
+	public final fun isEnabled (Lcc/modlabs/kpaper/main/Feature;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
+	public fun <init> ()V
+	public final fun build ()Lcc/modlabs/kpaper/main/FeatureConfig;
+	public final fun feature (Lcc/modlabs/kpaper/main/Feature;Z)V
+	public final fun getEnableCommandFeatures ()Z
+	public final fun getEnableCoroutineFeatures ()Z
+	public final fun getEnableEventFeatures ()Z
+	public final fun getEnableFileFeatures ()Z
+	public final fun getEnableGameFeatures ()Z
+	public final fun getEnableInventoryFeatures ()Z
+	public final fun getEnableMessageFeatures ()Z
+	public final fun getEnableUtilFeatures ()Z
+	public final fun getEnableVisualFeatures ()Z
+	public final fun getEnableWorldFeatures ()Z
+	public final fun setEnableCommandFeatures (Z)V
+	public final fun setEnableCoroutineFeatures (Z)V
+	public final fun setEnableEventFeatures (Z)V
+	public final fun setEnableFileFeatures (Z)V
+	public final fun setEnableGameFeatures (Z)V
+	public final fun setEnableInventoryFeatures (Z)V
+	public final fun setEnableMessageFeatures (Z)V
+	public final fun setEnableUtilFeatures (Z)V
+	public final fun setEnableVisualFeatures (Z)V
+	public final fun setEnableWorldFeatures (Z)V
+}
+
+public final class cc/modlabs/kpaper/main/FeatureConfigKt {
+	public static final fun featureConfig (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/main/FeatureConfig;
+}
+
+public abstract class cc/modlabs/kpaper/main/KPlugin : org/bukkit/plugin/java/JavaPlugin {
+	public fun <init> ()V
+	public fun getFeatureConfig ()Lcc/modlabs/kpaper/main/FeatureConfig;
+	public final fun isFeatureEnabled (Lcc/modlabs/kpaper/main/Feature;)Z
+	public fun load ()V
+	public final fun onDisable ()V
+	public final fun onEnable ()V
+	public final fun onLoad ()V
+	public fun shutdown ()V
+	public fun startup ()V
+}
+
+public final class cc/modlabs/kpaper/main/KPluginKt {
+	public static field PluginInstance Lcc/modlabs/kpaper/main/KPlugin;
+	public static final fun getPluginInstance ()Lcc/modlabs/kpaper/main/KPlugin;
+	public static final fun pluginInstance ()Lcc/modlabs/kpaper/main/KPlugin;
+	public static final fun setPluginInstance (Lcc/modlabs/kpaper/main/KPlugin;)V
+}
+
+public final class cc/modlabs/kpaper/messages/LocalMessageCooldown {
+	public static final field INSTANCE Lcc/modlabs/kpaper/messages/LocalMessageCooldown;
+	public final fun addCooldown-SxA4cEA (Ljava/util/UUID;Ljava/lang/String;J)V
+	public final fun hasCooldown (Ljava/util/UUID;Ljava/lang/String;)Z
+}
+
+public final class cc/modlabs/kpaper/messages/MessageFormat : java/lang/Enum {
+	public static final field ERROR Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static final field INFO Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static final field LOCKED Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static final field PLAIN Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static final field SUCCESS Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static final field WARNING Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getFormat ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/messages/MessageFormat;
+	public static fun values ()[Lcc/modlabs/kpaper/messages/MessageFormat;
+}
+
+public final class cc/modlabs/kpaper/messages/MessageFormatKt {
+	public static final fun getSound (Lcc/modlabs/kpaper/messages/MessageFormat;)Lcc/modlabs/kpaper/extensions/SoundEffect;
+	public static final fun sendCommandSender (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun sendCommandSender$default (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun sendCommandSenderWithCooldown-9VgGkz4 (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/lang/String;J)V
+	public static synthetic fun sendCommandSenderWithCooldown-9VgGkz4$default (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)V
+	public static final fun sendError (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendError$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendErrorWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendErrorWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+	public static final fun sendInfo (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendInfo$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendInfoWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendInfoWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+	public static final fun sendLocked (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendLocked$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendLockedWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendLockedWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+	public static final fun sendMessageBlock (Lorg/bukkit/command/CommandSender;[Ljava/lang/String;Z)V
+	public static synthetic fun sendMessageBlock$default (Lorg/bukkit/command/CommandSender;[Ljava/lang/String;ZILjava/lang/Object;)V
+	public static final fun sendMessageFormated (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;)V
+	public static final fun sendMessageFormated (Lorg/bukkit/entity/Player;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;)V
+	public static synthetic fun sendMessageFormated$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;ILjava/lang/Object;)V
+	public static synthetic fun sendMessageFormated$default (Lorg/bukkit/entity/Player;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun sendMessageFormatedWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;J)V
+	public static synthetic fun sendMessageFormatedWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Lcc/modlabs/kpaper/messages/MessageFormat;Ljava/lang/String;JILjava/lang/Object;)V
+	public static final fun sendPlain (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendPlain$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendPlainWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendPlainWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+	public static final fun sendPlayer (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun sendPlayer$default (Lcc/modlabs/kpaper/messages/MessageFormat;Lorg/bukkit/entity/Player;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun sendSuccess (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendSuccess$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendSuccessWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendSuccessWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+	public static final fun sendWarning (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;Z)V
+	public static synthetic fun sendWarning$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZILjava/lang/Object;)V
+	public static final fun sendWarningWithCooldown-9VgGkz4 (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJ)V
+	public static synthetic fun sendWarningWithCooldown-9VgGkz4$default (Lorg/bukkit/command/CommandSender;Ljava/lang/String;Ljava/util/Map;ZJILjava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/npc/DynamicNPC {
+	public fun <init> (Lorg/bukkit/Location;)V
+	public final fun getNPC ()Lcc/modlabs/kpaper/npc/NPC;
+	public final fun onPlayerLeft (Lorg/bukkit/entity/Player;)V
+	public final fun onPlayerNearby (Lorg/bukkit/entity/Player;D)V
+}
+
+public final class cc/modlabs/kpaper/npc/FriendlyNPC {
+	public fun <init> (Lorg/bukkit/Location;)V
+	public final fun approachPlayer (Lorg/bukkit/entity/Player;)V
+	public final fun followPlayer (Lorg/bukkit/entity/Player;D)V
+	public static synthetic fun followPlayer$default (Lcc/modlabs/kpaper/npc/FriendlyNPC;Lorg/bukkit/entity/Player;DILjava/lang/Object;)V
+	public final fun getNPC ()Lcc/modlabs/kpaper/npc/NPC;
+}
+
+public abstract interface class cc/modlabs/kpaper/npc/NPC {
+	public abstract fun addVisiblePlayer (Lorg/bukkit/entity/Player;)V
+	public abstract fun changeName (Ljava/lang/String;)V
+	public abstract fun followEntity (Lorg/bukkit/entity/Entity;D)Z
+	public abstract fun followNearbyPlayers (DD)Z
+	public abstract fun getConversation ()Lkotlin/jvm/functions/Function1;
+	public abstract fun getDescription ()Lnet/kyori/adventure/text/Component;
+	public abstract fun getEntity ()Lorg/bukkit/entity/Entity;
+	public abstract fun getEquipment ()Lorg/bukkit/inventory/EntityEquipment;
+	public abstract fun getFollowingEntity ()Lorg/bukkit/entity/Entity;
+	public abstract fun getID ()Ljava/util/UUID;
+	public abstract fun getLivingEntity ()Lorg/bukkit/entity/LivingEntity;
+	public abstract fun getMainHand ()Lorg/bukkit/inventory/MainHand;
+	public abstract fun getMannequin ()Lorg/bukkit/entity/Mannequin;
+	public abstract fun getProfile ()Lio/papermc/paper/datacomponent/item/ResolvableProfile;
+	public abstract fun getProximityRange ()D
+	public abstract fun getSkinParts ()Lcom/destroystokyo/paper/SkinParts$Mutable;
+	public abstract fun getSpawnLocation ()Lorg/bukkit/Location;
+	public abstract fun getVisiblePlayers ()Ljava/util/Set;
+	public abstract fun hasAI ()Z
+	public abstract fun hasGravity ()Z
+	public abstract fun isCustomNameVisible ()Z
+	public abstract fun isFollowingEntity ()Z
+	public abstract fun isFollowingNearbyPlayers ()Z
+	public abstract fun isImmovable ()Z
+	public abstract fun isLookingAtPlayers ()Z
+	public abstract fun isPathfindingEnabled ()Z
+	public abstract fun isVisibleToAllPlayers ()Z
+	public abstract fun onEvent (Lcc/modlabs/kpaper/npc/NPCEventType;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun overrideCustomName (Ljava/lang/String;Lorg/bukkit/entity/Player;)V
+	public abstract fun overrideDescription (Ljava/lang/String;Lorg/bukkit/entity/Player;)V
+	public abstract fun pausePatrolling ()Z
+	public abstract fun pauseWalking ()Z
+	public abstract fun removeAllEventHandlers ()V
+	public abstract fun removeConversation ()V
+	public abstract fun removeEventHandlers (Lcc/modlabs/kpaper/npc/NPCEventType;)V
+	public abstract fun removeVisiblePlayer (Lorg/bukkit/entity/Player;)V
+	public abstract fun resumePatrolling ()Z
+	public abstract fun resumeWalking ()Z
+	public abstract fun setAI (Z)V
+	public abstract fun setBoots (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setChestplate (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setConversation (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun setCustomNameVisible (Z)V
+	public abstract fun setDescription (Lnet/kyori/adventure/text/Component;)V
+	public abstract fun setEquipment (Lorg/bukkit/inventory/EquipmentSlot;Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setGravity (Z)V
+	public abstract fun setHelmet (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setImmovable (Z)V
+	public abstract fun setItemInMainHand (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setItemInOffHand (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setLeggings (Lorg/bukkit/inventory/ItemStack;)V
+	public abstract fun setLookAtPlayers (Z)V
+	public abstract fun setMainHand (Lorg/bukkit/inventory/MainHand;)V
+	public abstract fun setPathfindingEnabled (Z)V
+	public abstract fun setProfile (Lio/papermc/paper/datacomponent/item/ResolvableProfile;)V
+	public abstract fun setProximityRange (D)V
+	public abstract fun setSkinParts (Lcom/destroystokyo/paper/SkinParts$Mutable;)V
+	public abstract fun setSpawnLocation (Lorg/bukkit/Location;)V
+	public abstract fun setVisibleToAllPlayers (Z)V
+	public abstract fun setVisibleToPlayers (Ljava/util/Set;)V
+	public abstract fun startConversation (Lorg/bukkit/entity/Player;)V
+	public abstract fun startPatrolling (Ljava/util/List;)Z
+	public abstract fun startWalking ()Z
+	public abstract fun stopFollowing ()Z
+	public abstract fun stopFollowingNearbyPlayers ()Z
+	public abstract fun stopPatrolling ()Z
+	public abstract fun teleport (Lorg/bukkit/Location;)Z
+	public abstract fun walkPath (Ljava/util/List;)Z
+	public abstract fun walkTo (Lorg/bukkit/Location;)Z
+}
+
+public final class cc/modlabs/kpaper/npc/NPC$DefaultImpls {
+	public static synthetic fun followEntity$default (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Entity;DILjava/lang/Object;)Z
+	public static synthetic fun followNearbyPlayers$default (Lcc/modlabs/kpaper/npc/NPC;DDILjava/lang/Object;)Z
+}
+
+public final class cc/modlabs/kpaper/npc/NPCBuilder {
+	public fun <init> (Lorg/bukkit/Location;)V
+	public final fun boots (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun build ()Lcc/modlabs/kpaper/npc/NPC;
+	public final fun chestplate (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun conversation (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun customNameVisible (Z)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun description (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun description (Lnet/kyori/adventure/text/Component;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun equipment (Lorg/bukkit/inventory/EquipmentSlot;Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun gravity (Z)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun helmet (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun immovable (Z)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun itemInMainHand (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun itemInOffHand (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun leggings (Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun mainHand (Lorg/bukkit/inventory/MainHand;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun name (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun profile (Lio/papermc/paper/datacomponent/item/ResolvableProfile;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun skinParts (Lcom/destroystokyo/paper/SkinParts$Mutable;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+	public final fun skinParts (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/npc/NPCBuilder;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCConversation {
+	public static final field Companion Lcc/modlabs/kpaper/npc/NPCConversation$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Player;)V
+	public final fun conversation (Lkotlin/jvm/functions/Function1;)V
+	public final fun start ()V
+}
+
+public final class cc/modlabs/kpaper/npc/NPCConversation$Companion {
+	public final fun initialize ()V
+}
+
+public final class cc/modlabs/kpaper/npc/NPCConversation$ConversationBuilder {
+	public fun <init> (Lcc/modlabs/kpaper/npc/NPCConversation;)V
+	public final fun escapeSequence (Ljava/lang/String;)V
+	public final fun onCancel (Lkotlin/jvm/functions/Function2;)V
+	public final fun onComplete (Lkotlin/jvm/functions/Function3;)V
+	public final fun prompt (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun prompt (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V
+	public static synthetic fun prompt$default (Lcc/modlabs/kpaper/npc/NPCConversation$ConversationBuilder;Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)V
+	public final fun timeout (I)V
+}
+
+public final class cc/modlabs/kpaper/npc/NPCConversation$ConversationPrompt {
+	public fun <init> (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lnet/kyori/adventure/text/Component;
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun component4 ()Lkotlin/jvm/functions/Function3;
+	public final fun copy (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;)Lcc/modlabs/kpaper/npc/NPCConversation$ConversationPrompt;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/npc/NPCConversation$ConversationPrompt;Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function3;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/NPCConversation$ConversationPrompt;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMessage ()Lnet/kyori/adventure/text/Component;
+	public final fun getOnInput ()Lkotlin/jvm/functions/Function3;
+	public final fun getValidator ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCEvent {
+	public fun <init> (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/npc/NPCEventType;Ljava/util/Map;)V
+	public synthetic fun <init> (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/npc/NPCEventType;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/npc/NPC;
+	public final fun component2 ()Lorg/bukkit/entity/Player;
+	public final fun component3 ()Lcc/modlabs/kpaper/npc/NPCEventType;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/npc/NPCEventType;Ljava/util/Map;)Lcc/modlabs/kpaper/npc/NPCEvent;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/npc/NPCEvent;Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/npc/NPCEventType;Ljava/util/Map;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/NPCEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/util/Map;
+	public final fun getEventType ()Lcc/modlabs/kpaper/npc/NPCEventType;
+	public final fun getNpc ()Lcc/modlabs/kpaper/npc/NPC;
+	public final fun getPlayer ()Lorg/bukkit/entity/Player;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCEventListener {
+	public static final field INSTANCE Lcc/modlabs/kpaper/npc/NPCEventListener;
+	public final fun getNPCByUUID (Ljava/util/UUID;)Lcc/modlabs/kpaper/npc/NPC;
+	public final fun register ()V
+	public final fun registerNPC (Lorg/bukkit/entity/Entity;Lcc/modlabs/kpaper/npc/NPC;)V
+	public final fun registerProximityNPC (Lcc/modlabs/kpaper/npc/NPC;)V
+	public final fun registerVisibilityNPC (Lcc/modlabs/kpaper/npc/NPC;)V
+	public final fun unregisterNPC (Lorg/bukkit/entity/Entity;)V
+	public final fun unregisterProximityNPC (Lcc/modlabs/kpaper/npc/NPC;)V
+	public final fun unregisterVisibilityNPC (Lcc/modlabs/kpaper/npc/NPC;)V
+}
+
+public final class cc/modlabs/kpaper/npc/NPCEventType : java/lang/Enum {
+	public static final field DAMAGED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field LEFT_CLICKED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field PATROL_CYCLE_COMPLETE Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field PATROL_POINT_REACHED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field PLAYER_INTERACT_AT Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field PLAYER_PUNCHING_NEARBY Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field PLAYER_SNEAKING_NEARBY Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field RIGHT_CLICKED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field SHIFT_LEFT_CLICKED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static final field SHIFT_RIGHT_CLICKED Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPCEventType;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/NPCEventType;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCExamplesKt {
+	public static final fun BuilderPatternExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun ComplexTerrainNPCExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun CustomFollowDistanceExample (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun DirectPathNPCExample (Lorg/bukkit/Location;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun FollowNearbyPlayersExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun FollowingControlExample (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Entity;)V
+	public static final fun FollowingNPCExample (Lorg/bukkit/Location;Lorg/bukkit/entity/Player;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun NPCWithEventsExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun NPCWithInteractAtExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun NPCWithProfileExample (Lorg/bukkit/Location;Lio/papermc/paper/datacomponent/item/ResolvableProfile;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun NearbyFollowingControlExample (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/Location;)V
+	public static final fun PathfindingNPCExample (Lorg/bukkit/Location;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun PatrollingControlExample (Lcc/modlabs/kpaper/npc/NPC;Ljava/util/List;)V
+	public static final fun PatrollingGuardExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun PrivateNPCExample (Lorg/bukkit/Location;Ljava/util/Set;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun SinglePlayerNPCExample (Lorg/bukkit/Location;Lorg/bukkit/entity/Player;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun SkinPartsExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun VisibilityControlExample (Lcc/modlabs/kpaper/npc/NPC;Ljava/util/Set;)V
+	public static final fun WalkingControlExample (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/Location;)V
+	public static final fun WalkingNPCExample (Lorg/bukkit/Location;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun WatchfulGuardExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun conversationNPCExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun convertMannequinExample (Lorg/bukkit/entity/Mannequin;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun createSimpleNPCExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun createWarriorNPC (Lorg/bukkit/Location;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun customEquipmentExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun customNameVisibilityExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun floatingNPCExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun multiStepConversationExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun noDescriptionExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun programmaticConversationExample (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/NPC;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCExtensionsKt {
+	public static final fun createNPC (Lorg/bukkit/Location;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/npc/NPC;
+	public static synthetic fun createNPC$default (Lorg/bukkit/Location;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun createNPCWithProfile (Lorg/bukkit/Location;Lio/papermc/paper/datacomponent/item/ResolvableProfile;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPC;
+	public static synthetic fun createNPCWithProfile$default (Lorg/bukkit/Location;Lio/papermc/paper/datacomponent/item/ResolvableProfile;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun createSimpleNPC (Lorg/bukkit/Location;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPC;
+	public static final fun toNPC (Lorg/bukkit/entity/Mannequin;)Lcc/modlabs/kpaper/npc/NPC;
+}
+
+public final class cc/modlabs/kpaper/npc/NPCImpl : cc/modlabs/kpaper/npc/NPC {
+	public fun <init> (Lorg/bukkit/entity/Mannequin;)V
+	public fun addVisiblePlayer (Lorg/bukkit/entity/Player;)V
+	public fun changeName (Ljava/lang/String;)V
+	public final fun cleanup ()V
+	public fun followEntity (Lorg/bukkit/entity/Entity;D)Z
+	public fun followNearbyPlayers (DD)Z
+	public fun getConversation ()Lkotlin/jvm/functions/Function1;
+	public fun getDescription ()Lnet/kyori/adventure/text/Component;
+	public fun getEntity ()Lorg/bukkit/entity/Entity;
+	public fun getEquipment ()Lorg/bukkit/inventory/EntityEquipment;
+	public fun getFollowingEntity ()Lorg/bukkit/entity/Entity;
+	public fun getID ()Ljava/util/UUID;
+	public fun getLivingEntity ()Lorg/bukkit/entity/LivingEntity;
+	public fun getMainHand ()Lorg/bukkit/inventory/MainHand;
+	public fun getMannequin ()Lorg/bukkit/entity/Mannequin;
+	public fun getProfile ()Lio/papermc/paper/datacomponent/item/ResolvableProfile;
+	public fun getProximityRange ()D
+	public fun getSkinParts ()Lcom/destroystokyo/paper/SkinParts$Mutable;
+	public fun getSpawnLocation ()Lorg/bukkit/Location;
+	public fun getVisiblePlayers ()Ljava/util/Set;
+	public fun hasAI ()Z
+	public fun hasGravity ()Z
+	public fun isCustomNameVisible ()Z
+	public fun isFollowingEntity ()Z
+	public fun isFollowingNearbyPlayers ()Z
+	public fun isImmovable ()Z
+	public fun isLookingAtPlayers ()Z
+	public fun isPathfindingEnabled ()Z
+	public fun isVisibleToAllPlayers ()Z
+	public fun onEvent (Lcc/modlabs/kpaper/npc/NPCEventType;Lkotlin/jvm/functions/Function1;)V
+	public fun overrideCustomName (Ljava/lang/String;Lorg/bukkit/entity/Player;)V
+	public fun overrideDescription (Ljava/lang/String;Lorg/bukkit/entity/Player;)V
+	public fun pausePatrolling ()Z
+	public fun pauseWalking ()Z
+	public fun removeAllEventHandlers ()V
+	public fun removeConversation ()V
+	public fun removeEventHandlers (Lcc/modlabs/kpaper/npc/NPCEventType;)V
+	public fun removeVisiblePlayer (Lorg/bukkit/entity/Player;)V
+	public fun resumePatrolling ()Z
+	public fun resumeWalking ()Z
+	public fun setAI (Z)V
+	public fun setBoots (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setChestplate (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setConversation (Lkotlin/jvm/functions/Function1;)V
+	public fun setCustomNameVisible (Z)V
+	public fun setDescription (Lnet/kyori/adventure/text/Component;)V
+	public fun setEquipment (Lorg/bukkit/inventory/EquipmentSlot;Lorg/bukkit/inventory/ItemStack;)V
+	public fun setGravity (Z)V
+	public fun setHelmet (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setImmovable (Z)V
+	public fun setItemInMainHand (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setItemInOffHand (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setLeggings (Lorg/bukkit/inventory/ItemStack;)V
+	public fun setLookAtPlayers (Z)V
+	public fun setMainHand (Lorg/bukkit/inventory/MainHand;)V
+	public fun setPathfindingEnabled (Z)V
+	public fun setProfile (Lio/papermc/paper/datacomponent/item/ResolvableProfile;)V
+	public fun setProximityRange (D)V
+	public fun setSkinParts (Lcom/destroystokyo/paper/SkinParts$Mutable;)V
+	public fun setSpawnLocation (Lorg/bukkit/Location;)V
+	public fun setVisibleToAllPlayers (Z)V
+	public fun setVisibleToPlayers (Ljava/util/Set;)V
+	public fun startConversation (Lorg/bukkit/entity/Player;)V
+	public fun startPatrolling (Ljava/util/List;)Z
+	public fun startWalking ()Z
+	public fun stopFollowing ()Z
+	public fun stopFollowingNearbyPlayers ()Z
+	public fun stopPatrolling ()Z
+	public fun teleport (Lorg/bukkit/Location;)Z
+	public fun walkPath (Ljava/util/List;)Z
+	public fun walkTo (Lorg/bukkit/Location;)Z
+}
+
+public final class cc/modlabs/kpaper/npc/NPCManager {
+	public fun <init> ()V
+	public final fun clearAll ()V
+	public final fun createNPC (Ljava/lang/String;Lorg/bukkit/Location;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/npc/NPC;
+	public final fun getAllNPCs ()Ljava/util/Collection;
+	public final fun getNPC (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/NPC;
+	public final fun makeAllWalkTo (Lorg/bukkit/Location;)V
+	public final fun removeNPC (Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/npc/Pathfinder {
+	public static final field INSTANCE Lcc/modlabs/kpaper/npc/Pathfinder;
+	public final fun findPath (Lorg/bukkit/Location;Lorg/bukkit/Location;)Ljava/util/List;
+	public final fun needsJump (Lorg/bukkit/entity/LivingEntity;Lorg/bukkit/Location;)Z
+}
+
+public final class cc/modlabs/kpaper/npc/ShopNPC {
+	public fun <init> (Lorg/bukkit/Location;)V
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getNPC ()Lcc/modlabs/kpaper/npc/NPC;
+}
+
+public final class cc/modlabs/kpaper/packets/PacketInterceptor {
+	public static final field INSTANCE Lcc/modlabs/kpaper/packets/PacketInterceptor;
+	public final fun registerPacketCallback (Ljava/lang/Class;Lkotlin/jvm/functions/Function2;)I
+	public final fun unregisterPacketCallback (I)V
+}
+
+public final class cc/modlabs/kpaper/packets/PacketInterceptorKt {
+	public static final fun injectPacketInterceptor (Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/party/DefaultPartyAPI : cc/modlabs/kpaper/party/PartyAPI {
+	public fun <init> ()V
+	public final fun addMember (Ljava/lang/String;Ljava/util/UUID;)Z
+	public fun areInSameParty (Ljava/util/UUID;Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public final fun createParty (Ljava/lang/String;Ljava/util/UUID;I)Lcc/modlabs/kpaper/party/PartyAPI$PartyData;
+	public static synthetic fun createParty$default (Lcc/modlabs/kpaper/party/DefaultPartyAPI;Ljava/lang/String;Ljava/util/UUID;IILjava/lang/Object;)Lcc/modlabs/kpaper/party/PartyAPI$PartyData;
+	public fun getAllInvites (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOnlinePartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOnlinePartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyData (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyId (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyId (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMembersOfPlayer (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPlayerParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPlayerParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun hasInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public final fun invite (Ljava/util/UUID;Ljava/lang/String;Ljava/util/UUID;Ljava/time/Duration;)V
+	public static synthetic fun invite$default (Lcc/modlabs/kpaper/party/DefaultPartyAPI;Ljava/util/UUID;Ljava/lang/String;Ljava/util/UUID;Ljava/time/Duration;ILjava/lang/Object;)V
+	public fun isInParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun isInParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun isPartyFull (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun isPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun openPartyGUI (Lorg/bukkit/entity/Player;)V
+	public fun partyExists (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public final fun removeMember (Ljava/util/UUID;)V
+}
+
+public final class cc/modlabs/kpaper/party/DefaultPartyGUIFactory : cc/modlabs/kpaper/party/PartyGUIFactory {
+	public fun <init> ()V
+	public fun build (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/party/PartyAPI$PartyData;)Lorg/bukkit/inventory/Inventory;
+}
+
+public final class cc/modlabs/kpaper/party/Party {
+	public static final field INSTANCE Lcc/modlabs/kpaper/party/Party;
+	public final fun getApi ()Lcc/modlabs/kpaper/party/PartyAPI;
+	public final fun setApi (Lcc/modlabs/kpaper/party/PartyAPI;)V
+}
+
+public abstract interface class cc/modlabs/kpaper/party/PartyAPI {
+	public abstract fun areInSameParty (Ljava/util/UUID;Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getAllInvites (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getOnlinePartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getOnlinePartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyData (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyId (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyId (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPartyMembersOfPlayer (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPlayerParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun getPlayerParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun hasInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun isInParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun isInParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun isPartyFull (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun isPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public abstract fun openPartyGUI (Lorg/bukkit/entity/Player;)V
+	public abstract fun partyExists (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+}
+
+public final class cc/modlabs/kpaper/party/PartyAPI$DefaultImpls {
+	public static fun getPartyId (Lcc/modlabs/kpaper/party/PartyAPI;Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public static fun getPlayerParty (Lcc/modlabs/kpaper/party/PartyAPI;Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public static fun isInParty (Lcc/modlabs/kpaper/party/PartyAPI;Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+}
+
+public final class cc/modlabs/kpaper/party/PartyAPI$PartyData {
+	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Ljava/util/Set;JI)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/UUID;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun component4 ()J
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Ljava/util/Set;JI)Lcc/modlabs/kpaper/party/PartyAPI$PartyData;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/party/PartyAPI$PartyData;Ljava/lang/String;Ljava/util/UUID;Ljava/util/Set;JIILjava/lang/Object;)Lcc/modlabs/kpaper/party/PartyAPI$PartyData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()J
+	public final fun getLeader ()Ljava/util/UUID;
+	public final fun getMaxSize ()I
+	public final fun getMemberCount ()I
+	public final fun getMembers ()Ljava/util/Set;
+	public final fun getPartyId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isFull ()Z
+	public final fun isLeader (Ljava/util/UUID;)Z
+	public final fun isMember (Ljava/util/UUID;)Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/party/PartyAPI$PartyInvite {
+	public fun <init> (Ljava/lang/String;Ljava/util/UUID;Ljava/util/UUID;JJ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/UUID;
+	public final fun component3 ()Ljava/util/UUID;
+	public final fun component4 ()J
+	public final fun component5 ()J
+	public final fun copy (Ljava/lang/String;Ljava/util/UUID;Ljava/util/UUID;JJ)Lcc/modlabs/kpaper/party/PartyAPI$PartyInvite;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/party/PartyAPI$PartyInvite;Ljava/lang/String;Ljava/util/UUID;Ljava/util/UUID;JJILjava/lang/Object;)Lcc/modlabs/kpaper/party/PartyAPI$PartyInvite;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()J
+	public final fun getExpiresAt ()J
+	public final fun getInvitedPlayer ()Ljava/util/UUID;
+	public final fun getInviter ()Ljava/util/UUID;
+	public final fun getPartyId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isExpired ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/party/PartyGUI {
+	public static final field INSTANCE Lcc/modlabs/kpaper/party/PartyGUI;
+	public final fun getFactory ()Lcc/modlabs/kpaper/party/PartyGUIFactory;
+	public final fun setFactory (Lcc/modlabs/kpaper/party/PartyGUIFactory;)V
+}
+
+public abstract interface class cc/modlabs/kpaper/party/PartyGUIFactory {
+	public abstract fun build (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/party/PartyAPI$PartyData;)Lorg/bukkit/inventory/Inventory;
+}
+
+public final class cc/modlabs/kpaper/party/RedisPartyAPI : cc/modlabs/kpaper/party/PartyAPI, java/lang/AutoCloseable {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lredis/clients/jedis/JedisPooled;)V
+	public fun areInSameParty (Ljava/util/UUID;Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun close ()V
+	public fun getAllInvites (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOnlinePartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getOnlinePartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyData (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyId (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyId (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyMembersOfPlayer (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPlayerParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPlayerParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun hasInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun isInParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun isInParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun isPartyFull (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public fun isPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
+	public fun openPartyGUI (Lorg/bukkit/entity/Player;)V
+	public fun partyExists (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+}
+
+public final class cc/modlabs/kpaper/scoreboard/SimpleScoreboard {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun add (Ljava/lang/String;)V
+	public final fun add (Ljava/lang/String;Ljava/lang/Integer;)V
+	public static synthetic fun add$default (Lcc/modlabs/kpaper/scoreboard/SimpleScoreboard;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
+	public final fun blankLine ()V
+	public final fun build ()V
+	public final fun reset ()V
+	public final fun send ([Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/util/ConsoleFunctionsKt {
+	public static final field ANSI_BLACK Ljava/lang/String;
+	public static final field ANSI_BLUE Ljava/lang/String;
+	public static final field ANSI_CYAN Ljava/lang/String;
+	public static final field ANSI_GREEN Ljava/lang/String;
+	public static final field ANSI_PURPLE Ljava/lang/String;
+	public static final field ANSI_RED Ljava/lang/String;
+	public static final field ANSI_RESET Ljava/lang/String;
+	public static final field ANSI_WHITE Ljava/lang/String;
+	public static final field ANSI_YELLOW Ljava/lang/String;
+	public static final fun divider (ILjava/lang/String;)V
+	public static synthetic fun divider$default (ILjava/lang/String;ILjava/lang/Object;)V
+	public static final fun printColor (Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun printlnBlue (Ljava/lang/String;)V
+	public static final fun printlnColor (Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun printlnCyan (Ljava/lang/String;)V
+	public static final fun printlnGreen (Ljava/lang/String;)V
+	public static final fun printlnPurple (Ljava/lang/String;)V
+	public static final fun printlnRed (Ljava/lang/String;)V
+	public static final fun printlnYellow (Ljava/lang/String;)V
+	public static final fun progressBar (DILjava/lang/String;)V
+	public static synthetic fun progressBar$default (DILjava/lang/String;ILjava/lang/Object;)V
+	public static final fun readLinePrompt (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun readLinePrompt$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun sectionTitle (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun sectionTitle$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+}
+
+public final class cc/modlabs/kpaper/util/ConversationAPI {
+	public fun <init> (Lorg/bukkit/entity/Player;)V
+	public final fun conversation (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class cc/modlabs/kpaper/util/ConversationAPI$ConversationBuilder {
+	public fun <init> (Lcc/modlabs/kpaper/util/ConversationAPI;)V
+	public final fun build ()V
+	public final fun done (Lkotlin/jvm/functions/Function1;)V
+	public final fun question (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class cc/modlabs/kpaper/util/ConversationAPI$Question {
+	public fun <init> (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lnet/kyori/adventure/text/Component;
+	public final fun component3 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/util/ConversationAPI$Question;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/util/ConversationAPI$Question;Ljava/lang/String;Lnet/kyori/adventure/text/Component;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcc/modlabs/kpaper/util/ConversationAPI$Question;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIdentifier ()Ljava/lang/String;
+	public final fun getPrompt ()Lnet/kyori/adventure/text/Component;
+	public final fun getValidator ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class cc/modlabs/kpaper/util/Identity : net/kyori/adventure/key/Key, org/bukkit/Keyed {
+	public abstract fun asString ()Ljava/lang/String;
+	public abstract fun getIdentityKey ()Lnet/kyori/adventure/key/Key;
+	public abstract fun getKey ()Lorg/bukkit/NamespacedKey;
+	public abstract fun key ()Lnet/kyori/adventure/key/Key;
+	public abstract fun namespace ()Ljava/lang/String;
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/util/Identity$DefaultImpls {
+	public static fun asString (Lcc/modlabs/kpaper/util/Identity;)Ljava/lang/String;
+	public static fun getKey (Lcc/modlabs/kpaper/util/Identity;)Lorg/bukkit/NamespacedKey;
+	public static fun key (Lcc/modlabs/kpaper/util/Identity;)Lnet/kyori/adventure/key/Key;
+	public static fun namespace (Lcc/modlabs/kpaper/util/Identity;)Ljava/lang/String;
+	public static fun value (Lcc/modlabs/kpaper/util/Identity;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/util/LoggerFunctionsKt {
+	public static final fun consoleOutput (Ljava/lang/String;)V
+	public static final fun debug (Ljava/util/logging/Logger;Ljava/lang/String;)V
+	public static final fun error (Ljava/util/logging/Logger;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun error$default (Ljava/util/logging/Logger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun getInternalKPaperLogger ()Lorg/slf4j/Logger;
+	public static final fun getLogger ()Lorg/slf4j/Logger;
+	public static final fun logDebug (Ljava/lang/String;)V
+	public static final fun logError (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun logError$default (Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun logFailure (Ljava/lang/String;)V
+	public static final fun logInfo (Ljava/lang/String;)V
+	public static final fun logSuccess (Ljava/lang/String;)V
+	public static final fun logWarning (Ljava/lang/String;)V
+	public static final fun warn (Ljava/util/logging/Logger;Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/util/RandomFunctionsKt {
+	public static final fun getMultiSeededRandom (J[I)Lkotlin/random/Random;
+	public static final fun getRandomFloatAt (IIJ)F
+	public static final fun getRandomIntAt (IIJI)I
+}
+
+public final class cc/modlabs/kpaper/util/TextUtilsKt {
+	public static final fun toLegacy (Lnet/kyori/adventure/text/Component;)Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/visuals/VisualElement {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()I
+	public final fun component4-FghU774 ()Lkotlin/time/Duration;
+	public final fun copy-Q2Q30fc (Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/time/Duration;)Lcc/modlabs/kpaper/visuals/VisualElement;
+	public static synthetic fun copy-Q2Q30fc$default (Lcc/modlabs/kpaper/visuals/VisualElement;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILkotlin/time/Duration;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/VisualElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration-FghU774 ()Lkotlin/time/Duration;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getPersistent ()Z
+	public final fun getSlot ()I
+	public final fun getValid ()Z
+	public final fun getVisualizable ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun run-LRDsOJo (J)V
+	public final fun setDuration-BwNAW2A (Lkotlin/time/Duration;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class cc/modlabs/kpaper/visuals/VisualManager {
+	public abstract fun addVisual (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/VisualElement;)V
+	public abstract fun removePlayer (Lorg/bukkit/entity/Player;)V
+	public abstract fun removeVisual (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/VisualsStore {
+	public fun <init> (I)V
+	public final fun addVisual (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/VisualElement;)V
+	public final fun getMaxSize ()I
+	public final fun hasVisual (Lorg/bukkit/entity/Player;)Z
+	public final fun removePlayer (Lorg/bukkit/entity/Player;)V
+	public final fun removeVisual (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public final fun renderAll-LRDsOJo (J)Lkotlin/sequences/Sequence;
+	public final fun setMaxSize (I)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/BlockDisplayManager {
+	public fun <init> ()V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun createBlockDisplay (Lorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;
+	public final fun createBlockDisplay (Lorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;
+	public static synthetic fun createBlockDisplay$default (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;
+	public static synthetic fun createBlockDisplay$default (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;
+	public final fun get (I)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;
+	public final fun getAllBlockDisplays ()Ljava/util/Collection;
+	public final fun isBlockDisplay (I)Z
+	public final fun removeAllBlockDisplays ()V
+	public final fun removeBlockDisplay (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun updateBlock (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lorg/bukkit/block/data/BlockData;)V
+	public final fun updateLocation (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lorg/bukkit/Location;)V
+	public final fun updateScale (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun updateTransformation (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplay {
+	public fun <init> (ILorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)V
+	public synthetic fun <init> (ILorg/bukkit/block/data/BlockData;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun getBillboard ()Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public final fun getBlockData ()Lorg/bukkit/block/data/BlockData;
+	public final fun getDisplayTransformation ()Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public final fun getEntityId ()I
+	public final fun getGlowing ()Z
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getScale ()Lcom/github/retrooper/packetevents/util/Vector3f;
+	public final fun getViewers ()Ljava/util/Set;
+	public final fun getYOffset ()D
+	public final fun glowingInt ()I
+	public final fun isVisibleTo (Lorg/bukkit/entity/Player;)Z
+	public final fun moveToLocation (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/Location;)V
+	public final fun remove (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun setBlock (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lorg/bukkit/block/data/BlockData;)V
+	public final fun setBlockData (Lorg/bukkit/block/data/BlockData;)V
+	public final fun setDisplayTransformation (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)V
+	public final fun setLocation (Lorg/bukkit/Location;)V
+	public final fun setScale (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setScale (Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setTransformation (Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager;Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;)V
+	public final fun setYOffset (D)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard : java/lang/Enum {
+	public static final field CENTER Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public static final field FIXED Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public static final field HORIZONTAL Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public static final field VERTICAL Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public final fun getBillboardValue ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayBillboard;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation : java/lang/Enum {
+	public static final field FIRSTPERSON_LEFTHAND Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field FIRSTPERSON_RIGHTHAND Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field FIXED Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field GROUND Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field GUI Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field HEAD Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field NONE Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field THIRDPERSON_LEFTHAND Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static final field THIRDPERSON_RIGHTHAND Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/BlockDisplayManager$BlockDisplayTransformation;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/ItemDisplayManager {
+	public fun <init> ()V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun createItemDisplay (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;
+	public final fun createItemDisplay (Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;
+	public static synthetic fun createItemDisplay$default (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;
+	public static synthetic fun createItemDisplay$default (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;
+	public final fun get (I)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;
+	public final fun getAllItemDisplays ()Ljava/util/Collection;
+	public final fun isItemDisplay (I)Z
+	public final fun removeAllItemDisplays ()V
+	public final fun removeItemDisplay (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun updateItem (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lorg/bukkit/inventory/ItemStack;)V
+	public final fun updateLocation (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lorg/bukkit/Location;)V
+	public final fun updateScale (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun updateTransformation (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplay {
+	public fun <init> (ILorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/protocol/item/type/ItemType;Lcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)V
+	public synthetic fun <init> (ILorg/bukkit/inventory/ItemStack;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;ZLcom/github/retrooper/packetevents/protocol/item/type/ItemType;Lcom/github/retrooper/packetevents/util/Vector3f;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun getBillboard ()Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public final fun getDisplayTransformation ()Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public final fun getEntityId ()I
+	public final fun getGlowing ()Z
+	public final fun getItem ()Lorg/bukkit/inventory/ItemStack;
+	public final fun getItemType ()Lcom/github/retrooper/packetevents/protocol/item/type/ItemType;
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getScale ()Lcom/github/retrooper/packetevents/util/Vector3f;
+	public final fun getViewers ()Ljava/util/Set;
+	public final fun getYOffset ()D
+	public final fun glowingInt ()I
+	public final fun isVisibleTo (Lorg/bukkit/entity/Player;)Z
+	public final fun moveToLocation (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/Location;)V
+	public final fun remove (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun setDisplayTransformation (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)V
+	public final fun setItem (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lorg/bukkit/inventory/ItemStack;)V
+	public final fun setItem (Lorg/bukkit/inventory/ItemStack;)V
+	public final fun setItemType (Lcom/github/retrooper/packetevents/protocol/item/type/ItemType;)V
+	public final fun setLocation (Lorg/bukkit/Location;)V
+	public final fun setScale (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setScale (Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setTransformation (Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager;Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;)V
+	public final fun setYOffset (D)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard : java/lang/Enum {
+	public static final field CENTER Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public static final field FIXED Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public static final field HORIZONTAL Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public static final field VERTICAL Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public final fun getBillboardValue ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayBillboard;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation : java/lang/Enum {
+	public static final field FIRSTPERSON_LEFTHAND Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field FIRSTPERSON_RIGHTHAND Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field FIXED Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field GROUND Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field GUI Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field HEAD Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field NONE Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field THIRDPERSON_LEFTHAND Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static final field THIRDPERSON_RIGHTHAND Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()I
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/ItemDisplayManager$ItemDisplayTransformation;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/TextDisplayFlags : java/lang/Enum {
+	public static final field ALIGNMENT_CENTER Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static final field ALIGNMENT_LEFT Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static final field ALIGNMENT_RIGHT Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static final field Companion Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags$Companion;
+	public static final field HAS_SHADOW Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static final field IS_SEE_THROUGH Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static final field USE_DEFAULT_BACKGROUND_COLOR Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public final fun getBitValue ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/TextDisplayFlags;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/TextDisplayFlags$Companion {
+	public final fun calculateBitMask (Ljava/util/List;)I
+	public final fun fromBitMask (I)Ljava/util/List;
+}
+
+public final class cc/modlabs/kpaper/visuals/display/TextDisplayManager {
+	public fun <init> ()V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun createTextDisplay (Ljava/lang/String;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;III)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;
+	public final fun createTextDisplay (Ljava/lang/String;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;III)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;
+	public static synthetic fun createTextDisplay$default (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Ljava/lang/String;Lorg/bukkit/Location;Ljava/util/Collection;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;IIIILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;
+	public static synthetic fun createTextDisplay$default (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Ljava/lang/String;Lorg/bukkit/Location;Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;IIIILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;
+	public final fun get (I)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;
+	public final fun getAllTextDisplays ()Ljava/util/Collection;
+	public final fun isTextDisplay (I)Z
+	public final fun removeAllTextDisplays ()V
+	public final fun removeTextDisplay (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;Lorg/bukkit/entity/Player;)Z
+	public final fun startRotation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;IF)V
+	public static synthetic fun startRotation$default (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;IFILjava/lang/Object;)V
+	public final fun stopRotation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;)V
+	public final fun updateLocation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;Lorg/bukkit/Location;)V
+	public final fun updateText (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;Ljava/lang/String;)V
+	public final fun updateTransformation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay {
+	public fun <init> (ILjava/lang/String;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;III)V
+	public synthetic fun <init> (ILjava/lang/String;Lorg/bukkit/Location;Ljava/util/Set;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;ZILjava/util/List;ILcom/github/retrooper/packetevents/util/Vector3f;FLcom/github/retrooper/packetevents/util/Vector3f;Lcom/github/retrooper/packetevents/util/Quaternion4f;Lcom/github/retrooper/packetevents/util/Quaternion4f;IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addViewer (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun getBackgroundColor ()I
+	public final fun getBillboard ()Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public final fun getDisplayFlags ()Ljava/util/List;
+	public final fun getEntityId ()I
+	public final fun getGlowing ()Z
+	public final fun getInterpolationDelay ()I
+	public final fun getLeftRotation ()Lcom/github/retrooper/packetevents/util/Quaternion4f;
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getOpacity ()I
+	public final fun getPositionRotationInterpolationDuration ()I
+	public final fun getRightRotation ()Lcom/github/retrooper/packetevents/util/Quaternion4f;
+	public final fun getScale ()Lcom/github/retrooper/packetevents/util/Vector3f;
+	public final fun getText ()Ljava/lang/String;
+	public final fun getTransformationInterpolationDuration ()I
+	public final fun getTranslation ()Lcom/github/retrooper/packetevents/util/Vector3f;
+	public final fun getViewRange ()F
+	public final fun getViewers ()Ljava/util/Set;
+	public final fun getWidth ()F
+	public final fun getYOffset ()D
+	public final fun glowingInt ()I
+	public final fun isVisibleTo (Lorg/bukkit/entity/Player;)Z
+	public final fun moveToLocation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Lorg/bukkit/Location;)V
+	public final fun remove (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;)V
+	public final fun removeViewer (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Lorg/bukkit/entity/Player;)Z
+	public final fun setInterpolationDelay (I)V
+	public final fun setLeftRotation (Lcom/github/retrooper/packetevents/util/Quaternion4f;)V
+	public final fun setLocation (Lorg/bukkit/Location;)V
+	public final fun setPositionRotationInterpolationDuration (I)V
+	public final fun setRightRotation (Lcom/github/retrooper/packetevents/util/Quaternion4f;)V
+	public final fun setScale (Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setText (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;Ljava/lang/String;)V
+	public final fun setText (Ljava/lang/String;)V
+	public final fun setTransformationInterpolationDuration (I)V
+	public final fun setTranslation (Lcom/github/retrooper/packetevents/util/Vector3f;)V
+	public final fun setViewRange (F)V
+	public final fun setWidth (F)V
+	public final fun setYOffset (D)V
+	public final fun startRotation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;IF)V
+	public static synthetic fun startRotation$default (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplay;Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;IFILjava/lang/Object;)V
+	public final fun stopRotation (Lcc/modlabs/kpaper/visuals/display/TextDisplayManager;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard : java/lang/Enum {
+	public static final field CENTER Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public static final field FIXED Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public static final field HORIZONTAL Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public static final field VERTICAL Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public final fun getBillboardValue ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+	public static fun values ()[Lcc/modlabs/kpaper/visuals/display/TextDisplayManager$TextDisplayBillboard;
+}
+
+public final class cc/modlabs/kpaper/visuals/effect/ComplexParticleEffect : cc/modlabs/kpaper/visuals/effect/ParticleEffect {
+	public fun <init> (Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lcc/modlabs/kpaper/visuals/effect/ComplexParticleEffect;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/visuals/effect/ComplexParticleEffect;Ljava/util/Set;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/effect/ComplexParticleEffect;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEffects ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun play ()V
+	public fun play (Ljava/util/Set;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
+	public fun play (Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
+	public fun play ([Lorg/bukkit/Location;)V
+	public fun play ([Lorg/bukkit/entity/Entity;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/visuals/effect/ParticleData : com/destroystokyo/paper/ParticleBuilder, cc/modlabs/kpaper/visuals/effect/ParticleEffect {
+	public fun <init> (Lorg/bukkit/Particle;)V
+	public final fun component1 ()Lorg/bukkit/Particle;
+	public final fun copy (Lorg/bukkit/Particle;)Lcc/modlabs/kpaper/visuals/effect/ParticleData;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/visuals/effect/ParticleData;Lorg/bukkit/Particle;ILjava/lang/Object;)Lcc/modlabs/kpaper/visuals/effect/ParticleData;
+	public final fun edit (Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/visuals/effect/ParticleData;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getType ()Lorg/bukkit/Particle;
+	public fun hashCode ()I
+	public final fun offset (Lcc/modlabs/kpaper/world/shape/CubicalShape;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public fun play ()V
+	public fun play (Ljava/util/Set;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
+	public fun play (Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
+	public fun play ([Lorg/bukkit/Location;)V
+	public fun play ([Lorg/bukkit/entity/Entity;)V
+	public final fun putData (Lorg/bukkit/Particle;)Lcom/destroystokyo/paper/ParticleBuilder;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class cc/modlabs/kpaper/visuals/effect/ParticleEffect {
+	public abstract fun play ()V
+	public abstract fun play (Ljava/util/Set;Ljava/util/Set;)V
+	public abstract fun play (Lorg/bukkit/Location;Ljava/util/Set;)V
+	public abstract fun play (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
+	public abstract fun play (Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
+	public abstract fun play ([Lorg/bukkit/Location;)V
+	public abstract fun play ([Lorg/bukkit/entity/Entity;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/effect/ParticleEffect$DefaultImpls {
+	public static fun play (Lcc/modlabs/kpaper/visuals/effect/ParticleEffect;Lorg/bukkit/Location;Ljava/util/Set;)V
+	public static fun play (Lcc/modlabs/kpaper/visuals/effect/ParticleEffect;Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
+	public static fun play (Lcc/modlabs/kpaper/visuals/effect/ParticleEffect;Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
+}
+
+public final class cc/modlabs/kpaper/visuals/impl/ActionBarVisuals : cc/modlabs/kpaper/visuals/VisualManager {
+	public static final field INSTANCE Lcc/modlabs/kpaper/visuals/impl/ActionBarVisuals;
+	public fun addVisual (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/VisualElement;)V
+	public fun removePlayer (Lorg/bukkit/entity/Player;)V
+	public fun removeVisual (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public final fun runActionBars ()V
+}
+
+public final class cc/modlabs/kpaper/visuals/impl/BossBarVisuals : cc/modlabs/kpaper/visuals/VisualManager {
+	public static final field INSTANCE Lcc/modlabs/kpaper/visuals/impl/BossBarVisuals;
+	public fun addVisual (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/VisualElement;)V
+	public fun removePlayer (Lorg/bukkit/entity/Player;)V
+	public fun removeVisual (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public final fun runBossBar ()V
+}
+
+public final class cc/modlabs/kpaper/visuals/impl/TabVisuals : cc/modlabs/kpaper/visuals/VisualManager {
+	public static final field INSTANCE Lcc/modlabs/kpaper/visuals/impl/TabVisuals;
+	public fun addVisual (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/visuals/VisualElement;)V
+	public fun removePlayer (Lorg/bukkit/entity/Player;)V
+	public fun removeVisual (Lorg/bukkit/entity/Player;Ljava/lang/String;)V
+	public final fun runTablist ()V
+}
+
+public final class cc/modlabs/kpaper/world/Direction : java/lang/Enum {
+	public static final field EAST Lcc/modlabs/kpaper/world/Direction;
+	public static final field MIDDLE Lcc/modlabs/kpaper/world/Direction;
+	public static final field NORTH Lcc/modlabs/kpaper/world/Direction;
+	public static final field NORTH_EAST Lcc/modlabs/kpaper/world/Direction;
+	public static final field NORTH_WEST Lcc/modlabs/kpaper/world/Direction;
+	public static final field SOUTH Lcc/modlabs/kpaper/world/Direction;
+	public static final field SOUTH_EAST Lcc/modlabs/kpaper/world/Direction;
+	public static final field SOUTH_WEST Lcc/modlabs/kpaper/world/Direction;
+	public static final field WEST Lcc/modlabs/kpaper/world/Direction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/world/Direction;
+	public static fun values ()[Lcc/modlabs/kpaper/world/Direction;
+}
+
+public class cc/modlabs/kpaper/world/EmptyWorldGenerator : org/bukkit/generator/ChunkGenerator {
+	public fun <init> ()V
+	public fun getBaseHeight (Lorg/bukkit/generator/WorldInfo;Ljava/util/Random;IILorg/bukkit/HeightMap;)I
+	public fun getDefaultPopulators (Lorg/bukkit/World;)Ljava/util/List;
+	public fun shouldGenerateCaves ()Z
+	public fun shouldGenerateDecorations ()Z
+	public fun shouldGenerateMobs ()Z
+	public fun shouldGenerateNoise ()Z
+	public fun shouldGenerateStructures ()Z
+}
+
+public class cc/modlabs/kpaper/world/FlatWorldGenerator : org/bukkit/generator/ChunkGenerator {
+	public fun <init> ()V
+	public fun generateBedrock (Lorg/bukkit/generator/WorldInfo;Ljava/util/Random;IILorg/bukkit/generator/ChunkGenerator$ChunkData;)V
+	public fun generateSurface (Lorg/bukkit/generator/WorldInfo;Ljava/util/Random;IILorg/bukkit/generator/ChunkGenerator$ChunkData;)V
+	public fun getBaseHeight (Lorg/bukkit/generator/WorldInfo;Ljava/util/Random;IILorg/bukkit/HeightMap;)I
+	public fun getDefaultPopulators (Lorg/bukkit/World;)Ljava/util/List;
+	public fun shouldGenerateCaves ()Z
+	public fun shouldGenerateDecorations ()Z
+	public fun shouldGenerateMobs ()Z
+	public fun shouldGenerateNoise ()Z
+	public fun shouldGenerateStructures ()Z
+}
+
+public final class cc/modlabs/kpaper/world/StringLocationKt {
+	public static final fun toBlockPos (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lnet/minecraft/core/BlockPos;
+	public static final fun toBukkitLocation (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lorg/bukkit/Location;
+	public static final fun toStringLocation (Lorg/bukkit/Location;)Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+}
+
+public final class cc/modlabs/kpaper/world/shape/CubicalShape {
+	public fun <init> (DDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Lcc/modlabs/kpaper/world/shape/CubicalShape;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/world/shape/CubicalShape;DDDILjava/lang/Object;)Lcc/modlabs/kpaper/world/shape/CubicalShape;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDepth ()D
+	public final fun getHeight ()D
+	public final fun getLength ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

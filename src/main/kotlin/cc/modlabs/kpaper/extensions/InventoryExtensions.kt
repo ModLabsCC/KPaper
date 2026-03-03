@@ -3,7 +3,6 @@
 import cc.modlabs.kpaper.coroutines.taskRunLater
 import cc.modlabs.kpaper.inventory.ItemBuilder
 import cc.modlabs.kpaper.inventory.toItemBuilder
-import cc.modlabs.kpaper.main.PluginInstance
 import dev.fruxz.ascend.extension.isNull
 import dev.fruxz.stacked.text
 import org.bukkit.Bukkit
@@ -21,8 +20,14 @@ import org.jetbrains.annotations.ApiStatus.Experimental
 import java.util.UUID
 
 // Constants for inventory namespaces
-val NAMESPACE_GUI_IDENTIFIER = pluginKey("gui_identifier")
-val NAMESPACE_ITEM_IDENTIFIER = pluginKey("item_identifier")
+val GUI_IDENTIFIER_KEY = pluginKey("gui_identifier")
+val ITEM_IDENTIFIER_KEY = pluginKey("item_identifier")
+
+@Deprecated("Use GUI_IDENTIFIER_KEY.", ReplaceWith("GUI_IDENTIFIER_KEY"))
+val NAMESPACE_GUI_IDENTIFIER = GUI_IDENTIFIER_KEY
+
+@Deprecated("Use ITEM_IDENTIFIER_KEY.", ReplaceWith("ITEM_IDENTIFIER_KEY"))
+val NAMESPACE_ITEM_IDENTIFIER = ITEM_IDENTIFIER_KEY
 
 
 /**
@@ -93,14 +98,14 @@ fun openWithIdentifier(player: Player, inv: Inventory, identifier: String? = nul
 
 fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey, String>? = arrayOf(), identificationItem: ItemStack = Material.LIGHT_GRAY_STAINED_GLASS_PANE.asQuantity(1)) {
     this.setItem(0, this.getItem(0)?.toItemBuilder {
-        addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
+        addPersistentData(GUI_IDENTIFIER_KEY, identifier)
         identifiers.forEach { map ->
             map?.forEach { (key, value) ->
                 addPersistentData(key, value)
             }
         }
     }?.build() ?: identificationItem.toItemBuilder {
-        addPersistentData(NAMESPACE_GUI_IDENTIFIER, identifier)
+        addPersistentData(GUI_IDENTIFIER_KEY, identifier)
         identifiers.forEach { map ->
             map?.forEach { (key, value) ->
                 addPersistentData(key, value)
@@ -111,14 +116,14 @@ fun Inventory.identify(identifier: String, vararg identifiers: Map<NamespacedKey
 
 fun Inventory.isIdentifiedAs(identifier: String): Boolean {
     return this.getItem(0)?.itemMeta?.persistentDataContainer?.get(
-        NAMESPACE_GUI_IDENTIFIER,
+        GUI_IDENTIFIER_KEY,
         PersistentDataType.STRING
     ) == identifier
 }
 
 val Inventory.identifier: String?
     get() = this.getItem(0)?.itemMeta?.persistentDataContainer?.get(
-        NAMESPACE_GUI_IDENTIFIER,
+        GUI_IDENTIFIER_KEY,
         PersistentDataType.STRING
     )
 
@@ -131,14 +136,14 @@ fun Inventory.identifier(namespacedKey: NamespacedKey): String? {
 
 fun ItemStack.isIdentifiedAs(identifier: String): Boolean {
     return this.itemMeta?.persistentDataContainer?.get(
-        NAMESPACE_ITEM_IDENTIFIER,
+        ITEM_IDENTIFIER_KEY,
         PersistentDataType.STRING
     ) == identifier
 }
 
 val ItemStack.identifier: String?
     get() = this.itemMeta?.persistentDataContainer?.get(
-        NAMESPACE_ITEM_IDENTIFIER,
+        ITEM_IDENTIFIER_KEY,
         PersistentDataType.STRING
     )
 
@@ -419,15 +424,20 @@ fun ItemStack.hasKey(namespacedKey: String): Boolean {
     ) ?: false
 }
 
-fun Inventory.clone(inventoryHolder: InventoryHolder? = null, shuffeld: Boolean = false): Inventory {
+fun Inventory.cloneCompat(inventoryHolder: InventoryHolder? = null, shuffled: Boolean = false): Inventory {
     val newInventory = Bukkit.createInventory(inventoryHolder, size)
     newInventory.contents = contents
 
-    if (shuffeld) {
+    if (shuffled) {
         newInventory.contents = newInventory.contents.shuffled()
     }
 
     return newInventory
+}
+
+@Deprecated("Typo in parameter name and ambiguous API name. Use cloneCompat(inventoryHolder, shuffled).", ReplaceWith("cloneCompat(inventoryHolder, shuffeld)"))
+fun Inventory.clone(inventoryHolder: InventoryHolder? = null, shuffeld: Boolean = false): Inventory {
+    return cloneCompat(inventoryHolder, shuffeld)
 }
 
 private inline fun <reified T> Array<T>.shuffled(): Array<T> {

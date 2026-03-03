@@ -155,7 +155,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @param condition the condition to check before removing the data (defaults to false)
      * @return the ItemBuilder with the persistent data removed (or unchanged if the condition is false)
      */
-    fun removePersistantDataIf(key: NamespacedKey, condition: Boolean = false): ItemBuilder {
+    fun removePersistentDataIf(key: NamespacedKey, condition: Boolean = false): ItemBuilder {
         if (condition) {
             val meta = itemStack.itemMeta
             meta.persistentDataContainer.remove(key)
@@ -163,6 +163,11 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
             return this
         }
         return this
+    }
+
+    @Deprecated("Typo in function name. Use removePersistentDataIf().", ReplaceWith("removePersistentDataIf(key, condition)"))
+    fun removePersistantDataIf(key: NamespacedKey, condition: Boolean = false): ItemBuilder {
+        return removePersistentDataIf(key, condition)
     }
 
     /**
@@ -355,7 +360,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
             "https://textures.minecraft.net/texture/$texture"
         }
 
-        val textureObject = MinecraftSkin(Textures(SKIN(skinUrl)))
+        val textureObject = MinecraftSkin(Textures(Skin(skinUrl)))
 
         val gson = Gson()
         val base64 = Base64.getEncoder().encodeToString(gson.toJson(textureObject).toByteArray())

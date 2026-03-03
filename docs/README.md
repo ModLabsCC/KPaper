@@ -13,6 +13,7 @@ Welcome to the comprehensive documentation for KPaper - a Kotlin utility library
 - [Plugin Development](core/plugin-development.md) - Understanding KPlugin and core concepts
 - [Feature Configuration](core/feature-config.md) - Managing plugin features
 - [Dependency Injection](core/dependency-injection.md) - Working with dependencies
+- [Naming Conventions](core/naming-conventions.md) - API and package naming standards
 
 ### API Guides
 - [Event System](api/events.md) - Event handling and custom events

@@ -1,3 +1,5 @@
+@file:kotlin.jvm.JvmName("TranslationExtensionKt")
+
 package cc.modlabs.kpaper.extensions
 
 import cc.modlabs.klassicx.extensions.code

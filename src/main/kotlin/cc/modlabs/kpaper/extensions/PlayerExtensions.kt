@@ -33,7 +33,10 @@ fun UUID.toPlayer(): Player? = Bukkit.getPlayer(this)
 
 fun String.toUUID(): UUID = UUID.fromString(this)
 
-fun CommandSender.sendEmtpyLine() = sendMessage(text(" "))
+fun CommandSender.sendEmptyLine() = sendMessage(text(" "))
+
+@Deprecated("Typo in function name. Use sendEmptyLine().", ReplaceWith("sendEmptyLine()"))
+fun CommandSender.sendEmtpyLine() = sendEmptyLine()
 
 fun Player.toOfflinePlayer(): OfflinePlayer = Bukkit.getOfflinePlayer(uniqueId)
 
@@ -93,9 +96,9 @@ fun Player.send(message: String) {
 }
 
 fun CommandSender.sendMessageBlock(vararg lines: String) {
-    sendEmtpyLine()
+    sendEmptyLine()
     lines.forEach { sendMessage(text(it)) }
-    sendEmtpyLine()
+    sendEmptyLine()
 }
 
 fun Player.title(

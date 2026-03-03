@@ -1,4 +1,6 @@
-﻿package cc.modlabs.kpaper.extensions
+@file:kotlin.jvm.JvmName("LocationExtensionKt")
+
+package cc.modlabs.kpaper.extensions
 
 import org.bukkit.*
 import org.bukkit.block.Block
@@ -53,8 +55,8 @@ fun Location.surroundings(): List<Location> {
 }
 
 
-fun str2Loc(str: String): Location {
-    val args = str.split(",").toTypedArray()
+fun parseLocation(serialized: String): Location {
+    val args = serialized.split(",").toTypedArray()
     val worldName = args[0]
     val world = Bukkit.getWorld(worldName) ?: throw IllegalArgumentException("World $worldName not found")
 
@@ -73,7 +75,9 @@ fun str2Loc(str: String): Location {
     return Location(Bukkit.getWorlds()[0], 0.5, 10.0, 0.5)
 }
 
-fun loc2BlockStr(loc: Location): String {
+fun String.toLocation(): Location = parseLocation(this)
+
+fun locationToBlockString(loc: Location): String {
     var location = ""
     location += loc.world.name + ","
     location += loc.blockX.toString() + ","
@@ -82,7 +86,7 @@ fun loc2BlockStr(loc: Location): String {
     return location
 }
 
-fun loc2Str(location: Location): String {
+fun locationToString(location: Location): String {
     var loc = ""
     loc += location.world.name + ","
     loc += location.x.toString() + ","
@@ -92,6 +96,15 @@ fun loc2Str(location: Location): String {
     loc += location.pitch
     return loc
 }
+
+@Deprecated("Use parseLocation(serialized).", ReplaceWith("parseLocation(str)"))
+fun str2Loc(str: String): Location = parseLocation(str)
+
+@Deprecated("Use locationToBlockString(loc).", ReplaceWith("locationToBlockString(loc)"))
+fun loc2BlockStr(loc: Location): String = locationToBlockString(loc)
+
+@Deprecated("Use locationToString(location).", ReplaceWith("locationToString(location)"))
+fun loc2Str(location: Location): String = locationToString(location)
 
 
 fun Location.asSafeLocation(): Location {
@@ -125,14 +138,23 @@ fun Location.toNorth(): Location {
     return this.apply { this.yaw = 180.0f; this.pitch = 0f }
 }
 
-fun Location.toSaveAbleString(): String {
+fun Location.toSavableString(): String {
     return "${world.name};$x;$y;$z"
 }
 
-fun Location.toSaveAbleBlockString(): String {
+fun Location.toSavableBlockString(): String {
     return "${world.name};${blockX};${blockY};${blockZ}"
 }
 
-fun Location.toSaveAbleDirectionalString(): String {
+fun Location.toSavableDirectionalString(): String {
     return "${world.name};$x;$y;$z;$yaw;$pitch"
 }
+
+@Deprecated("Typo in function name. Use toSavableString().", ReplaceWith("toSavableString()"))
+fun Location.toSaveAbleString(): String = toSavableString()
+
+@Deprecated("Typo in function name. Use toSavableBlockString().", ReplaceWith("toSavableBlockString()"))
+fun Location.toSaveAbleBlockString(): String = toSavableBlockString()
+
+@Deprecated("Typo in function name. Use toSavableDirectionalString().", ReplaceWith("toSavableDirectionalString()"))
+fun Location.toSaveAbleDirectionalString(): String = toSavableDirectionalString()

@@ -16,5 +16,7 @@ jobs:
           cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: API compatibility check
+        run: ./gradlew apiCheck --stacktrace
       - name: Build with Gradle
         run: ./gradlew build --stacktrace

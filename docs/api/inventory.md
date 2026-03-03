@@ -2,6 +2,27 @@
 
 KPaper provides a comprehensive inventory and GUI system that makes creating interactive menus, item builders, and custom inventories simple and intuitive.
 
+## Preferred Naming Migration
+
+Use the preferred API names below in new code. Legacy names still work as deprecated bridges.
+
+| Old API | Preferred API |
+|---|---|
+| `removePersistantDataIf(...)` | `removePersistentDataIf(...)` |
+| `Inventory.clone(..., shuffeld = ...)` | `Inventory.cloneCompat(..., shuffled = ...)` |
+| `NAMESPACE_GUI_IDENTIFIER` | `GUI_IDENTIFIER_KEY` |
+| `NAMESPACE_ITEM_IDENTIFIER` | `ITEM_IDENTIFIER_KEY` |
+
+```kotlin
+// Before
+builder.removePersistantDataIf(key, condition = true)
+val copy = inventory.clone(shuffeld = true)
+
+// After
+builder.removePersistentDataIf(key, condition = true)
+val copy = inventory.cloneCompat(shuffled = true)
+```
+
 ## Item Building
 
 ### Basic Item Creation

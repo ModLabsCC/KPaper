@@ -14,6 +14,11 @@ import org.bukkit.plugin.java.JavaPlugin
  */
 lateinit var PluginInstance: KPlugin
 
+/**
+ * Preferred lower-camel accessor for [PluginInstance].
+ */
+fun pluginInstance(): KPlugin = PluginInstance
+
 
 abstract class KPlugin : JavaPlugin() {
     /**

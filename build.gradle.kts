@@ -5,6 +5,7 @@ import java.util.*
 plugins {
     kotlin("jvm") version "2.1.20"
     `java-library`
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     kotlin("plugin.serialization") version "2.1.20"
     id("maven-publish")

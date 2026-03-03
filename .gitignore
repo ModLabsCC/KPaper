@@ -46,3 +46,4 @@ bin/
 
 .idea/*
 .kotlin/*
+/logs
