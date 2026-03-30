@@ -5,7 +5,6 @@ import cc.modlabs.kpaper.extensions.timer
 import cc.modlabs.kpaper.visuals.VisualElement
 import cc.modlabs.kpaper.visuals.VisualManager
 import cc.modlabs.kpaper.visuals.VisualsStore
-import dev.fruxz.stacked.text
 import org.bukkit.entity.Player
 import kotlin.time.Duration.Companion.seconds
 

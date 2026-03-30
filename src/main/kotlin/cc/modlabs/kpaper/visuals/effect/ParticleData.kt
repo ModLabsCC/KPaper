@@ -20,15 +20,18 @@ data class ParticleData(
 
     fun edit(block: ParticleData.() -> Unit) = apply(block)
 
-    override fun play(): Unit = spawn().dump()
+    override fun play() {
+        spawn().dump()
+    }
 
     override fun play(vararg locations: Location?): Unit = locations.forEach { location ->
         if (location == null) return@forEach
         location(location).spawn()
     }
 
-    override fun play(vararg entities: Entity?): Unit =
+    override fun play(vararg entities: Entity?) {
         receivers(entities.filterIsInstance<Player>()).spawn().dump()
+    }
 
     override fun play(locations: Set<Location>, entities: Set<Entity>) {
         val receivers = entities.filterIsInstance<Player>()

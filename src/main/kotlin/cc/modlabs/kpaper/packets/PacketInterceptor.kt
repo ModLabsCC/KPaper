@@ -1,8 +1,8 @@
 package cc.modlabs.kpaper.packets
 
+import cc.modlabs.klassicx.extensions.forceCast
 import cc.modlabs.kpaper.extensions.packetHandler
 import cc.modlabs.kpaper.util.getLogger
-import dev.fruxz.ascend.extension.forceCast
 import io.netty.channel.Channel
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext

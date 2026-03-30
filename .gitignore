@@ -47,3 +47,4 @@ bin/
 .idea/*
 .kotlin/*
 /logs
+/.gradle-user

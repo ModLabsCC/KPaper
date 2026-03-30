@@ -2,8 +2,8 @@
 
 package cc.modlabs.kpaper.extensions
 
+import cc.modlabs.klassicx.tools.minecraft.inMinecraftTicks
 import cc.modlabs.kpaper.visuals.effect.ParticleData
-import dev.fruxz.ascend.extension.time.inWholeMinecraftTicks
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Particle
@@ -239,13 +239,13 @@ class Melody(
     var delayPerBeat: Duration
         get() = ticksPerBeat.takeIf { it > 0 }?.minecraftTicks ?: Duration.ZERO
         set(value) {
-            ticksPerBeat = value.inWholeMinecraftTicks
+            ticksPerBeat = value.inMinecraftTicks
         }
 
     var delayPerSound: Duration
         get() = ticksPerSound.takeIf { it > 0 }?.minecraftTicks ?: Duration.ZERO
         set(value) {
-            ticksPerSound = value.inWholeMinecraftTicks
+            ticksPerSound = value.inMinecraftTicks
         }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -320,8 +320,8 @@ class MelodyBuilder {
     }
 
     fun build(): Melody = Melody(
-        ticksPerBeat = delayPerBeat.inWholeMinecraftTicks,
-        ticksPerSound = delayPerSound.inWholeMinecraftTicks,
+        ticksPerBeat = delayPerBeat.inMinecraftTicks,
+        ticksPerSound = delayPerSound.inMinecraftTicks,
         repetitions = repetitions,
         beats = beats.toList()
     )
@@ -343,7 +343,7 @@ fun PotionEffect(type: PotionEffectType, durationTicks: Int, amplifier: Int = 0,
     )
 
 fun PotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true) =
-    PotionEffect(type, duration.inWholeMinecraftTicks.toInt(), amplifier, ambient, particles, icon)
+    PotionEffect(type, duration.inMinecraftTicks.toInt(), amplifier, ambient, particles, icon)
 
 fun buildPotionEffect(type: PotionEffectType, duration: Duration = 10.seconds, amplifier: Int = 0, ambient: Boolean = true, particles: Boolean = true, icon: Boolean = true, builder: PotionEffect.() -> Unit) =
     PotionEffect(type, duration, amplifier, ambient, particles, icon).apply(builder)

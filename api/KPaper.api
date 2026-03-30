@@ -1,6 +1,6 @@
 public abstract interface class cc/modlabs/kpaper/command/CommandBuilder {
-	public abstract fun getAliases ()Ljava/util/List;
-	public abstract fun getDescription ()Ljava/lang/String;
+	public fun getAliases ()Ljava/util/List;
+	public fun getDescription ()Ljava/lang/String;
 	public abstract fun register ()Lcom/mojang/brigadier/tree/LiteralCommandNode;
 }
 
@@ -1135,7 +1135,7 @@ public final class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;
@@ -1143,6 +1143,7 @@ public synthetic class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$$seria
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/MinecraftSkin;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class cc/modlabs/kpaper/inventory/mineskin/MinecraftSkin$Companion {
@@ -1161,7 +1162,7 @@ public final class cc/modlabs/kpaper/inventory/mineskin/SKIN {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class cc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class cc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/SKIN;
@@ -1169,6 +1170,7 @@ public synthetic class cc/modlabs/kpaper/inventory/mineskin/SKIN$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/SKIN;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class cc/modlabs/kpaper/inventory/mineskin/SKIN$Companion {
@@ -1210,7 +1212,7 @@ public final class cc/modlabs/kpaper/inventory/mineskin/Textures {
 	public fun toString ()Ljava/lang/String;
 }
 
-public synthetic class cc/modlabs/kpaper/inventory/mineskin/Textures$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+public final synthetic class cc/modlabs/kpaper/inventory/mineskin/Textures$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field INSTANCE Lcc/modlabs/kpaper/inventory/mineskin/Textures$$serializer;
 	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
 	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcc/modlabs/kpaper/inventory/mineskin/Textures;
@@ -1218,6 +1220,7 @@ public synthetic class cc/modlabs/kpaper/inventory/mineskin/Textures$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcc/modlabs/kpaper/inventory/mineskin/Textures;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class cc/modlabs/kpaper/inventory/mineskin/Textures$Companion {
@@ -1238,10 +1241,10 @@ public final class cc/modlabs/kpaper/inventory/mineskin/Urls {
 }
 
 public abstract interface class cc/modlabs/kpaper/inventory/simple/SimpleGUI : org/bukkit/inventory/InventoryHolder {
-	public abstract fun handle (Lorg/bukkit/event/inventory/InventoryClickEvent;)V
-	public abstract fun onClose (Lorg/bukkit/event/inventory/InventoryCloseEvent;)V
-	public abstract fun onDrag (Lorg/bukkit/event/inventory/InventoryDragEvent;)V
-	public abstract fun open ()V
+	public fun handle (Lorg/bukkit/event/inventory/InventoryClickEvent;)V
+	public fun onClose (Lorg/bukkit/event/inventory/InventoryCloseEvent;)V
+	public fun onDrag (Lorg/bukkit/event/inventory/InventoryDragEvent;)V
+	public fun open ()V
 }
 
 public final class cc/modlabs/kpaper/inventory/simple/SimpleGUI$DefaultImpls {
@@ -1339,6 +1342,30 @@ public final class cc/modlabs/kpaper/main/KPluginKt {
 	public static final fun setPluginInstance (Lcc/modlabs/kpaper/main/KPlugin;)V
 }
 
+public final class cc/modlabs/kpaper/messages/AdventureSerializerKt {
+	public static final fun asStyledComponent (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;)Lnet/kyori/adventure/text/TextComponent;
+	public static synthetic fun asStyledComponent$default (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;ILjava/lang/Object;)Lnet/kyori/adventure/text/TextComponent;
+	public static final fun asStyledString (Lnet/kyori/adventure/text/ComponentLike;Lnet/kyori/adventure/text/minimessage/MiniMessage;)Ljava/lang/String;
+	public static synthetic fun asStyledString$default (Lnet/kyori/adventure/text/ComponentLike;Lnet/kyori/adventure/text/minimessage/MiniMessage;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun getAdventureSerializer ()Lnet/kyori/adventure/text/serializer/legacy/LegacyComponentSerializer;
+	public static final fun getAsComponent (Ljava/lang/String;)Lnet/kyori/adventure/text/TextComponent;
+	public static final fun getAsComponents (Ljava/lang/Iterable;)Ljava/util/List;
+	public static final fun getAsComponents (Ljava/lang/String;)Ljava/util/List;
+	public static final fun getAsPlainString (Lnet/kyori/adventure/text/ComponentLike;)Ljava/lang/String;
+	public static final fun getAsString (Lnet/kyori/adventure/text/ComponentLike;)Ljava/lang/String;
+	public static final fun getAsStyledComponent (Ljava/lang/String;)Lnet/kyori/adventure/text/TextComponent;
+	public static final fun getAsStyledString (Lnet/kyori/adventure/text/ComponentLike;)Ljava/lang/String;
+	public static final fun getMiniMessageSerializer ()Lnet/kyori/adventure/text/minimessage/MiniMessage;
+	public static final fun getPlainAdventureSerializer ()Lnet/kyori/adventure/text/serializer/ComponentSerializer;
+	public static final fun getStrictMiniMessageSerializer ()Lnet/kyori/adventure/text/minimessage/MiniMessage;
+	public static final fun setAdventureSerializer (Lnet/kyori/adventure/text/serializer/legacy/LegacyComponentSerializer;)V
+	public static final fun setMiniMessageSerializer (Lnet/kyori/adventure/text/minimessage/MiniMessage;)V
+	public static final fun setPlainAdventureSerializer (Lnet/kyori/adventure/text/serializer/ComponentSerializer;)V
+	public static final fun setStrictMiniMessageSerializer (Lnet/kyori/adventure/text/minimessage/MiniMessage;)V
+	public static final fun text (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;)Lnet/kyori/adventure/text/TextComponent;
+	public static synthetic fun text$default (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;ILjava/lang/Object;)Lnet/kyori/adventure/text/TextComponent;
+}
+
 public final class cc/modlabs/kpaper/messages/LocalMessageCooldown {
 	public static final field INSTANCE Lcc/modlabs/kpaper/messages/LocalMessageCooldown;
 	public final fun addCooldown-SxA4cEA (Ljava/util/UUID;Ljava/lang/String;J)V
@@ -1419,7 +1446,9 @@ public abstract interface class cc/modlabs/kpaper/npc/NPC {
 	public abstract fun addVisiblePlayer (Lorg/bukkit/entity/Player;)V
 	public abstract fun changeName (Ljava/lang/String;)V
 	public abstract fun followEntity (Lorg/bukkit/entity/Entity;D)Z
+	public static synthetic fun followEntity$default (Lcc/modlabs/kpaper/npc/NPC;Lorg/bukkit/entity/Entity;DILjava/lang/Object;)Z
 	public abstract fun followNearbyPlayers (DD)Z
+	public static synthetic fun followNearbyPlayers$default (Lcc/modlabs/kpaper/npc/NPC;DDILjava/lang/Object;)Z
 	public abstract fun getConversation ()Lkotlin/jvm/functions/Function1;
 	public abstract fun getDescription ()Lnet/kyori/adventure/text/Component;
 	public abstract fun getEntity ()Lorg/bukkit/entity/Entity;
@@ -1800,16 +1829,16 @@ public abstract interface class cc/modlabs/kpaper/party/PartyAPI {
 	public abstract fun getOnlinePartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyData (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyId (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
-	public abstract fun getPartyId (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPartyId (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyMemberCount (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyMembers (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPartyMembersOfPlayer (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun getPlayerParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
-	public abstract fun getPlayerParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun getPlayerParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun hasInvite (Ljava/util/UUID;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun isInParty (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
-	public abstract fun isInParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
+	public fun isInParty (Lorg/bukkit/OfflinePlayer;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun isPartyFull (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun isPartyLeader (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
 	public abstract fun openPartyGUI (Lorg/bukkit/entity/Player;)V
@@ -1969,12 +1998,12 @@ public final class cc/modlabs/kpaper/util/ConversationAPI$Question {
 }
 
 public abstract interface class cc/modlabs/kpaper/util/Identity : net/kyori/adventure/key/Key, org/bukkit/Keyed {
-	public abstract fun asString ()Ljava/lang/String;
+	public fun asString ()Ljava/lang/String;
 	public abstract fun getIdentityKey ()Lnet/kyori/adventure/key/Key;
-	public abstract fun getKey ()Lorg/bukkit/NamespacedKey;
-	public abstract fun key ()Lnet/kyori/adventure/key/Key;
-	public abstract fun namespace ()Ljava/lang/String;
-	public abstract fun value ()Ljava/lang/String;
+	public fun getKey ()Lorg/bukkit/NamespacedKey;
+	public fun key ()Lnet/kyori/adventure/key/Key;
+	public fun namespace ()Ljava/lang/String;
+	public fun value ()Ljava/lang/String;
 }
 
 public final class cc/modlabs/kpaper/util/Identity$DefaultImpls {
@@ -2340,9 +2369,9 @@ public final class cc/modlabs/kpaper/visuals/effect/ParticleData : com/destroyst
 public abstract interface class cc/modlabs/kpaper/visuals/effect/ParticleEffect {
 	public abstract fun play ()V
 	public abstract fun play (Ljava/util/Set;Ljava/util/Set;)V
-	public abstract fun play (Lorg/bukkit/Location;Ljava/util/Set;)V
-	public abstract fun play (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
-	public abstract fun play (Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Ljava/util/Set;)V
+	public fun play (Lorg/bukkit/Location;Lorg/bukkit/entity/Entity;)V
+	public fun play (Lorg/bukkit/entity/Entity;Ljava/util/Set;)V
 	public abstract fun play ([Lorg/bukkit/Location;)V
 	public abstract fun play ([Lorg/bukkit/entity/Entity;)V
 }
@@ -2435,5 +2464,23 @@ public final class cc/modlabs/kpaper/world/shape/CubicalShape {
 	public final fun getLength ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/fruxz/ascend/extension/CompatKt {
+	public static final fun dump (Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun forceCast (Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun forceCastOrNull (Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun isNull (Ljava/lang/Object;)Z
+}
+
+public final class dev/fruxz/stacked/TextCompatKt {
+	public static final fun text (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;)Lnet/kyori/adventure/text/Component;
+	public static synthetic fun text$default (Ljava/lang/String;Lnet/kyori/adventure/text/minimessage/MiniMessage;Lnet/kyori/adventure/text/minimessage/tag/resolver/TagResolver;ILjava/lang/Object;)Lnet/kyori/adventure/text/Component;
+}
+
+public final class dev/fruxz/stacked/extension/AdventureCompatKt {
+	public static final fun Times-WzaCiaA (JJJ)Lnet/kyori/adventure/title/Title$Times;
+	public static final fun Title (Lnet/kyori/adventure/text/Component;Lnet/kyori/adventure/text/Component;Lnet/kyori/adventure/title/Title$Times;)Lnet/kyori/adventure/title/Title;
+	public static final fun getAsPlainString (Lnet/kyori/adventure/text/ComponentLike;)Ljava/lang/String;
 }
 

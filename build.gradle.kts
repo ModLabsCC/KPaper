@@ -3,11 +3,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.3.20"
     `java-library`
     id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
-    kotlin("plugin.serialization") version "2.1.20"
+    kotlin("plugin.serialization") version "2.3.20"
     id("maven-publish")
     id("org.sonarqube") version "7.0.1.6134"
 }
@@ -36,10 +36,7 @@ val mockkVersion = "1.13.16"
 
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-
-    api("dev.fruxz:stacked:2025.8-d43bc19")
-
-    api("cc.modlabs:KlassicX:2025.12.4.1928")
+    api("cc.modlabs:KlassicX:2026.3.30.1246")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
