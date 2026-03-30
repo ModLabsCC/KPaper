@@ -75,10 +75,10 @@ publishing {
     repositories {
         maven {
             name = "ModLabs"
-            url = uri("https://nexus.modlabs.cc/repository/maven-public/")
+            url = uri("https://repo-api.modlabs.cc/repo/maven/maven-public/")
             credentials {
-                username = System.getenv("NEXUS_USER")
-                password = System.getenv("NEXUS_PASS")
+                username = System.getenv("NEXUS_USER") ?: "modlabs"
+                password = System.getenv("REPO_TOKEN")
             }
         }
         mavenLocal()

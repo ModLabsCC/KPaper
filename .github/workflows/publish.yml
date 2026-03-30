@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew publish
         env:
           NEXUS_USER: ${{ secrets.NEXUS_USER }}
-          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+          REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
           VERSION_OVERRIDE: ${{ env.VERSION }}
 
       - name: Create GitHub Release

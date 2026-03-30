@@ -37,7 +37,7 @@ KPaper is a powerful utility library designed to simplify plugin development wit
 ```kotlin
 repositories {
     mavenCentral()
-    maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
+    maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
 dependencies {
