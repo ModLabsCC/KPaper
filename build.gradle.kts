@@ -27,7 +27,7 @@ sonar {
 
 repositories {
     mavenCentral()
-    maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
+    maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
 val minecraftVersion: String by project
@@ -37,7 +37,7 @@ val mockkVersion = "1.13.16"
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
 
-    api("dev.fruxz:stacked:2024.1.1")
+    api("dev.fruxz:stacked:2025.8-d43bc19")
 
     api("cc.modlabs:KlassicX:2025.12.4.1928")
 

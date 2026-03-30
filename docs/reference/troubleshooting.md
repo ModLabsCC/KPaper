@@ -18,7 +18,7 @@ Could not resolve dependency: cc.modlabs:KPaper:LATEST
    // Add to build.gradle.kts
    repositories {
        mavenCentral()
-       maven("https://nexus.modlabs.cc/repository/maven-mirrors/") // Add this
+       maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/") // Add this
    }
    ```
 

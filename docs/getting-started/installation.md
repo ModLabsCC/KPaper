@@ -18,7 +18,7 @@ Add the KPaper repository and dependency to your `build.gradle.kts`:
 ```kotlin
 repositories {
     mavenCentral()
-    maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
+    maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
     maven("https://repo.papermc.io/repository/maven-public/") // Paper repository
 }
 
@@ -95,7 +95,7 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
-    maven("https://nexus.modlabs.cc/repository/maven-mirrors/")
+    maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
 dependencies {
