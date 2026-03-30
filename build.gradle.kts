@@ -36,7 +36,7 @@ val mockkVersion = "1.13.16"
 
 dependencies {
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    api("cc.modlabs:KlassicX:2026.3.30.1246")
+    api("cc.modlabs:KlassicX:2026.3.30.1332")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
