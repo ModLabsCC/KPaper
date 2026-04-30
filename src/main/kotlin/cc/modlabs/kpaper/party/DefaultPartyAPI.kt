@@ -20,7 +20,9 @@ import java.util.concurrent.CopyOnWriteArraySet
  * Note: This implementation is NOT persistent and serves as a default/fallback.
  * Projects can provide their own implementation (e.g. Redis) via [Party.api].
  */
-class DefaultPartyAPI : PartyAPI {
+class DefaultPartyAPI(
+    private val onlinePlayerLookup: OnlinePlayerLookup = OnlinePlayerLookup { Bukkit.getPlayer(it) },
+) : PartyAPI {
 
     private data class InternalParty(
         val id: String,
@@ -104,7 +106,7 @@ class DefaultPartyAPI : PartyAPI {
 
     override fun getOnlinePartyMembers(partyId: String): CompletableFuture<Set<UUID>> =
         CompletableFuture.completedFuture(
-            parties[partyId]?.members?.filter { Bukkit.getPlayer(it) != null }?.toSet() ?: emptySet()
+            parties[partyId]?.members?.filter { onlinePlayerLookup(it) != null }?.toSet() ?: emptySet()
         )
 
     // --------------- Utilities -----------------
@@ -130,7 +132,7 @@ class DefaultPartyAPI : PartyAPI {
     )
 
     private fun getOnlineCount(partyId: String): Int =
-        parties[partyId]?.members?.count { Bukkit.getPlayer(it) != null } ?: 0
+        parties[partyId]?.members?.count { onlinePlayerLookup(it) != null } ?: 0
 
     // --------------- Minimal management API (internal) -----------------
     // Not part of PartyAPI (which is read-only), but useful for tests/examples

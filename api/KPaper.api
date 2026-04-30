@@ -77,11 +77,6 @@ public final class cc/modlabs/kpaper/event/ListenersKt {
 	public static final fun unregister (Lorg/bukkit/event/Listener;)V
 }
 
-public final class cc/modlabs/kpaper/event/ListenersKt$sam$i$org_bukkit_plugin_EventExecutor$0 : org/bukkit/plugin/EventExecutor {
-	public fun <init> (Lkotlin/jvm/functions/Function2;)V
-	public final synthetic fun execute (Lorg/bukkit/event/Listener;Lorg/bukkit/event/Event;)V
-}
-
 public abstract class cc/modlabs/kpaper/event/SingleListener : org/bukkit/event/Listener {
 	public fun <init> (Lorg/bukkit/event/EventPriority;Z)V
 	public final fun getIgnoreCancelled ()Z
@@ -667,8 +662,8 @@ public abstract interface class cc/modlabs/kpaper/inventory/ISerializer {
 }
 
 public final class cc/modlabs/kpaper/inventory/InventoryBuilder {
-	public fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;)V
-	public synthetic fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (ILnet/kyori/adventure/text/Component;Lorg/bukkit/entity/Player;Ljava/util/Map;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun build ()Lorg/bukkit/inventory/Inventory;
 	public final fun fill (Lcc/modlabs/kpaper/inventory/InventoryItem;)Lcc/modlabs/kpaper/inventory/InventoryBuilder;
 	public final fun getInventory ()Lorg/bukkit/inventory/Inventory;
@@ -1781,6 +1776,8 @@ public final class cc/modlabs/kpaper/packets/PacketInterceptorKt {
 
 public final class cc/modlabs/kpaper/party/DefaultPartyAPI : cc/modlabs/kpaper/party/PartyAPI {
 	public fun <init> ()V
+	public fun <init> (Lcc/modlabs/kpaper/party/OnlinePlayerLookup;)V
+	public synthetic fun <init> (Lcc/modlabs/kpaper/party/OnlinePlayerLookup;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun addMember (Ljava/lang/String;Ljava/util/UUID;)Z
 	public fun areInSameParty (Ljava/util/UUID;Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
 	public final fun createParty (Ljava/lang/String;Ljava/util/UUID;I)Lcc/modlabs/kpaper/party/PartyAPI$PartyData;
@@ -1813,6 +1810,10 @@ public final class cc/modlabs/kpaper/party/DefaultPartyAPI : cc/modlabs/kpaper/p
 public final class cc/modlabs/kpaper/party/DefaultPartyGUIFactory : cc/modlabs/kpaper/party/PartyGUIFactory {
 	public fun <init> ()V
 	public fun build (Lorg/bukkit/entity/Player;Lcc/modlabs/kpaper/party/PartyAPI$PartyData;)Lorg/bukkit/inventory/Inventory;
+}
+
+public abstract interface class cc/modlabs/kpaper/party/OnlinePlayerLookup {
+	public abstract fun invoke (Ljava/util/UUID;)Lorg/bukkit/entity/Player;
 }
 
 public final class cc/modlabs/kpaper/party/Party {
@@ -1906,7 +1907,8 @@ public abstract interface class cc/modlabs/kpaper/party/PartyGUIFactory {
 
 public final class cc/modlabs/kpaper/party/RedisPartyAPI : cc/modlabs/kpaper/party/PartyAPI, java/lang/AutoCloseable {
 	public fun <init> (Ljava/lang/String;)V
-	public fun <init> (Lredis/clients/jedis/JedisPooled;)V
+	public fun <init> (Lredis/clients/jedis/JedisPooled;Lcc/modlabs/kpaper/party/OnlinePlayerLookup;)V
+	public synthetic fun <init> (Lredis/clients/jedis/JedisPooled;Lcc/modlabs/kpaper/party/OnlinePlayerLookup;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun areInSameParty (Ljava/util/UUID;Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;
 	public fun close ()V
 	public fun getAllInvites (Ljava/util/UUID;)Ljava/util/concurrent/CompletableFuture;

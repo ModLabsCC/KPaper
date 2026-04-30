@@ -1,7 +1,6 @@
 package cc.modlabs.kpaper.party
 
 import io.mockk.*
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -11,7 +10,6 @@ import redis.clients.jedis.JedisPooled
 import redis.clients.jedis.params.ScanParams
 import redis.clients.jedis.resps.ScanResult
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
 class RedisPartyAPITest {
 
@@ -22,7 +20,6 @@ class RedisPartyAPITest {
     fun setup() {
         jedis = mockk(relaxed = true)
         api = RedisPartyAPI(jedis)
-        mockkStatic(Bukkit::class)
     }
 
     @AfterEach
@@ -69,12 +66,15 @@ class RedisPartyAPITest {
         every { jedis.get("party:alpha") } returns "{\"partyId\":\"alpha\",\"leader\":\"$p1\",\"members\":[\"$p1\",\"$p2\"],\"createdAt\":1,\"maxSize\":8}"
 
         val mockPlayer: Player = mockk(relaxed = true)
-        every { Bukkit.getPlayer(p1) } returns mockPlayer
-        every { Bukkit.getPlayer(p2) } returns null
+        val localApi = RedisPartyAPI(
+            jedis,
+            OnlinePlayerLookup { if (it == p1) mockPlayer else null },
+        )
 
-        val set = api.getOnlinePartyMembers("alpha").join()
+        val set = localApi.getOnlinePartyMembers("alpha").join()
         assertEquals(setOf(p1), set)
-        assertEquals(1, api.getOnlinePartyMemberCount("alpha").join())
+        assertEquals(1, localApi.getOnlinePartyMemberCount("alpha").join())
+        localApi.close()
     }
 
     @Test
@@ -96,7 +96,7 @@ class RedisPartyAPITest {
         // Scan for all invites
         val paramsSlot = slot<ScanParams>()
         every { jedis.scan(any<String>(), capture(paramsSlot)) } answers {
-            val cursor = firstArg<String>()
+            val cursor = invocation.args[0] as String
             // Return single page then finish
             if (cursor == ScanParams.SCAN_POINTER_START) {
                 ScanResult<String>("0", listOf(invKey))

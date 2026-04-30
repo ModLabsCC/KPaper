@@ -28,7 +28,8 @@ import java.util.concurrent.CompletableFuture
  * Note: [openPartyGUI] does synchronous reads from Redis to build the inventory.
  */
 class RedisPartyAPI(
-    private val jedis: JedisPooled
+    private val jedis: JedisPooled,
+    private val onlinePlayerLookup: OnlinePlayerLookup = OnlinePlayerLookup { Bukkit.getPlayer(it) },
 ) : PartyAPI, AutoCloseable {
 
     constructor(redisUri: String) : this(JedisPooled(redisUri))
@@ -136,14 +137,14 @@ class RedisPartyAPI(
     override fun getOnlinePartyMembers(partyId: String): CompletableFuture<Set<UUID>> =
         CompletableFuture.supplyAsync {
             val members = getPartyDataSync(partyId)?.members ?: return@supplyAsync emptySet()
-            members.filter { Bukkit.getPlayer(it) != null }.toSet()
+            members.filter { onlinePlayerLookup(it) != null }.toSet()
         }
 
     // --------------- Utilities -----------------
 
     override fun getOnlinePartyMemberCount(partyId: String): CompletableFuture<Int> =
         CompletableFuture.supplyAsync {
-            getPartyDataSync(partyId)?.members?.count { Bukkit.getPlayer(it) != null } ?: 0
+            getPartyDataSync(partyId)?.members?.count { onlinePlayerLookup(it) != null } ?: 0
         }
 
     override fun openPartyGUI(player: Player) {

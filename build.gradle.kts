@@ -5,8 +5,8 @@ import java.util.*
 plugins {
     kotlin("jvm") version "2.3.20"
     `java-library`
-    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.17.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
     kotlin("plugin.serialization") version "2.3.20"
     id("maven-publish")
     id("org.sonarqube") version "7.0.1.6134"
@@ -30,25 +30,34 @@ repositories {
     maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
+// BCV pins ASM older than Java 25 class files (major 69); Paper 26 requires JVM 25.
+configurations.matching { it.name.startsWith("bcv-rt-jvm") }.configureEach {
+    resolutionStrategy {
+        force(
+            "org.ow2.asm:asm:9.8",
+            "org.ow2.asm:asm-tree:9.8",
+        )
+    }
+}
+
 val minecraftVersion: String by project
 val koTestVersion = "6.0.0.M1"
 val mockkVersion = "1.13.16"
 
 dependencies {
-    paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("$minecraftVersion.build.+")
     api("cc.modlabs:KlassicX:2026.3.30.1421")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")
 
     // PacketEvents for TextDisplayFactory (display entities)
-    api("com.github.retrooper:packetevents-spigot:2.11.2")
+    api("com.github.retrooper:packetevents-spigot:2.12.1")
 
     // Redis client for Redis-backed PartyAPI implementation (Jedis)
     implementation("redis.clients:jedis:7.1.0")
 
     testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
     testImplementation("io.mockk:mockk:${mockkVersion}")
-    testImplementation("com.google.code.gson:gson:2.11.0")
     implementation("com.google.code.gson:gson:2.11.0")
 }
 
@@ -117,14 +126,14 @@ publishing {
 tasks {
     withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release.set(21)
+        options.release.set(25)
     }
 
     withType<KotlinCompile> {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
     }
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }

@@ -1205,10 +1205,10 @@ class NPCImpl(
         when (slot) {
             EquipmentSlot.HAND -> entity.equipment.setItemInMainHand(item)
             EquipmentSlot.OFF_HAND -> entity.equipment.setItemInOffHand(item)
-            EquipmentSlot.HEAD -> entity.equipment.helmet = item
-            EquipmentSlot.CHEST -> entity.equipment.chestplate = item
-            EquipmentSlot.LEGS -> entity.equipment.leggings = item
-            EquipmentSlot.FEET -> entity.equipment.boots = item
+            EquipmentSlot.HEAD -> entity.equipment.setHelmet(item)
+            EquipmentSlot.CHEST -> entity.equipment.setChestplate(item)
+            EquipmentSlot.LEGS -> entity.equipment.setLeggings(item)
+            EquipmentSlot.FEET -> entity.equipment.setBoots(item)
             EquipmentSlot.BODY, EquipmentSlot.SADDLE -> {
                 // These slots don't apply to mannequins
             }
@@ -1227,22 +1227,22 @@ class NPCImpl(
 
     override fun setHelmet(item: ItemStack?) {
         val entity = getMannequin() ?: return
-        entity.equipment.helmet = item
+        entity.equipment.setHelmet(item)
     }
 
     override fun setChestplate(item: ItemStack?) {
         val entity = getMannequin() ?: return
-        entity.equipment.chestplate = item
+        entity.equipment.setChestplate(item)
     }
 
     override fun setLeggings(item: ItemStack?) {
         val entity = getMannequin() ?: return
-        entity.equipment.leggings = item
+        entity.equipment.setLeggings(item)
     }
 
     override fun setBoots(item: ItemStack?) {
         val entity = getMannequin() ?: return
-        entity.equipment.boots = item
+        entity.equipment.setBoots(item)
     }
 
     // Event handling

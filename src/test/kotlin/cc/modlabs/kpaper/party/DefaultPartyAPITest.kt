@@ -1,12 +1,7 @@
 package cc.modlabs.kpaper.party
 
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,12 +15,6 @@ class DefaultPartyAPITest {
     @BeforeEach
     fun setup() {
         api = DefaultPartyAPI()
-        mockkStatic(Bukkit::class)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkAll()
     }
 
     @Test
@@ -67,7 +56,7 @@ class DefaultPartyAPITest {
     fun `remove leader promotes or disbands`() {
         val leader = UUID.randomUUID()
         val m1 = UUID.randomUUID()
-        val p = api.createParty("pp", leader, maxSize = 5)
+        api.createParty("pp", leader, maxSize = 5)
         api.addMember("pp", m1)
 
         // Remove current leader -> m1 should become leader
@@ -105,20 +94,22 @@ class DefaultPartyAPITest {
         val leader = UUID.randomUUID()
         val onlineMember = UUID.randomUUID()
         val offlineMember = UUID.randomUUID()
-        api.createParty("o1", leader, maxSize = 5)
-        api.addMember("o1", onlineMember)
-        api.addMember("o1", offlineMember)
 
-        // Mock Bukkit.getPlayer: return non-null for onlineMember only
         val mockPlayer: Player = mockk(relaxed = true)
-        every { Bukkit.getPlayer(onlineMember) } returns mockPlayer
-        every { Bukkit.getPlayer(leader) } returns mockPlayer
-        every { Bukkit.getPlayer(offlineMember) } returns null
+        val apiWithLookup = DefaultPartyAPI(
+            onlinePlayerLookup = OnlinePlayerLookup { id ->
+                if (id == onlineMember || id == leader) mockPlayer else null
+            },
+        )
 
-        val online = api.getOnlinePartyMembers("o1").join()
+        apiWithLookup.createParty("o1", leader, maxSize = 5)
+        apiWithLookup.addMember("o1", onlineMember)
+        apiWithLookup.addMember("o1", offlineMember)
+
+        val online = apiWithLookup.getOnlinePartyMembers("o1").join()
         assertTrue(leader in online)
         assertTrue(onlineMember in online)
         assertFalse(offlineMember in online)
-        assertEquals(2, api.getOnlinePartyMemberCount("o1").join())
+        assertEquals(2, apiWithLookup.getOnlinePartyMemberCount("o1").join())
     }
 }

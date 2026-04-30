@@ -322,10 +322,10 @@ class NPCBuilder(
             when (slot) {
                 EquipmentSlot.HAND -> mannequin.equipment.setItemInMainHand(item)
                 EquipmentSlot.OFF_HAND -> mannequin.equipment.setItemInOffHand(item)
-                EquipmentSlot.HEAD -> mannequin.equipment.helmet = item
-                EquipmentSlot.CHEST -> mannequin.equipment.chestplate = item
-                EquipmentSlot.LEGS -> mannequin.equipment.leggings = item
-                EquipmentSlot.FEET -> mannequin.equipment.boots = item
+                EquipmentSlot.HEAD -> mannequin.equipment.setHelmet(item)
+                EquipmentSlot.CHEST -> mannequin.equipment.setChestplate(item)
+                EquipmentSlot.LEGS -> mannequin.equipment.setLeggings(item)
+                EquipmentSlot.FEET -> mannequin.equipment.setBoots(item)
                 EquipmentSlot.BODY, EquipmentSlot.SADDLE -> {
                     // These slots don't apply to mannequins
                 }

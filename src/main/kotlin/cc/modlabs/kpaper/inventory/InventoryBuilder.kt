@@ -12,9 +12,12 @@ class InventoryBuilder(
     private val size: Int,
     private val title: Component,
     private val owner: Player? = null,
-    private var items: MutableMap<Int, InventoryItem> = mutableMapOf()
+    private var items: MutableMap<Int, InventoryItem> = mutableMapOf(),
+    private val createInventory: (Player?, Int, Component) -> Inventory = { o, s, t ->
+        Bukkit.createInventory(o, s, t)
+    },
 ) {
-    val inventory = Bukkit.createInventory(owner, size, title)
+    val inventory = createInventory(owner, size, title)
 
     fun setItem(slot: Int, item: InventoryItem): InventoryBuilder {
         items[slot] = item
