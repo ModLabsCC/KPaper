@@ -52,6 +52,9 @@ abstract class KPlugin : JavaPlugin() {
             logger.warning("The main instance has been modified, even though it has already been set by another plugin!")
         }
         PluginInstance = this
+        if (isFeatureEnabled(Feature.AREAS)) {
+            AreaSystem.registerCommands(this)
+        }
         load()
     }
 
