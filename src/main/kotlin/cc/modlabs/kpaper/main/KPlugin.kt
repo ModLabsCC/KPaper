@@ -4,6 +4,7 @@ import cc.modlabs.kpaper.event.CustomEventListener
 import cc.modlabs.kpaper.inventory.internal.AnvilListener
 import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.simple.SimpleGUIListener
+import cc.modlabs.kpaper.world.area.AreaSystem
 import com.github.retrooper.packetevents.PacketEvents
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import org.bukkit.Bukkit
@@ -65,6 +66,9 @@ abstract class KPlugin : JavaPlugin() {
         if (isFeatureEnabled(Feature.INVENTORY)) {
             Bukkit.getPluginManager().registerEvents(SimpleGUIListener(), this)
         }
+        if (isFeatureEnabled(Feature.AREAS)) {
+            AreaSystem.load(this)
+        }
 
         val packetEvents = SpigotPacketEventsBuilder.build(this)
         PacketEvents.setAPI(packetEvents)
@@ -80,6 +84,9 @@ abstract class KPlugin : JavaPlugin() {
         }
         if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) {
             CustomEventListener.unload()
+        }
+        if (isFeatureEnabled(Feature.AREAS)) {
+            AreaSystem.unload()
         }
 
         PacketEvents.getAPI().terminate()

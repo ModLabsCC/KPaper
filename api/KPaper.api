@@ -501,13 +501,25 @@ public final class cc/modlabs/kpaper/file/config/PluginJsonConfig : cc/modlabs/k
 }
 
 public final class cc/modlabs/kpaper/file/config/WorldConfig : cc/modlabs/kpaper/file/config/FileYamlConfig {
+	public static final field Companion Lcc/modlabs/kpaper/file/config/WorldConfig$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/bukkit/World;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/bukkit/World;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/WorldConfig$Companion {
 }
 
 public final class cc/modlabs/kpaper/file/config/WorldJsonConfig : cc/modlabs/kpaper/file/config/FileJsonConfig {
+	public static final field Companion Lcc/modlabs/kpaper/file/config/WorldJsonConfig$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/bukkit/World;Ljava/lang/String;)V
+	public synthetic fun <init> (Lorg/bukkit/World;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class cc/modlabs/kpaper/file/config/WorldJsonConfig$Companion {
 }
 
 public final class cc/modlabs/kpaper/file/gson/ItemStackTypeAdapter : com/google/gson/JsonDeserializer, com/google/gson/JsonSerializer {
@@ -1261,6 +1273,7 @@ public final class cc/modlabs/kpaper/inventory/simple/SimpleGuiFactoryKt {
 }
 
 public final class cc/modlabs/kpaper/main/Feature : java/lang/Enum {
+	public static final field AREAS Lcc/modlabs/kpaper/main/Feature;
 	public static final field COMMANDS Lcc/modlabs/kpaper/main/Feature;
 	public static final field COROUTINES Lcc/modlabs/kpaper/main/Feature;
 	public static final field CUSTOM_EVENTS Lcc/modlabs/kpaper/main/Feature;
@@ -1292,6 +1305,7 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public fun <init> ()V
 	public final fun build ()Lcc/modlabs/kpaper/main/FeatureConfig;
 	public final fun feature (Lcc/modlabs/kpaper/main/Feature;Z)V
+	public final fun getEnableAreaFeatures ()Z
 	public final fun getEnableCommandFeatures ()Z
 	public final fun getEnableCoroutineFeatures ()Z
 	public final fun getEnableEventFeatures ()Z
@@ -1302,6 +1316,7 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public final fun getEnableUtilFeatures ()Z
 	public final fun getEnableVisualFeatures ()Z
 	public final fun getEnableWorldFeatures ()Z
+	public final fun setEnableAreaFeatures (Z)V
 	public final fun setEnableCommandFeatures (Z)V
 	public final fun setEnableCoroutineFeatures (Z)V
 	public final fun setEnableEventFeatures (Z)V
@@ -2451,6 +2466,154 @@ public final class cc/modlabs/kpaper/world/StringLocationKt {
 	public static final fun toBlockPos (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lnet/minecraft/core/BlockPos;
 	public static final fun toBukkitLocation (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lorg/bukkit/Location;
 	public static final fun toStringLocation (Lorg/bukkit/Location;)Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+}
+
+public final class cc/modlabs/kpaper/world/area/AreaCache {
+	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaCache;
+	public final fun addArea (Lcc/modlabs/kpaper/world/area/model/Area;)V
+	public final fun clear ()V
+	public final fun getArea (Ljava/lang/String;)Lcc/modlabs/kpaper/world/area/model/Area;
+	public final fun getAreas ()Ljava/util/List;
+	public final fun reloadAreas ()V
+	public final fun removeArea (Lcc/modlabs/kpaper/world/area/model/Area;)V
+}
+
+public final class cc/modlabs/kpaper/world/area/AreaCommand : cc/modlabs/kpaper/command/CommandBuilder {
+	public fun <init> ()V
+	public fun getAliases ()Ljava/util/List;
+	public fun getDescription ()Ljava/lang/String;
+	public fun register ()Lcom/mojang/brigadier/tree/LiteralCommandNode;
+}
+
+public final class cc/modlabs/kpaper/world/area/AreaConfigService {
+	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaConfigService;
+	public final fun addFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun removeFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun savePoint (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;
+	public final fun saveSound (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;FF)Ljava/lang/Object;
+}
+
+public final class cc/modlabs/kpaper/world/area/AreaSystem {
+	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaSystem;
+	public final fun load (Lcc/modlabs/kpaper/main/KPlugin;)V
+	public final fun unload ()V
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaEnterEvent : cc/modlabs/kpaper/world/area/event/AreaEvent {
+	public static final field Companion Lcc/modlabs/kpaper/world/area/event/AreaEnterEvent$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;)V
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+	public final fun getPlayer ()Lorg/bukkit/entity/Player;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaEnterEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public abstract class cc/modlabs/kpaper/world/area/event/AreaEvent : org/bukkit/event/Event, org/bukkit/event/Cancellable {
+	public static final field Companion Lcc/modlabs/kpaper/world/area/event/AreaEvent$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/world/area/model/Area;)V
+	public final fun getArea ()Lcc/modlabs/kpaper/world/area/model/Area;
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+	public fun isCancelled ()Z
+	public fun setCancelled (Z)V
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaLeaveEvent : cc/modlabs/kpaper/world/area/event/AreaEvent {
+	public static final field Companion Lcc/modlabs/kpaper/world/area/event/AreaLeaveEvent$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;)V
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+	public final fun getPlayer ()Lorg/bukkit/entity/Player;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaLeaveEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaLoadEvent : org/bukkit/event/Event {
+	public static final field Companion Lcc/modlabs/kpaper/world/area/event/AreaLoadEvent$Companion;
+	public fun <init> (Lcc/modlabs/kpaper/world/area/model/Area;)V
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreaLoadEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreasLoadedEvent : org/bukkit/event/Event {
+	public static final field Companion Lcc/modlabs/kpaper/world/area/event/AreasLoadedEvent$Companion;
+	public fun <init> (Ljava/util/List;)V
+	public static final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+	public fun getHandlers ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/event/AreasLoadedEvent$Companion {
+	public final fun getHandlerList ()Lorg/bukkit/event/HandlerList;
+}
+
+public final class cc/modlabs/kpaper/world/area/listener/AreaListeners : org/bukkit/event/Listener {
+	public fun <init> ()V
+	public final fun onMove (Lorg/bukkit/event/player/PlayerMoveEvent;)V
+	public final fun onPlayerJoin (Lorg/bukkit/event/player/PlayerJoinEvent;)V
+	public final fun onTeleportIntoArea (Lorg/bukkit/event/player/PlayerTeleportEvent;)V
+}
+
+public final class cc/modlabs/kpaper/world/area/model/Area {
+	public fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FF)V
+	public synthetic fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun contains (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Z
+	public final fun contains (Lorg/bukkit/Location;)Z
+	public final fun getEntryPitch ()F
+	public final fun getEntrySound ()Ljava/lang/String;
+	public final fun getEntryVolume ()F
+	public final fun getExitPitch ()F
+	public final fun getExitSound ()Ljava/lang/String;
+	public final fun getExitVolume ()F
+	public final fun getFlag (Lcc/modlabs/kpaper/world/area/model/AreaFlag;)Ljava/lang/Object;
+	public final fun getFlags ()Ljava/util/Map;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPoint1 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun getPoint2 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun hasFlag (Lcc/modlabs/kpaper/world/area/model/AreaFlag;)Z
+}
+
+public final class cc/modlabs/kpaper/world/area/model/AreaFlag {
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun decodeValue (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun encodeValue (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getKey ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/world/area/model/AreaFlags {
+	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/model/AreaFlags;
+	public final fun all ()Ljava/util/Collection;
+	public final fun get (Ljava/lang/String;)Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+	public final fun getOrCreateBoolean (Ljava/lang/String;)Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+	public final fun getPVE ()Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+	public final fun getPVP ()Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+	public final fun getSURVIVAL ()Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+	public final fun register (Lcc/modlabs/kpaper/world/area/model/AreaFlag;)Lcc/modlabs/kpaper/world/area/model/AreaFlag;
+}
+
+public final class cc/modlabs/kpaper/world/area/model/AreaKt {
+	public static final fun getArea (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lcc/modlabs/kpaper/world/area/model/Area;
+	public static final fun getArea (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/world/area/model/Area;
+	public static final fun getChatRoomName (Lcc/modlabs/kpaper/world/area/model/Area;)Ljava/lang/String;
+	public static final fun isInArea (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Z
+	public static final fun isInArea (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Lcc/modlabs/kpaper/world/area/model/Area;)Z
+	public static final fun isInArea (Lorg/bukkit/Location;)Z
+	public static final fun isInArea (Lorg/bukkit/Location;Lcc/modlabs/kpaper/world/area/model/Area;)Z
+	public static final fun onEnter (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;)V
+	public static final fun onLeave (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;)V
 }
 
 public final class cc/modlabs/kpaper/world/shape/CubicalShape {

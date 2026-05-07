@@ -1,0 +1,146 @@
+package cc.modlabs.kpaper.world.area
+
+import cc.modlabs.klassicx.tools.minecraft.toStringLocation
+import cc.modlabs.kpaper.file.config.WorldConfig
+import cc.modlabs.kpaper.util.getLogger
+import cc.modlabs.kpaper.world.area.event.AreaLoadEvent
+import cc.modlabs.kpaper.world.area.event.AreasLoadedEvent
+import cc.modlabs.kpaper.world.area.model.Area
+import cc.modlabs.kpaper.world.area.model.AreaFlag
+import cc.modlabs.kpaper.world.area.model.AreaFlags
+import org.bukkit.Bukkit
+import org.bukkit.World
+import java.util.concurrent.locks.ReadWriteLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
+
+object AreaCache {
+
+    private val areas = mutableMapOf<String, Area>()
+    private val cacheLock: ReadWriteLock = ReentrantReadWriteLock()
+
+    private fun loadForWorld(world: World) {
+        val areasConfig = WorldConfig(world)
+        val areaNames = areasConfig.getConfigurationSection("areas")?.getKeys(false) ?: return
+        for (area in areaNames) {
+            getLogger().info("Loading area $area")
+            val name = areasConfig.getString("areas.$area.name") ?: continue
+            val point1 = areasConfig.getString("areas.$area.p1") ?: continue
+            val point2 = areasConfig.getString("areas.$area.p2") ?: continue
+
+            val entrySoundName = areasConfig.getString("areas.$area.sound.entry.name")
+            val entrySoundVolume = areasConfig.getDouble("areas.$area.sound.entry.volume", 1.0).toFloat()
+            val entrySoundPitch = areasConfig.getDouble("areas.$area.sound.entry.pitch", 1.0).toFloat()
+
+            val exitSoundName = areasConfig.getString("areas.$area.sound.exit.name")
+            val exitSoundVolume = areasConfig.getDouble("areas.$area.sound.exit.volume", 1.0).toFloat()
+            val exitSoundPitch = areasConfig.getDouble("areas.$area.sound.exit.pitch", 1.0).toFloat()
+
+            val flags = loadFlags(areasConfig, area)
+
+            val areaObj = Area(
+                name,
+                point1.toStringLocation(),
+                point2.toStringLocation(),
+                flags,
+                entrySoundName,
+                entrySoundVolume,
+                entrySoundPitch,
+                exitSoundName,
+                exitSoundVolume,
+                exitSoundPitch
+            )
+            areas[area] = areaObj
+            Bukkit.getPluginManager().callEvent(AreaLoadEvent(areaObj))
+            getLogger().info("Loaded area $area")
+        }
+    }
+
+    fun reloadAreas() {
+        cacheLock.writeLock().lock()
+        areas.clear()
+
+        val worlds = Bukkit.getWorlds()
+        for (world in worlds) {
+            loadForWorld(world)
+        }
+        Bukkit.getPluginManager().callEvent(AreasLoadedEvent(areas.values.toList()))
+        getLogger().info("Loaded ${areas.size} areas.")
+        cacheLock.writeLock().unlock()
+    }
+
+    fun addArea(area: Area) {
+        cacheLock.writeLock().lock()
+        areas[area.name] = area
+        cacheLock.writeLock().unlock()
+    }
+
+    fun removeArea(area: Area) {
+        cacheLock.writeLock().lock()
+        areas.remove(area.name)
+        cacheLock.writeLock().unlock()
+    }
+
+    fun getArea(name: String): Area? {
+        cacheLock.readLock().lock()
+        try {
+            return areas[name]
+        } finally {
+            cacheLock.readLock().unlock()
+        }
+    }
+
+    fun getAreas(): List<Area> {
+        cacheLock.readLock().lock()
+        try {
+            return areas.values.toList()
+        } finally {
+            cacheLock.readLock().unlock()
+        }
+    }
+
+    fun clear() {
+        cacheLock.writeLock().lock()
+        try {
+            areas.clear()
+        } finally {
+            cacheLock.writeLock().unlock()
+        }
+    }
+
+    private fun loadFlags(areasConfig: WorldConfig, areaName: String): Map<AreaFlag<*>, Any> {
+        val flagsPath = "areas.$areaName.flags"
+        val loadedFlags = mutableMapOf<AreaFlag<*>, Any>()
+
+        areasConfig.getStringList(flagsPath).forEach { legacyFlag ->
+            val resolvedFlag = AreaFlags.getOrCreateBoolean(legacyFlag)
+            loadedFlags[resolvedFlag] = true
+        }
+
+        val typedSection = areasConfig.getConfigurationSection(flagsPath)
+        typedSection?.getKeys(false)?.forEach { key ->
+            val rawValue = typedSection.get(key)
+            val knownFlag = AreaFlags.get(key)
+
+            if (knownFlag != null) {
+                val parsedValue = parseFlagValue(knownFlag, rawValue)
+                if (parsedValue != null) {
+                    loadedFlags[knownFlag] = parsedValue
+                }
+                return@forEach
+            }
+
+            val dynamicFlag = AreaFlags.getOrCreateBoolean(key)
+            dynamicFlag.decodeValue(rawValue)?.let { decoded ->
+                loadedFlags[dynamicFlag] = decoded
+            }
+        }
+
+        return loadedFlags
+    }
+
+    private fun parseFlagValue(flag: AreaFlag<*>, rawValue: Any?): Any? {
+        @Suppress("UNCHECKED_CAST")
+        return (flag as AreaFlag<Any?>).decodeValue(rawValue)
+    }
+
+}

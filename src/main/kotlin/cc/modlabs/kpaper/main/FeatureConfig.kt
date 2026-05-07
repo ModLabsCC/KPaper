@@ -15,6 +15,7 @@ enum class Feature {
     VISUALS,
     GAME,
     UTIL,
+    AREAS,
 }
 
 /**
@@ -43,6 +44,7 @@ class FeatureConfigBuilder {
             Feature.VISUALS to true,
             Feature.GAME to true,
             Feature.UTIL to true,
+            Feature.AREAS to true,
         ).forEach { (feature, enabled) -> put(feature, enabled) }
     }
 
@@ -90,6 +92,10 @@ class FeatureConfigBuilder {
     var enableUtilFeatures: Boolean
         get() = flags[Feature.UTIL] == true
         set(value) { flags[Feature.UTIL] = value }
+
+    var enableAreaFeatures: Boolean
+        get() = flags[Feature.AREAS] == true
+        set(value) { flags[Feature.AREAS] = value }
 
     fun build() = FeatureConfig(flags)
 }
