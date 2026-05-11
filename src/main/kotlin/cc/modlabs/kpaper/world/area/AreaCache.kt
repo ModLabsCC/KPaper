@@ -57,15 +57,23 @@ object AreaCache {
 
     fun reloadAreas() {
         cacheLock.writeLock().lock()
-        areas.clear()
+        try {
+            areas.clear()
 
-        val worlds = Bukkit.getWorlds()
-        for (world in worlds) {
-            loadForWorld(world)
+            val worlds = Bukkit.getWorlds()
+            for (world in worlds) {
+                try {
+                    loadForWorld(world)
+                } catch (e: Exception) {
+                    getLogger().warn("Failed to load areas for world '${world.name}': ${e.message}")
+                    e.printStackTrace()
+                }
+            }
+            Bukkit.getPluginManager().callEvent(AreasLoadedEvent(areas.values.toList()))
+            getLogger().info("Loaded ${areas.size} areas.")
+        } finally {
+            cacheLock.writeLock().unlock()
         }
-        Bukkit.getPluginManager().callEvent(AreasLoadedEvent(areas.values.toList()))
-        getLogger().info("Loaded ${areas.size} areas.")
-        cacheLock.writeLock().unlock()
     }
 
     fun addArea(area: Area) {

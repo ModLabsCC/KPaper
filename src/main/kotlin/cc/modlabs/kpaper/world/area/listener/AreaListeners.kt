@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.world.area.listener
 
+import cc.modlabs.kpaper.world.area.AreaCache
 import cc.modlabs.kpaper.world.area.model.getArea
 import cc.modlabs.kpaper.world.area.model.onEnter
 import cc.modlabs.kpaper.world.area.model.onLeave
@@ -10,6 +11,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import org.bukkit.event.world.WorldLoadEvent
+import org.bukkit.event.world.WorldUnloadEvent
 
 class AreaListeners : Listener {
 
@@ -47,5 +50,20 @@ class AreaListeners : Listener {
         val from = event.from
         val to = event.to
         handleMovement(from, to, player)
+    }
+
+    /**
+     * Custom dimensions (e.g. WorldEngine with a namespace prefix) are often not present in
+     * [org.bukkit.Bukkit.getWorlds] when plugins enable. Reload area definitions whenever a world loads
+     * so [cc.modlabs.kpaper.world.area.AreaCache] picks up that world's worldConfig.yml.
+     */
+    @EventHandler
+    fun onWorldLoad(event: WorldLoadEvent) {
+        AreaCache.reloadAreas()
+    }
+
+    @EventHandler
+    fun onWorldUnload(event: WorldUnloadEvent) {
+        AreaCache.reloadAreas()
     }
 }
