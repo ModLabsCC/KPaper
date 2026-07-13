@@ -5,14 +5,15 @@ import org.bukkit.Bukkit
 import kotlinx.coroutines.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
 fun sync(block: () -> Unit) {
-    Bukkit.getScheduler().runTask(PluginInstance, block)
+    Bukkit.getGlobalRegionScheduler().execute(PluginInstance, block)
 }
 
 fun async(block: () -> Unit) {
-    Bukkit.getScheduler().runTaskAsynchronously(PluginInstance, block)
+    Bukkit.getAsyncScheduler().runNow(PluginInstance) { block() }
 }
 
 /**
@@ -20,7 +21,7 @@ fun async(block: () -> Unit) {
  * True blocking is illegal, see [mcasync] for options.
  */
 fun <T> mcroutine(coroutine: suspend () -> T) {
-    CoroutineScope(Dispatchers.mc).launch {
+    KPaperCoroutines.scope.launch(Dispatchers.mc) {
         coroutine()
     }
 }
@@ -41,18 +42,58 @@ suspend fun <T> mcasync(coroutine: suspend () -> T): T {
 }
 
 fun <T> mcasyncBlocking(coroutine: suspend () -> T) {
-    CoroutineScope(Dispatchers.async).launch {
+    KPaperCoroutines.scope.launch(Dispatchers.async) {
         coroutine()
     }
 }
 
 
-val globalPool: ExecutorService = Executors.newCachedThreadPool()
+private object KPaperCoroutines {
+    private val threadNumber = AtomicInteger()
+    private var job = SupervisorJob()
+    private var pool: ExecutorService = createPool()
+
+    val scope: CoroutineScope
+        get() = CoroutineScope(job + CoroutineExceptionHandler { _, error ->
+            val plugin = runCatching { PluginInstance }.getOrNull()
+            if (plugin != null) {
+                plugin.logger.severe("Uncaught KPaper coroutine failure: ${error.message}")
+                error.printStackTrace()
+            }
+        })
+
+    fun executor(): ExecutorService = synchronized(this) {
+        if (pool.isShutdown) pool = createPool()
+        if (!job.isActive) job = SupervisorJob()
+        pool
+    }
+
+    fun shutdown() = synchronized(this) {
+        job.cancel(CancellationException("KPaper plugin disabled"))
+        pool.shutdownNow()
+    }
+
+    private fun createPool(): ExecutorService = Executors.newCachedThreadPool { runnable ->
+        Thread(runnable, "kpaper-async-${threadNumber.incrementAndGet()}").apply { isDaemon = true }
+    }
+}
+
+@Deprecated("Use the KPaper coroutine helpers; this executor is lifecycle-managed and must not be shut down by callers")
+val globalPool: ExecutorService
+    get() = KPaperCoroutines.executor()
+
+fun initializeCoroutines() {
+    KPaperCoroutines.executor()
+}
+
+fun shutdownCoroutines() {
+    KPaperCoroutines.shutdown()
+}
 
 object MinecraftCoroutineDispatcher : CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
-        if (!Bukkit.isPrimaryThread()) {
-            Bukkit.getServer().scheduler.runTask(PluginInstance, block)
+        if (!Bukkit.isGlobalTickThread()) {
+            Bukkit.getGlobalRegionScheduler().execute(PluginInstance, block)
             return
         }
         block.run()
@@ -60,12 +101,11 @@ object MinecraftCoroutineDispatcher : CoroutineDispatcher() {
 }
 
 object AsyncCoroutineDispatcher : CoroutineDispatcher() {
+    override fun isDispatchNeeded(context: CoroutineContext): Boolean =
+        !Thread.currentThread().name.startsWith("kpaper-async-")
+
     override fun dispatch(context: CoroutineContext, block: Runnable) {
-        if (Bukkit.isPrimaryThread()) {
-            globalPool.execute(block)
-            return
-        }
-        block.run()
+        KPaperCoroutines.executor().execute(block)
     }
 }
 

@@ -8,25 +8,28 @@ import dev.fruxz.stacked.text
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
+import org.bukkit.Bukkit
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.seconds
 
 object BossBarVisuals : VisualManager {
     private val store = VisualsStore(5)
     private val buff = StringBuilder()
-    private var bossBarStore = mutableMapOf<Player, BossBar>()
+    private var bossBarStore = ConcurrentHashMap<UUID, BossBar>()
     private val prefix: String = "\uF82A<color:#FFFFFF>[</color> "
     private val suffix: String = " <color:#FFFFFF>]</color>"
     private val fontKey = Key.key("serverbase", "default")
 
     private fun createBossBar(player: Player): BossBar {
         val bar = BossBar.bossBar(text(""), 0.0f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS)
-        bossBarStore[player] = bar
+        bossBarStore[player.uniqueId] = bar
         bar.addViewer(player)
         return bar
     }
 
     override fun addVisual(player: Player, visual: VisualElement) {
-        if (!bossBarStore.containsKey(player)) {
+        if (!bossBarStore.containsKey(player.uniqueId)) {
             createBossBar(player)
         }
         store.addVisual(player, visual)
@@ -36,14 +39,21 @@ object BossBarVisuals : VisualManager {
     override fun removeVisual(player: Player, id: String) {
         store.removeVisual(player, id)
         if (!store.hasVisual(player)) {
-            val bar = bossBarStore.remove(player)
+            val bar = bossBarStore.remove(player.uniqueId)
             bar?.removeViewer(player)
         }
     }
 
 
-    override fun removePlayer(player: Player) =
+    override fun removePlayer(player: Player) {
         store.removePlayer(player)
+        bossBarStore.remove(player.uniqueId)?.removeViewer(player)
+    }
+
+    fun clear() {
+        bossBarStore.forEach { (uuid, bar) -> Bukkit.getPlayer(uuid)?.let(bar::removeViewer) }
+        bossBarStore.clear()
+    }
 
     fun runBossBar() {
         timer(20, "Render BossBar") {
@@ -51,7 +61,7 @@ object BossBarVisuals : VisualManager {
                 buff.setLength(0)
                 it.second.forEach { s -> buff.append(s ?: "").append(' ') }
                 val player = it.first
-                val bar = bossBarStore[player] ?: error("No BossBar for $player")
+                val bar = bossBarStore[player.uniqueId] ?: error("No BossBar for $player")
                 bar.name(text(prefix + buff.toString().trim() + suffix).font(fontKey))
             }
         }

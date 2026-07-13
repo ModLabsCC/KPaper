@@ -22,8 +22,8 @@ object NPCEventListener {
     private val visibilityNPCs = mutableMapOf<UUID, NPC>()
     private var proximityTask: BukkitTask? = null
     private var lookAtTask: BukkitTask? = null // Separate task for look-at (runs more frequently)
-    private val playerPunchingState = mutableMapOf<Player, Long>() // Player -> last punch time
-    private val playerSneakingState = mutableMapOf<Player, Boolean>() // Player -> is sneaking
+    private val playerPunchingState = mutableMapOf<UUID, Long>()
+    private val playerSneakingState = mutableMapOf<UUID, Boolean>()
 
     /**
      * Gets the entity for an NPC by UUID, trying multiple methods.
@@ -174,7 +174,7 @@ object NPCEventListener {
             val player = event.player
             if (event.animationType == org.bukkit.event.player.PlayerAnimationType.ARM_SWING) {
                 // Player is punching - track it
-                playerPunchingState[player] = System.currentTimeMillis()
+                playerPunchingState[player.uniqueId] = System.currentTimeMillis()
             }
         }
 
@@ -192,6 +192,8 @@ object NPCEventListener {
             visibilityNPCs.values.forEach { npc ->
                 (npc as? NPCImpl)?.onPlayerQuit(player)
             }
+            playerPunchingState.remove(player.uniqueId)
+            playerSneakingState.remove(player.uniqueId)
         }
 
         // Start proximity monitoring task
@@ -294,12 +296,9 @@ object NPCEventListener {
                 
                 val npcLocation = entity.location
                 val world = entity.world
-                if (world == null) {
-                    return@forEach
-                }
                 
                 val range = npc.getProximityRange()
-                val npcName = entity.customName ?: entity.type.name
+                val npcName = entity.plainCustomName() ?: entity.type.name
 
                 // Get all nearby players
                 val allNearbyEntities = world.getNearbyEntities(npcLocation, range, range, range)
@@ -321,7 +320,7 @@ object NPCEventListener {
                     val distance = player.location.distance(npcLocation)
                     
                     // Check for sneaking - trigger event when player starts sneaking
-                    val wasSneaking = playerSneakingState[player] ?: false
+                    val wasSneaking = playerSneakingState[player.uniqueId] ?: false
                     val isSneaking = player.isSneaking
                     
                     if (isSneaking && !wasSneaking) {
@@ -339,10 +338,10 @@ object NPCEventListener {
                     }
                     
                     // Update sneaking state
-                    playerSneakingState[player] = isSneaking
+                    playerSneakingState[player.uniqueId] = isSneaking
 
                     // Check for punching (within last 500ms)
-                    val lastPunchTime = playerPunchingState[player] ?: 0L
+                    val lastPunchTime = playerPunchingState[player.uniqueId] ?: 0L
                     if (currentTime - lastPunchTime < 500) {
                         // Player is punching nearby - trigger event
                         val punchingEvent = NPCEvent(
@@ -356,7 +355,7 @@ object NPCEventListener {
                         )
                         (npc as? NPCImpl)?.triggerEvent(punchingEvent)
                         // Remove punch state after triggering to avoid duplicate events
-                        playerPunchingState.remove(player)
+                        playerPunchingState.remove(player.uniqueId)
                     }
                 }
             }
@@ -387,7 +386,7 @@ object NPCEventListener {
         val horizontalDistance = sqrt(direction.x * direction.x + direction.z * direction.z)
         val pitch = Math.toDegrees(-atan2(direction.y, horizontalDistance)).toFloat().coerceIn(-90f, 90f)
         
-        val entityName = entity.customName ?: entity.type.name
+        val entityName = entity.plainCustomName() ?: entity.type.name
         
         // Ensure AI is enabled for mannequins to maintain look direction
         // In MC 1.21.10, mannequins need AI to look at entities properly
@@ -440,7 +439,7 @@ object NPCEventListener {
      */
     fun registerProximityNPC(npc: NPC) {
         val entity = npc.getEntity()
-        val npcName = entity?.customName ?: entity?.type?.name ?: "Unknown"
+        val npcName = entity?.plainCustomName() ?: entity?.type?.name ?: "Unknown"
         val npcId = npc.getID() ?: return
 
         proximityNPCs[npcId] = npc
@@ -478,6 +477,19 @@ object NPCEventListener {
     fun unregisterVisibilityNPC(npc: NPC) {
         val npcId = npc.getID() ?: return
         visibilityNPCs.remove(npcId)
+    }
+
+    fun shutdown() {
+        proximityTask?.cancel()
+        lookAtTask?.cancel()
+        proximityTask = null
+        lookAtTask = null
+        npcMap.clear()
+        proximityNPCs.clear()
+        visibilityNPCs.clear()
+        playerPunchingState.clear()
+        playerSneakingState.clear()
+        isRegistered = false
     }
 }
 

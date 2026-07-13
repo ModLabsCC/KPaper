@@ -1,231 +1,94 @@
 package cc.modlabs.kpaper.inventory
 
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
-import org.bukkit.util.io.BukkitObjectInputStream
-import org.bukkit.util.io.BukkitObjectOutputStream
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.IOException
+import java.util.Base64
 
 object ItemStackConverter {
+    private const val MAX_ITEMS = 4096
+    private const val MAX_ITEM_BYTES = 4 * 1024 * 1024
 
+    fun playerInventoryToBase64(playerInventory: PlayerInventory): Array<String> =
+        arrayOf(toBase64(playerInventory), itemStackArrayToBase64(playerInventory.armorContents))
 
-    /**
-     * Converts the player inventory to a String array of Base64 strings. First string is the content and second string is the armor.
-     *
-     * @param playerInventory to turn into an array of strings.
-     * @return Array of strings: [ main content, armor content ]
-     * @throws IllegalStateException
-     */
-    @Throws(IllegalStateException::class)
-    fun playerInventoryToBase64(playerInventory: PlayerInventory): Array<String> {
-        //get the main content part, this doesn't return the armor
-        val content = toBase64(playerInventory)
-        val armor = itemStackArrayToBase64(playerInventory.armorContents)
-        return arrayOf(content, armor)
-    }
+    fun itemStackArrayToBase64(items: Array<ItemStack?>?): String =
+        encodeItems(items ?: emptyArray())
 
-    /**
-     *
-     * A method to serialize an [ItemStack] array to Base64 String.
-     *
-     *
-     *
-     *
-     * Based off of [.toBase64].
-     *
-     * @param items to turn into a Base64 String.
-     * @return Base64 string of the items.
-     * @throws IllegalStateException
-     */
-    @Throws(IllegalStateException::class)
-    fun itemStackArrayToBase64(items: Array<ItemStack?>?): String {
-        return try {
-            val outputStream = ByteArrayOutputStream()
-            val dataOutput = BukkitObjectOutputStream(outputStream)
+    fun itemStackToBase64(item: ItemStack): String =
+        Base64.getEncoder().encodeToString(item.serializeAsBytes())
 
-            // Write the size of the inventory
-            dataOutput.writeInt(items!!.size)
+    fun toBase64(inventory: Inventory): String =
+        encodeItems(Array(inventory.size) { inventory.getItem(it) })
 
-            // Save every element in the list
-            for (i in items.indices) {
-                dataOutput.writeObject(items[i])
-            }
-
-            // Serialize that array
-            dataOutput.close()
-            Base64Coder.encodeLines(outputStream.toByteArray())
-        } catch (e: Exception) {
-            throw IllegalStateException("Unable to save item stacks.", e)
-        }
-    }
-
-
-    /**
-     *
-     * A method to serialize an [ItemStack] to Base64 String.
-     * Based off of [.toBase64].
-     *
-     * @param item to turn into a Base64 String.
-     * @return Base64 string of the item.
-     * @throws IllegalStateException
-     */
-    @Throws(IllegalStateException::class)
-    fun itemStackToBase64(item: ItemStack): String {
-        return try {
-            val outputStream = ByteArrayOutputStream()
-            val dataOutput = BukkitObjectOutputStream(outputStream)
-
-            // Save the element
-            dataOutput.writeObject(item)
-
-            // Serialize that array
-            dataOutput.close()
-            Base64Coder.encodeLines(outputStream.toByteArray())
-        } catch (e: Exception) {
-            throw IllegalStateException("Unable to save item stacks.", e)
-        }
-    }
-
-    /**
-     * A method to serialize an inventory to Base64 string.
-     *
-     *
-     *
-     *
-     * Special thanks to Comphenix in the Bukkit forums or also known
-     * as aadnk on GitHub.
-     *
-     * [Original Source](https://gist.github.com/aadnk/8138186)
-     *
-     * @param inventory to serialize
-     * @return Base64 string of the provided inventory
-     * @throws IllegalStateException
-     */
-    @Throws(IllegalStateException::class)
-    fun toBase64(inventory: Inventory): String {
-        return try {
-            val outputStream = ByteArrayOutputStream()
-            val dataOutput = BukkitObjectOutputStream(outputStream)
-
-            // Write the size of the inventory
-            dataOutput.writeInt(inventory.size)
-
-            // Save every element in the list
-            for (i in 0 until inventory.size) {
-                dataOutput.writeObject(inventory.getItem(i))
-            }
-
-            // Serialize that array
-            dataOutput.close()
-            Base64Coder.encodeLines(outputStream.toByteArray())
-        } catch (e: Exception) {
-            throw IllegalStateException("Unable to save item stacks.", e)
-        }
-    }
-
-    /**
-     *
-     * A method to get an [Inventory] from an encoded, Base64, string.
-     *
-     *
-     *
-     *
-     * Special thanks to Comphenix in the Bukkit forums or also known
-     * as aadnk on GitHub.
-     *
-     * [Original Source](https://gist.github.com/aadnk/8138186)
-     *
-     * @param data Base64 string of data containing an inventory.
-     * @return Inventory created from the Base64 string.
-     * @throws IOException
-     */
     @Throws(IOException::class)
     fun fromBase64(data: String?): Inventory? {
-        return try {
-            val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(data))
-            val dataInput = BukkitObjectInputStream(inputStream)
-            var invSize = dataInput.readInt()
-            val initialSize = invSize
-            if(invSize % 9 != 0) {
-                invSize += (9 - invSize % 9)
-            }
-            val inventory = Bukkit.getServer().createInventory(null, invSize)
-
-            // Read the serialized inventory
-            for (i in 0 until initialSize) {
-                inventory.setItem(i, dataInput.readObject() as ItemStack?)
-            }
-            dataInput.close()
-            inventory
-        } catch (e: ClassNotFoundException) {
-            throw IOException("Unable to decode class type.", e)
-        }
+        if (data == null) return null
+        val items = decodeItems(data)
+        val size = ((items.size.coerceAtLeast(1) + 8) / 9) * 9
+        if (size > 6 * 9) throw IOException("Inventory is too large: $size")
+        return Bukkit.createInventory(null, size).also { it.contents = items }
     }
 
-    /**
-     * Gets an array of ItemStacks from Base64 string.
-     *
-     *
-     *
-     *
-     * Base off of [.fromBase64].
-     *
-     * @param data Base64 string to convert to ItemStack array.
-     * @return ItemStack array created from the Base64 string.
-     * @throws IOException
-     */
     @Throws(IOException::class)
-    fun itemStackArrayFromBase64(data: String?): Array<ItemStack?>? {
-        return try {
-            val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(data))
-            val dataInput = BukkitObjectInputStream(inputStream)
-            val items = arrayOfNulls<ItemStack?>(dataInput.readInt())
+    fun itemStackArrayFromBase64(data: String?): Array<ItemStack?>? = data?.let(::decodeItems)
 
-            // Read the serialized inventory
-            for (i in items.indices) {
-                items[i] = dataInput.readObject() as? ItemStack? ?: ItemStack(Material.AIR)
-            }
-            dataInput.close()
-            items
-        } catch (e: ClassNotFoundException) {
-            throw IOException("Unable to decode class type.", e)
-        }
-    }
-
-
-    /**
-     * Gets an ItemStack from Base64 string.
-     *
-     *
-     *
-     *
-     * Base off of [.fromBase64].
-     *
-     * @param data Base64 string to convert to ItemStack.
-     * @return ItemStack created from the Base64 string.
-     * @throws IOException
-     */
     @Throws(IOException::class)
     fun itemStackFromBase64(data: String?): ItemStack {
-        return try {
-            val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(data))
-            val dataInput = BukkitObjectInputStream(inputStream)
+        if (data == null) throw IOException("Item data cannot be null")
+        val bytes = decodeBase64(data)
+        if (bytes.size !in 1..MAX_ITEM_BYTES) throw IOException("Invalid serialized item length: ${bytes.size}")
+        return ItemStack.deserializeBytes(bytes)
+    }
 
-            // Read the serialized inventory
-            val item = dataInput.readObject() as ItemStack
+    private fun encodeItems(items: Array<ItemStack?>): String {
+        require(items.size <= MAX_ITEMS) { "Too many items" }
+        val bytes = ByteArrayOutputStream().use { byteStream ->
+            DataOutputStream(byteStream).use { output ->
+                output.writeInt(items.size)
+                items.forEach { item ->
+                    if (item == null || item.isEmpty) {
+                        output.writeInt(-1)
+                    } else {
+                        val itemBytes = item.serializeAsBytes()
+                        require(itemBytes.size <= MAX_ITEM_BYTES) { "Serialized item is too large" }
+                        output.writeInt(itemBytes.size)
+                        output.write(itemBytes)
+                    }
+                }
+            }
+            byteStream.toByteArray()
+        }
+        return Base64.getEncoder().encodeToString(bytes)
+    }
 
-            dataInput.close()
-            item
-        } catch (e: ClassNotFoundException) {
-            throw IOException("Unable to decode class type.", e)
+    private fun decodeItems(data: String): Array<ItemStack?> {
+        val bytes = decodeBase64(data)
+        return DataInputStream(ByteArrayInputStream(bytes)).use { input ->
+            val count = input.readInt()
+            if (count !in 0..MAX_ITEMS) throw IOException("Invalid item count: $count")
+            arrayOfNulls<ItemStack>(count).also { items ->
+                repeat(count) { index ->
+                    val length = input.readInt()
+                    if (length == -1) return@repeat
+                    if (length !in 1..MAX_ITEM_BYTES) throw IOException("Invalid serialized item length: $length")
+                    val itemBytes = input.readNBytes(length)
+                    if (itemBytes.size != length) throw IOException("Unexpected end of serialized item")
+                    items[index] = ItemStack.deserializeBytes(itemBytes)
+                }
+            }
         }
     }
 
-
+    private fun decodeBase64(data: String): ByteArray = try {
+        Base64.getMimeDecoder().decode(data)
+    } catch (error: IllegalArgumentException) {
+        throw IOException("Invalid Base64 item data", error)
+    }
 }

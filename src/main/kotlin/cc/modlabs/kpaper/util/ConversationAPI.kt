@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package cc.modlabs.kpaper.util
 
 import cc.modlabs.kpaper.main.PluginInstance
@@ -8,6 +10,7 @@ import org.bukkit.conversations.Prompt
 import org.bukkit.conversations.StringPrompt
 import org.bukkit.entity.Player
 
+@Deprecated("Bukkit conversations are deprecated; use native Paper dialogs from cc.modlabs.kpaper.dialog")
 class ConversationAPI(private val player: Player) {
 
     private val questions = mutableListOf<Question>()

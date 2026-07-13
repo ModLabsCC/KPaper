@@ -10,4 +10,15 @@ package cc.modlabs.kpaper.party
 object Party {
     @Volatile
     var api: PartyAPI = DefaultPartyAPI()
+
+    fun replace(api: PartyAPI, closePrevious: Boolean = true) {
+        val previous = this.api
+        this.api = api
+        if (closePrevious && previous !== api) (previous as? AutoCloseable)?.close()
+    }
+
+    fun close() {
+        (api as? AutoCloseable)?.close()
+        api = DefaultPartyAPI()
+    }
 }

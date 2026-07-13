@@ -45,7 +45,7 @@ val koTestVersion = "6.0.0.M1"
 val mockkVersion = "1.13.16"
 
 dependencies {
-    paperweight.paperDevBundle("$minecraftVersion.build.+")
+    paperweight.paperDevBundle(minecraftVersion)
     api("cc.modlabs:KlassicX:2026.3.30.1421")
 
     api("com.squareup.okhttp3:okhttp:4.12.0")

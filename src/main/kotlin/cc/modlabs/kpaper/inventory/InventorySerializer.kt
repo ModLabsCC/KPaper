@@ -1,141 +1,79 @@
-﻿package cc.modlabs.kpaper.inventory
+package cc.modlabs.kpaper.inventory
 
 import org.bukkit.Bukkit
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.util.io.BukkitObjectInputStream
-import org.bukkit.util.io.BukkitObjectOutputStream
-import java.io.*
-import java.util.*
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 class InventorySerializer : ISerializer {
-
-    @Throws(IOException::class)
     override fun serialize(inventories: List<Inventory>, outputStream: OutputStream) {
-        val dataOut = DataOutputStream(outputStream)
-        val inventoryCount = inventories.size
-        dataOut.writeInt(inventoryCount)
-        for (inventory in inventories) {
-            serializeSingleInventory(inventory, outputStream)
+        require(inventories.size <= MAX_INVENTORIES) { "Too many inventories" }
+        DataOutputStream(outputStream).let { output ->
+            output.writeInt(FORMAT_VERSION)
+            output.writeInt(inventories.size)
+            inventories.forEach { inventory -> writeInventory(output, inventory) }
+            output.flush()
         }
-        dataOut.flush()
     }
 
-    @Throws(IOException::class)
     override fun deserializeInventories(stream: InputStream): List<Inventory> {
-        val dataIn = DataInputStream(stream)
-        val inventoryCount = dataIn.readInt()
-        val inventories: MutableList<Inventory> = ArrayList(inventoryCount)
-        for (i in 0 until inventoryCount) {
-            inventories.add(deserializeSingleInventory(dataIn))
-        }
-        return inventories
+        val input = DataInputStream(stream)
+        val version = input.readInt()
+        if (version != FORMAT_VERSION) throw IOException("Unsupported inventory format version: $version")
+        val count = input.readInt()
+        if (count !in 0..MAX_INVENTORIES) throw IOException("Invalid inventory count: $count")
+        return List(count) { readInventory(input) }
     }
 
     companion object {
-        private const val NULL_STACK: Byte = 0x00
-        private const val NORM_STACK: Byte = 0x01
+        private const val FORMAT_VERSION = 2
+        private const val MAX_INVENTORIES = 256
+        private const val MAX_SLOTS = 6 * 9
+        private const val MAX_ITEM_BYTES = 4 * 1024 * 1024
 
-        // -------------------------
-        // New: ByteArray BLOB APIs
-        // -------------------------
-
-        /**
-         * New: Serialize ONE inventory into compressed bytes (no Base64).
-         * Suitable for storing in BLOB/MEDIUMBLOB.
-         */
-        fun serializeToBytes(inventory: Inventory): ByteArray {
-            return Serializer.serializeToBytes(listOf(inventory))
+        private fun writeInventory(output: DataOutputStream, inventory: Inventory) {
+            require(inventory.size in 1..MAX_SLOTS) { "Invalid inventory size: ${inventory.size}" }
+            output.writeInt(inventory.size)
+            repeat(inventory.size) { slot -> writeItem(output, inventory.getItem(slot)) }
         }
 
-        /**
-         * New: Deserialize ONE inventory from compressed bytes (no Base64).
-         */
-        @Throws(IOException::class)
-        fun deserializeFromBytes(bytes: ByteArray): Inventory {
-            return Serializer.deserializeInventoriesFromBytes(bytes).first()
-        }
-
-        /**
-         * New: Serialize MANY inventories into compressed bytes (no Base64).
-         */
-        fun serializeInventoriesToBytes(inventories: List<Inventory>): ByteArray {
-            return Serializer.serializeToBytes(inventories)
-        }
-
-        /**
-         * New: Deserialize MANY inventories from compressed bytes (no Base64).
-         */
-        @Throws(IOException::class)
-        fun deserializeInventoriesFromBytes(bytes: ByteArray): List<Inventory> {
-            return Serializer.deserializeInventoriesFromBytes(bytes)
-        }
-
-        // -------------------------
-        // Existing low-level format
-        // (inventory -> OutputStream)
-        // -------------------------
-
-        @Throws(IOException::class)
-        private fun serializeSingleInventory(inventory: Inventory, out: OutputStream) {
-            val dataOut = DataOutputStream(out)
-            val slots = inventory.size
-            dataOut.writeInt(slots)
-            for (i in 0 until slots) {
-                val item = inventory.getItem(i)
-                val isNull = item == null
-                dataOut.writeByte((if (isNull) NULL_STACK else NORM_STACK).toInt())
-                if (!isNull) {
-                    serializeItemStack(item, dataOut)
-                }
+        private fun writeItem(output: DataOutputStream, item: ItemStack?) {
+            if (item == null || item.isEmpty) {
+                output.writeInt(-1)
+                return
             }
-            dataOut.flush()
+            val bytes = item.serializeAsBytes()
+            require(bytes.size <= MAX_ITEM_BYTES) { "Serialized item is too large" }
+            output.writeInt(bytes.size)
+            output.write(bytes)
         }
 
-        private fun serializeItemStack(itemStack: ItemStack?, out: OutputStream) {
-            BukkitObjectOutputStream(out).use { oos ->
-                oos.writeObject(itemStack)
-                oos.flush()
-                // NOTE: use() closes the stream wrapper, but not the underlying stream in most JDK impls.
-                // If you ever see issues, switch to manual flush without closing.
-            }
-        }
-
-        @Throws(IOException::class, ClassNotFoundException::class)
-        private fun deserializeItemStack(stream: InputStream): ItemStack {
-            BukkitObjectInputStream(stream).use { ois ->
-                return ois.readObject() as ItemStack
-            }
-        }
-
-        @Throws(IOException::class)
-        private fun deserializeSingleInventory(stream: InputStream): Inventory {
-            val dais = DataInputStream(stream)
-            val size = dais.readInt()
-            val invSize = (1 + ((size - 1) / 9)) * 9 // ceil(size/9) * 9
-            val inventory = Bukkit.createInventory(null, invSize)
-
-            for (i in 0 until size) {
-                val marker = dais.readByte()
-                if (marker == NULL_STACK) continue
-                val itemStack = deserializeItemStack(dais)
-                inventory.setItem(i, itemStack)
-            }
+        private fun readInventory(input: DataInputStream): Inventory {
+            val size = input.readInt()
+            if (size !in 1..MAX_SLOTS) throw IOException("Invalid inventory size: $size")
+            val inventory = Bukkit.createInventory(null, ((size + 8) / 9) * 9)
+            repeat(size) { slot -> inventory.setItem(slot, readItem(input)) }
             return inventory
         }
 
-        // -------------------------
-        // Legacy String APIs (Base64)
-        // Keep these so old data still works
-        // -------------------------
-
-        fun serialize(inventory: Inventory): String {
-            return Serializer.serialize(listOf(inventory))
+        private fun readItem(input: DataInputStream): ItemStack? {
+            val length = input.readInt()
+            if (length == -1) return null
+            if (length !in 1..MAX_ITEM_BYTES) throw IOException("Invalid serialized item length: $length")
+            return ItemStack.deserializeBytes(input.readNBytes(length).also {
+                if (it.size != length) throw IOException("Unexpected end of serialized item")
+            })
         }
 
-        @Throws(IOException::class)
-        fun deserialize(serialized: String): Inventory {
-            return Serializer.deserializeInventories(serialized).first()
-        }
+        fun serializeToBytes(inventory: Inventory): ByteArray = Serializer.serializeToBytes(listOf(inventory))
+        fun deserializeFromBytes(bytes: ByteArray): Inventory = Serializer.deserializeInventoriesFromBytes(bytes).first()
+        fun serializeInventoriesToBytes(inventories: List<Inventory>): ByteArray = Serializer.serializeToBytes(inventories)
+        fun deserializeInventoriesFromBytes(bytes: ByteArray): List<Inventory> = Serializer.deserializeInventoriesFromBytes(bytes)
+        fun serialize(inventory: Inventory): String = Serializer.serialize(listOf(inventory))
+        fun deserialize(serialized: String): Inventory = Serializer.deserializeInventories(serialized).first()
     }
 }

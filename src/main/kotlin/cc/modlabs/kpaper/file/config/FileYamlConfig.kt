@@ -14,8 +14,6 @@ import java.io.IOException
  * @property fileName The name of the configuration file.
  */
 abstract class FileYamlConfig(var path: String) : YamlConfiguration() {
-    private var seperator: String?
-
     val file: File
 
     fun saveConfig() {
@@ -31,19 +29,16 @@ abstract class FileYamlConfig(var path: String) : YamlConfiguration() {
     }
 
     init {
-        seperator = System.getProperty("file.seperator")
-        if (seperator == null) {
-            seperator = "/"
-        }
-        path = path.replace("/", seperator.toString())
-        file = File(path)
+        file = File(path).canonicalFile
+        path = file.path
         try {
+            file.parentFile?.mkdirs()
             if (!file.exists()) {
                 file.createNewFile()
             }
             load(path)
-        } catch (_: IOException) {
-            // Do nothing
+        } catch (e: IOException) {
+            throw IllegalStateException("Unable to initialize YAML configuration at $path", e)
         } catch (e: InvalidConfigurationException) {
             e.printStackTrace()
         }

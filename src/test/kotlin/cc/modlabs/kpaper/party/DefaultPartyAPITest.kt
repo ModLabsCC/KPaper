@@ -53,6 +53,31 @@ class DefaultPartyAPITest {
     }
 
     @Test
+    fun `player cannot be added to two parties`() {
+        val firstLeader = UUID.randomUUID()
+        val secondLeader = UUID.randomUUID()
+        val member = UUID.randomUUID()
+        api.createParty("first", firstLeader)
+        api.createParty("second", secondLeader)
+        assertTrue(api.addMember("first", member))
+        assertFalse(api.addMember("second", member))
+        assertEquals("first", api.getPartyId(member).join().orElseThrow())
+    }
+
+    @Test
+    fun `recreating party clears stale reverse mappings`() {
+        val oldLeader = UUID.randomUUID()
+        val member = UUID.randomUUID()
+        val newLeader = UUID.randomUUID()
+        api.createParty("same", oldLeader)
+        api.addMember("same", member)
+        api.createParty("same", newLeader)
+        assertFalse(api.isInParty(oldLeader).join())
+        assertFalse(api.isInParty(member).join())
+        assertTrue(api.isPartyLeader(newLeader).join())
+    }
+
+    @Test
     fun `remove leader promotes or disbands`() {
         val leader = UUID.randomUUID()
         val m1 = UUID.randomUUID()

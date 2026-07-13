@@ -1,9 +1,18 @@
 ﻿package cc.modlabs.kpaper.main
 
 import cc.modlabs.kpaper.event.CustomEventListener
+import cc.modlabs.kpaper.coroutines.initializeCoroutines
+import cc.modlabs.kpaper.coroutines.shutdownCoroutines
 import cc.modlabs.kpaper.inventory.internal.AnvilListener
 import cc.modlabs.kpaper.inventory.internal.ItemClickListener
 import cc.modlabs.kpaper.inventory.simple.SimpleGUIListener
+import cc.modlabs.kpaper.inventory.mineskin.MineSkinFetcher
+import cc.modlabs.kpaper.ticks.TickService
+import cc.modlabs.kpaper.scheduling.KPaperScheduler
+import cc.modlabs.kpaper.messages.LocalMessageCooldown
+import cc.modlabs.kpaper.npc.NPCEventListener
+import cc.modlabs.kpaper.party.Party
+import cc.modlabs.kpaper.visuals.impl.BossBarVisuals
 import cc.modlabs.kpaper.world.area.AreaSystem
 import com.github.retrooper.packetevents.PacketEvents
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
@@ -59,6 +68,8 @@ abstract class KPlugin : JavaPlugin() {
     }
 
     final override fun onEnable() {
+        initializeCoroutines()
+        TickService.load(this)
         if (isFeatureEnabled(Feature.ITEM_CLICK)) {
             Bukkit.getPluginManager().registerEvents(AnvilListener, this)
             ItemClickListener.load()
@@ -82,18 +93,22 @@ abstract class KPlugin : JavaPlugin() {
     }
 
     final override fun onDisable() {
-        if (isFeatureEnabled(Feature.ITEM_CLICK)) {
-            ItemClickListener.unload()
+        try {
+            shutdown()
+        } finally {
+            if (isFeatureEnabled(Feature.ITEM_CLICK)) ItemClickListener.unload()
+            if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) CustomEventListener.unload()
+            if (isFeatureEnabled(Feature.AREAS)) AreaSystem.unload()
+            TickService.unload()
+            KPaperScheduler.cancel(this)
+            AnvilListener.clear()
+            NPCEventListener.shutdown()
+            BossBarVisuals.clear()
+            LocalMessageCooldown.clear()
+            Party.close()
+            MineSkinFetcher.clearCache()
+            shutdownCoroutines()
+            PacketEvents.getAPI().terminate()
         }
-        if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) {
-            CustomEventListener.unload()
-        }
-        if (isFeatureEnabled(Feature.AREAS)) {
-            AreaSystem.unload()
-        }
-
-        PacketEvents.getAPI().terminate()
-
-        shutdown()
     }
 }

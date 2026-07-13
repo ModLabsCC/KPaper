@@ -37,6 +37,7 @@ class DefaultPartyAPI(
     private val parties = ConcurrentHashMap<String, InternalParty>()
     private val playerToParty = ConcurrentHashMap<UUID, String>()
     private val invites = ConcurrentHashMap<InviteKey, PartyAPI.PartyInvite>()
+    private val mutationLock = Any()
 
     // --------------- Party checks -----------------
 
@@ -87,18 +88,21 @@ class DefaultPartyAPI(
         CompletableFuture.completedFuture(parties[partyId]?.let { it.members.size >= it.maxSize } ?: false)
 
     override fun hasInvite(playerId: UUID, partyId: String): CompletableFuture<Boolean> =
-        CompletableFuture.completedFuture(invites[InviteKey(partyId, playerId)]?.let { !it.isExpired() } ?: false)
+        CompletableFuture.completedFuture(activeInvite(InviteKey(partyId, playerId)) != null)
 
     override fun getInvite(playerId: UUID, partyId: String): CompletableFuture<Optional<PartyAPI.PartyInvite>> =
         CompletableFuture.completedFuture(
-            Optional.ofNullable(invites[InviteKey(partyId, playerId)]?.takeUnless { it.isExpired() })
+            Optional.ofNullable(activeInvite(InviteKey(partyId, playerId)))
         )
 
     // --------------- Invites -----------------
 
     override fun getAllInvites(playerId: UUID): CompletableFuture<Set<String>> =
         CompletableFuture.completedFuture(
-            invites.filter { it.key.playerId == playerId && !it.value.isExpired() }.keys.map { it.partyId }.toSet()
+            run {
+                invites.entries.removeIf { it.value.isExpired() }
+                invites.keys.filter { it.playerId == playerId }.map { it.partyId }.toSet()
+            }
         )
 
     override fun partyExists(partyId: String): CompletableFuture<Boolean> =
@@ -134,26 +138,52 @@ class DefaultPartyAPI(
     private fun getOnlineCount(partyId: String): Int =
         parties[partyId]?.members?.count { onlinePlayerLookup(it) != null } ?: 0
 
+    private fun activeInvite(key: InviteKey): PartyAPI.PartyInvite? {
+        val invite = invites[key] ?: return null
+        if (invite.isExpired()) {
+            invites.remove(key, invite)
+            return null
+        }
+        return invite
+    }
+
     // --------------- Minimal management API (internal) -----------------
     // Not part of PartyAPI (which is read-only), but useful for tests/examples
 
     fun createParty(id: String, leader: UUID, maxSize: Int = 8): PartyAPI.PartyData {
-        val p = InternalParty(id, leader, mutableSetOf<UUID>().apply { add(leader) }, System.currentTimeMillis(), maxSize)
-        parties[id] = p
-        playerToParty[leader] = id
-        return p.toApi()
+        require(id.isNotBlank()) { "Party id cannot be blank" }
+        require(maxSize > 0) { "Party maxSize must be positive" }
+        return synchronized(mutationLock) {
+            parties.remove(id)?.members?.forEach { member -> playerToParty.remove(member, id) }
+            playerToParty[leader]?.let { previous -> removeMemberLocked(leader, previous) }
+            val p = InternalParty(id, leader, CopyOnWriteArraySet<UUID>().apply { add(leader) }, System.currentTimeMillis(), maxSize)
+            parties[id] = p
+            playerToParty[leader] = id
+            p.toApi()
+        }
     }
 
     fun addMember(partyId: String, playerId: UUID): Boolean {
-        val p = parties[partyId] ?: return false
-        if (p.members.size >= p.maxSize) return false
-        p.members.add(playerId)
-        playerToParty[playerId] = partyId
-        return true
+        return synchronized(mutationLock) {
+            val p = parties[partyId] ?: return@synchronized false
+            val currentParty = playerToParty[playerId]
+            if (currentParty != null) return@synchronized currentParty == partyId
+            if (p.members.size >= p.maxSize) return@synchronized false
+            if (!p.members.add(playerId)) return@synchronized false
+            playerToParty[playerId] = partyId
+            true
+        }
     }
 
     fun removeMember(playerId: UUID) {
-        val pid = playerToParty.remove(playerId) ?: return
+        synchronized(mutationLock) {
+            val pid = playerToParty[playerId] ?: return
+            removeMemberLocked(playerId, pid)
+        }
+    }
+
+    private fun removeMemberLocked(playerId: UUID, pid: String) {
+        playerToParty.remove(playerId, pid)
         val p = parties[pid] ?: return
         p.members.remove(playerId)
         if (playerId == p.leader) {
@@ -161,6 +191,8 @@ class DefaultPartyAPI(
             val newLeader = p.members.firstOrNull()
             if (newLeader == null) {
                 parties.remove(pid)
+                p.members.forEach { member -> playerToParty.remove(member, pid) }
+                invites.keys.removeIf { it.partyId == pid }
             } else {
                 p.leader = newLeader
             }
@@ -168,6 +200,9 @@ class DefaultPartyAPI(
     }
 
     fun invite(playerId: UUID, partyId: String, inviter: UUID, ttl: Duration = Duration.ofSeconds(60)) {
+        require(!ttl.isNegative && !ttl.isZero) { "Invite TTL must be positive" }
+        val party = parties[partyId] ?: throw IllegalArgumentException("Unknown party: $partyId")
+        require(party.members.contains(inviter)) { "Inviter must be a member of the party" }
         val invite = PartyAPI.PartyInvite(
             partyId = partyId,
             invitedPlayer = playerId,

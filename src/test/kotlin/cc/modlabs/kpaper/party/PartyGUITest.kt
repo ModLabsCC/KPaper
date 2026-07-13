@@ -46,7 +46,7 @@ class PartyGUITest {
     @Test
     fun `RedisPartyAPI openPartyGUI uses Redis to build and opens`() {
         val jedis: JedisPooled = mockk(relaxed = true)
-        val api = RedisPartyAPI(jedis)
+        val api = RedisPartyAPI(jedis, uiDispatcher = { _, task -> task() })
         val player: Player = mockk(relaxed = true)
 
         val pid = "pid-123"
@@ -71,7 +71,7 @@ class PartyGUITest {
         }
 
         api.openPartyGUI(player)
-        verify(exactly = 1) { player.openInventory(inv) }
+        verify(timeout = 2_000, exactly = 1) { player.openInventory(inv) }
         api.close()
     }
 }

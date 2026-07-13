@@ -26,6 +26,7 @@ fun Location.dropItemNaturally(item: ItemStack) = world.dropItemNaturally(this, 
 fun Location.spawnArrow(direction: Vector, speed: Float, spread: Float) =
     world.spawnArrow(this, direction, speed, spread)
 
+@Suppress("DEPRECATION")
 fun Location.generateTree(type: TreeType) = world.generateTree(this, type)
 
 @Suppress("DEPRECATION")

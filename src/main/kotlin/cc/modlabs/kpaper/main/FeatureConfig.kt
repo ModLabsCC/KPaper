@@ -22,6 +22,7 @@ enum class Feature {
  * Holds the configuration for enabling/disabling features.
  * It maps each feature to a Boolean indicating whether the feature is active.
  */
+@ConsistentCopyVisibility
 data class FeatureConfig internal constructor(val flags: Map<Feature, Boolean>) {
     fun isEnabled(feature: Feature): Boolean = flags[feature] ?: false
 }

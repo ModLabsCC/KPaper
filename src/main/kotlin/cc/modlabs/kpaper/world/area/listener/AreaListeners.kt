@@ -20,7 +20,7 @@ class AreaListeners : Listener {
         val fromArea = from.getArea()
         val toArea = to.getArea()
 
-        if (fromArea != null && toArea != null && fromArea.name != toArea.name) {
+        if (fromArea != null && toArea != null && fromArea !== toArea) {
             fromArea.onLeave(player)
             toArea.onEnter(player)
         } else if (fromArea != null && toArea == null) {
@@ -64,6 +64,6 @@ class AreaListeners : Listener {
 
     @EventHandler
     fun onWorldUnload(event: WorldUnloadEvent) {
-        AreaCache.reloadAreas()
+        AreaCache.clear(event.world.name)
     }
 }

@@ -284,9 +284,9 @@ class BlockDisplayManager {
                 Optional.of(UUID.randomUUID()),
                 EntityTypes.BLOCK_DISPLAY,
                 Vector3d(location.x, location.y + blockDisplay.yOffset, location.z),
-                location.pitch.toFloat(),
-                location.yaw.toFloat(),
-                location.yaw.toFloat(),
+                location.pitch,
+                location.yaw,
+                location.yaw,
                 0,
                 Optional.of(Vector3d(0.0, 0.0, 0.0))
             )

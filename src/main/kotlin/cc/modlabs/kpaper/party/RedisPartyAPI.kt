@@ -15,6 +15,8 @@ import org.bukkit.entity.Player
 import java.util.Optional
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * Redis-backed implementation of [PartyAPI].
@@ -30,83 +32,97 @@ import java.util.concurrent.CompletableFuture
 class RedisPartyAPI(
     private val jedis: JedisPooled,
     private val onlinePlayerLookup: OnlinePlayerLookup = OnlinePlayerLookup { Bukkit.getPlayer(it) },
+    private val uiDispatcher: (Player, () -> Unit) -> Unit = { player, task ->
+        player.scheduler.run(cc.modlabs.kpaper.main.PluginInstance, { task() }, null)
+    },
 ) : PartyAPI, AutoCloseable {
 
     constructor(redisUri: String) : this(JedisPooled(redisUri))
+    constructor(jedis: JedisPooled, onlinePlayerLookup: OnlinePlayerLookup) : this(
+        jedis,
+        onlinePlayerLookup,
+        { player, task -> player.scheduler.run(cc.modlabs.kpaper.main.PluginInstance, { task() }, null) },
+    )
 
     private val gson = Gson()
+    private val executor: ExecutorService = Executors.newFixedThreadPool(4) { runnable ->
+        Thread(runnable, "kpaper-redis").apply { isDaemon = true }
+    }
+
+    private fun <T> redisAsync(block: () -> T): CompletableFuture<T> =
+        CompletableFuture.supplyAsync(block, executor)
 
     // --------------- Party checks -----------------
 
     override fun isInParty(playerId: UUID): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync { jedis.get(playerPartyKey(playerId)) != null }
+        redisAsync { jedis.get(playerPartyKey(playerId)) != null }
 
     override fun isInParty(player: OfflinePlayer): CompletableFuture<Boolean> =
         isInParty(player.uniqueId)
 
     override fun isPartyLeader(playerId: UUID): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync {
-            val partyId = jedis.get(playerPartyKey(playerId)) ?: return@supplyAsync false
-            val pdata = getPartyDataSync(partyId) ?: return@supplyAsync false
+        redisAsync {
+            val partyId = jedis.get(playerPartyKey(playerId)) ?: return@redisAsync false
+            val pdata = getPartyDataSync(partyId) ?: return@redisAsync false
             pdata.leader == playerId
         }
 
     override fun areInSameParty(player1: UUID, player2: UUID): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync {
+        redisAsync {
             val p1 = jedis.get(playerPartyKey(player1))
             val p2 = jedis.get(playerPartyKey(player2))
             p1 != null && p1 == p2
         }
 
     override fun getPartyId(playerId: UUID): CompletableFuture<Optional<String>> =
-        CompletableFuture.supplyAsync { Optional.ofNullable(jedis.get(playerPartyKey(playerId))) }
+        redisAsync { Optional.ofNullable(jedis.get(playerPartyKey(playerId))) }
 
     // --------------- Party data -----------------
 
     override fun getPartyData(partyId: String): CompletableFuture<Optional<PartyAPI.PartyData>> =
-        CompletableFuture.supplyAsync {
+        redisAsync {
             Optional.ofNullable(getPartyDataSync(partyId))
         }
 
     override fun getPlayerParty(playerId: UUID): CompletableFuture<Optional<PartyAPI.PartyData>> =
-        CompletableFuture.supplyAsync {
-            val pid = jedis.get(playerPartyKey(playerId)) ?: return@supplyAsync Optional.empty()
+        redisAsync {
+            val pid = jedis.get(playerPartyKey(playerId)) ?: return@redisAsync Optional.empty()
             Optional.ofNullable(getPartyDataSync(pid))
         }
 
     override fun getPartyLeader(playerId: UUID): CompletableFuture<Optional<UUID>> =
-        CompletableFuture.supplyAsync {
-            val pid = jedis.get(playerPartyKey(playerId)) ?: return@supplyAsync Optional.empty()
+        redisAsync {
+            val pid = jedis.get(playerPartyKey(playerId)) ?: return@redisAsync Optional.empty()
             Optional.ofNullable(getPartyDataSync(pid)?.leader)
         }
 
     override fun getPartyMembers(partyId: String): CompletableFuture<Set<UUID>> =
-        CompletableFuture.supplyAsync {
+        redisAsync {
             getPartyDataSync(partyId)?.members ?: emptySet()
         }
 
     override fun getPartyMembersOfPlayer(playerId: UUID): CompletableFuture<Set<UUID>> =
-        CompletableFuture.supplyAsync {
-            val pid = jedis.get(playerPartyKey(playerId)) ?: return@supplyAsync emptySet()
+        redisAsync {
+            val pid = jedis.get(playerPartyKey(playerId)) ?: return@redisAsync emptySet()
             getPartyDataSync(pid)?.members ?: emptySet()
         }
 
     override fun getPartyMemberCount(partyId: String): CompletableFuture<Int> =
-        CompletableFuture.supplyAsync { getPartyDataSync(partyId)?.members?.size ?: 0 }
+        redisAsync { getPartyDataSync(partyId)?.members?.size ?: 0 }
 
     override fun isPartyFull(partyId: String): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync { getPartyDataSync(partyId)?.isFull() ?: false }
+        redisAsync { getPartyDataSync(partyId)?.isFull() ?: false }
 
     override fun hasInvite(playerId: UUID, partyId: String): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync {
-            val json = jedis.get(inviteKey(partyId, playerId)) ?: return@supplyAsync false
-            val inv = parseInvite(json) ?: return@supplyAsync false
+        redisAsync {
+            val json = jedis.get(inviteKey(partyId, playerId)) ?: return@redisAsync false
+            val inv = parseInvite(json) ?: return@redisAsync false
             !inv.isExpired()
         }
 
     override fun getInvite(playerId: UUID, partyId: String): CompletableFuture<Optional<PartyAPI.PartyInvite>> =
-        CompletableFuture.supplyAsync {
-            val json = jedis.get(inviteKey(partyId, playerId)) ?: return@supplyAsync Optional.empty()
+        redisAsync {
+            val json = jedis.get(inviteKey(partyId, playerId)) ?: return@redisAsync Optional.empty()
             val inv = parseInvite(json)?.takeUnless { it.isExpired() }
             Optional.ofNullable(inv)
         }
@@ -114,7 +130,7 @@ class RedisPartyAPI(
     // --------------- Invites -----------------
 
     override fun getAllInvites(playerId: UUID): CompletableFuture<Set<String>> =
-        CompletableFuture.supplyAsync {
+        redisAsync {
             val pattern = "party_invite:*:${playerId}"
             var cursor = ScanParams.SCAN_POINTER_START
             val params = ScanParams().match(pattern).count(500)
@@ -132,26 +148,30 @@ class RedisPartyAPI(
         }
 
     override fun partyExists(partyId: String): CompletableFuture<Boolean> =
-        CompletableFuture.supplyAsync { jedis.get(partyKey(partyId)) != null }
+        redisAsync { jedis.get(partyKey(partyId)) != null }
 
     override fun getOnlinePartyMembers(partyId: String): CompletableFuture<Set<UUID>> =
-        CompletableFuture.supplyAsync {
-            val members = getPartyDataSync(partyId)?.members ?: return@supplyAsync emptySet()
+        redisAsync {
+            val members = getPartyDataSync(partyId)?.members ?: return@redisAsync emptySet()
             members.filter { onlinePlayerLookup(it) != null }.toSet()
         }
 
     // --------------- Utilities -----------------
 
     override fun getOnlinePartyMemberCount(partyId: String): CompletableFuture<Int> =
-        CompletableFuture.supplyAsync {
+        redisAsync {
             getPartyDataSync(partyId)?.members?.count { onlinePlayerLookup(it) != null } ?: 0
         }
 
     override fun openPartyGUI(player: Player) {
-        val pid = jedis.get(playerPartyKey(player.uniqueId))
-        val pdata = pid?.let { getPartyDataSync(it) }
-        val inv = PartyGUI.factory.build(player, pdata)
-        player.openInventory(inv)
+        redisAsync {
+            jedis.get(playerPartyKey(player.uniqueId))?.let(::getPartyDataSync)
+        }.thenAccept { pdata ->
+            uiDispatcher(player) {
+                val inv = PartyGUI.factory.build(player, pdata)
+                player.openInventory(inv)
+            }
+        }
     }
 
     // --------------- Internal helpers -----------------
@@ -162,7 +182,7 @@ class RedisPartyAPI(
 
     private fun getPartyDataSync(partyId: String): PartyAPI.PartyData? {
         val json = jedis.get(partyKey(partyId)) ?: return null
-        return parseParty(json)
+        return parseParty(json)?.takeIf { it.partyId == partyId }
     }
 
     private fun parseParty(json: String): PartyAPI.PartyData? {
@@ -199,6 +219,7 @@ class RedisPartyAPI(
     }
 
     override fun close() {
+        executor.shutdownNow()
         jedis.close()
     }
 

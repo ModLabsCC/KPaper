@@ -33,5 +33,6 @@ object AreaSystem {
         listeners?.let { HandlerList.unregisterAll(it) }
         listeners = null
         AreaCache.clear()
+        commandHandlerRegistered = false
     }
 }

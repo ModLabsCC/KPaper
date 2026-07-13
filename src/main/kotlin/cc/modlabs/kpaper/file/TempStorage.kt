@@ -18,7 +18,16 @@ open class BaseTempStorage(dir: String = ".temp") {
      * - Saving a temporary file with given name and content:
      * ```kotlin
      * saveTempFile("filename.txt", "Hello, World!")*/
-    private val tempFolder = File(dir).also { it.mkdirs() }
+    private val tempFolder = File(dir).canonicalFile.also { it.mkdirs() }
+
+    private fun resolve(path: String): File {
+        require(path.isNotBlank()) { "Temporary file path cannot be blank" }
+        val resolved = File(tempFolder, path).canonicalFile
+        require(resolved.toPath().startsWith(tempFolder.toPath())) {
+            "Temporary file path escapes the storage directory: $path"
+        }
+        return resolved
+    }
 
     /**
      * Saves a temporary file with the given name and content.
@@ -27,7 +36,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @param content The content to be written to the temporary file, as a byte array.
      */
     fun saveTempFile(name: String, content: ByteArray) {
-        val file = File(tempFolder, name).also { it.createFileIfNotExists() }
+        val file = resolve(name).also { it.createFileIfNotExists() }
         file.writeBytes(content)
     }
 
@@ -38,7 +47,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @param content The content to be written to the file.
      */
     fun saveTempFile(name: String, content: String) {
-        val file = File(tempFolder, name).also { it.createFileIfNotExists() }
+        val file = resolve(name).also { it.createFileIfNotExists() }
         file.writeText(content)
     }
 
@@ -49,7 +58,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @param content the content of the temporary file to be saved
      */
     fun saveTempFile(name: String, content: File) {
-        val file = File(tempFolder, name).also { it.createFileIfNotExists() }
+        val file = resolve(name).also { it.createFileIfNotExists() }
         content.copyTo(file, true)
     }
 
@@ -60,7 +69,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return true if the file was successfully deleted, false otherwise
      */
     fun deleteTempFile(name: String): Boolean {
-        val file = File(tempFolder, name)
+        val file = resolve(name)
         return file.delete()
     }
 
@@ -71,7 +80,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return The content of the temporary file as a byte array.
      */
     fun readTempFile(name: String): ByteArray {
-        val file = File(tempFolder, name)
+        val file = resolve(name)
         return file.readBytes()
     }
 
@@ -82,7 +91,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return the content of the temporary file as a string
      */
     fun readTempFileAsString(name: String): String {
-        val file = File(tempFolder, name).also { it.createFileIfNotExists() }
+        val file = resolve(name).also { it.createFileIfNotExists() }
         return file.readText()
     }
 
@@ -93,8 +102,9 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return the content of the temporary file as a string
      */
     fun readTempFileAsString(file: File): String {
-        file.also { it.createFileIfNotExists() }
-        return file.readText()
+        val safeFile = resolve(file.path)
+        safeFile.createFileIfNotExists()
+        return safeFile.readText()
     }
 
     /**
@@ -104,7 +114,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return the content of the file as a string, or null if the file does not exist
      */
     fun readTempFileAsStringOrNull(name: String): String? {
-        val file = File(tempFolder, name)
+        val file = resolve(name)
 
         if (!file.exists()) {
             return null
@@ -120,7 +130,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return a [File] object representing the temporary file
      */
     fun getTempFile(name: String): File {
-        return File(tempFolder, name)
+        return resolve(name)
     }
 
     /**
@@ -130,7 +140,7 @@ open class BaseTempStorage(dir: String = ".temp") {
      * @return A list of names of the temporary files in the specified path. An empty list is returned if the folder does not exist or if there are no files in the folder.
      */
     fun getTempFiles(path: String): List<File> {
-        val folder = File(tempFolder, path).also { it.mkdirs() }
+        val folder = resolve(path).also { it.mkdirs() }
         return folder.listFiles()?.toList() ?: emptyList()
     }
 

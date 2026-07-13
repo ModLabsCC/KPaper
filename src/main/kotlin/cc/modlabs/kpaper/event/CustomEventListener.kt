@@ -23,7 +23,9 @@ object CustomEventListener: EventHandler() {
 
         val block = it.clickedBlock ?: return@listen
 
-        Bukkit.getPluginManager().callEvent(PlayerInteractAtBlockEvent(player, block))
+        val event = PlayerInteractAtBlockEvent(player, block)
+        Bukkit.getPluginManager().callEvent(event)
+        if (event.isCancelled) it.isCancelled = true
     }
 
 
@@ -31,7 +33,10 @@ object CustomEventListener: EventHandler() {
         val damager = it.damager as? Player ?: return@listen
         val victim = it.entity as? Player ?: return@listen
 
-        Bukkit.getPluginManager().callEvent(PlayerDamageByPlayerEvent(damager, victim, it.damage))
+        val event = PlayerDamageByPlayerEvent(damager, victim, it.damage)
+        Bukkit.getPluginManager().callEvent(event)
+        it.isCancelled = event.isCancelled
+        if (!event.isCancelled) it.damage = event.damage
 
     }
 

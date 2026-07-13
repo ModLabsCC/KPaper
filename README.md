@@ -4,8 +4,8 @@
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/ModLabsCC/KPaper/build.yml?branch=main)](https://github.com/ModLabsCC/KPaper/actions)
 [![License](https://img.shields.io/github/license/ModLabsCC/KPaper)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
-[![Paper](https://img.shields.io/badge/paper-1.21.6-green.svg)](https://papermc.io)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3.20-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Paper](https://img.shields.io/badge/paper-26.2_beta-green.svg)](https://papermc.io)
 
 *A comprehensive Kotlin utility library that revolutionizes Paper plugin development*
 

@@ -23,6 +23,10 @@ object AnvilListener : Listener {
         activeGUIs.remove(inventory)
     }
 
+    fun clear() {
+        activeGUIs.clear()
+    }
+
     @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         if (event.inventory.type != InventoryType.ANVIL) return

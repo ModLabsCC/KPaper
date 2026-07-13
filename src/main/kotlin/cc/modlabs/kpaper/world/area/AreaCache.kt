@@ -18,9 +18,10 @@ object AreaCache {
     private val areas = mutableMapOf<String, Area>()
     private val cacheLock: ReadWriteLock = ReentrantReadWriteLock()
 
-    private fun loadForWorld(world: World) {
+    private fun loadForWorld(world: World): List<Area> {
         val areasConfig = WorldConfig(world)
-        val areaNames = areasConfig.getConfigurationSection("areas")?.getKeys(false) ?: return
+        val areaNames = areasConfig.getConfigurationSection("areas")?.getKeys(false) ?: return emptyList()
+        val loaded = mutableListOf<Area>()
         for (area in areaNames) {
             getLogger().info("Loading area $area")
             val name = areasConfig.getString("areas.$area.name") ?: continue
@@ -49,53 +50,72 @@ object AreaCache {
                 exitSoundVolume,
                 exitSoundPitch
             )
-            areas[area] = areaObj
-            Bukkit.getPluginManager().callEvent(AreaLoadEvent(areaObj))
+            loaded += areaObj
             getLogger().info("Loaded area $area")
         }
+        return loaded
     }
 
     fun reloadAreas() {
+        val loaded = mutableListOf<Area>()
+        for (world in Bukkit.getWorlds()) {
+            try {
+                loaded += loadForWorld(world)
+            } catch (e: Exception) {
+                getLogger().warn("Failed to load areas for world '${world.name}': ${e.message}")
+                e.printStackTrace()
+            }
+        }
+
         cacheLock.writeLock().lock()
         try {
             areas.clear()
+            loaded.forEach { areas[areaKey(it)] = it }
+        } finally {
+            cacheLock.writeLock().unlock()
+        }
+        loaded.forEach { Bukkit.getPluginManager().callEvent(AreaLoadEvent(it)) }
+        Bukkit.getPluginManager().callEvent(AreasLoadedEvent(loaded.toList()))
+        getLogger().info("Loaded ${loaded.size} areas.")
+    }
 
-            val worlds = Bukkit.getWorlds()
-            for (world in worlds) {
-                try {
-                    loadForWorld(world)
-                } catch (e: Exception) {
-                    getLogger().warn("Failed to load areas for world '${world.name}': ${e.message}")
-                    e.printStackTrace()
-                }
-            }
-            Bukkit.getPluginManager().callEvent(AreasLoadedEvent(areas.values.toList()))
-            getLogger().info("Loaded ${areas.size} areas.")
+    fun addArea(area: Area) {
+        cacheLock.writeLock().lock()
+        try {
+            areas[areaKey(area)] = area
         } finally {
             cacheLock.writeLock().unlock()
         }
     }
 
-    fun addArea(area: Area) {
-        cacheLock.writeLock().lock()
-        areas[area.name] = area
-        cacheLock.writeLock().unlock()
-    }
-
     fun removeArea(area: Area) {
         cacheLock.writeLock().lock()
-        areas.remove(area.name)
-        cacheLock.writeLock().unlock()
+        try {
+            areas.remove(areaKey(area))
+        } finally {
+            cacheLock.writeLock().unlock()
+        }
     }
 
     fun getArea(name: String): Area? {
         cacheLock.readLock().lock()
         try {
-            return areas[name]
+            return areas[name] ?: areas.values.firstOrNull { it.name == name }
         } finally {
             cacheLock.readLock().unlock()
         }
     }
+
+    fun getArea(world: String, name: String): Area? {
+        cacheLock.readLock().lock()
+        try {
+            return areas["$world:$name"]
+        } finally {
+            cacheLock.readLock().unlock()
+        }
+    }
+
+    fun getAreas(world: String): List<Area> = getAreas().filter { it.point1.world == world }
 
     fun getAreas(): List<Area> {
         cacheLock.readLock().lock()
@@ -150,5 +170,16 @@ object AreaCache {
         @Suppress("UNCHECKED_CAST")
         return (flag as AreaFlag<Any?>).decodeValue(rawValue)
     }
+
+    fun clear(world: String) {
+        cacheLock.writeLock().lock()
+        try {
+            areas.entries.removeIf { it.value.point1.world == world }
+        } finally {
+            cacheLock.writeLock().unlock()
+        }
+    }
+
+    private fun areaKey(area: Area): String = "${area.point1.world}:${area.name}"
 
 }

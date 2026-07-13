@@ -11,15 +11,15 @@ import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.gson.Gson
 import dev.fruxz.ascend.extension.forceCastOrNull
 import io.papermc.paper.datacomponent.DataComponentTypes.CONSUMABLE
+import io.papermc.paper.datacomponent.DataComponentBuilder
+import io.papermc.paper.datacomponent.DataComponentType
 import io.papermc.paper.datacomponent.item.Consumable
 import io.papermc.paper.datacomponent.item.consumable.ConsumeEffect
 import io.papermc.paper.datacomponent.item.consumable.ItemUseAnimation
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
-import net.minecraft.world.item.component.CustomModelData
 import org.bukkit.*
-import org.bukkit.craftbukkit.inventory.components.CraftCustomModelDataComponent
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -92,6 +92,31 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         val meta = itemStack.itemMeta.forceCastOrNull<T>() ?: return this
         dsl.invoke(meta)
         itemStack.itemMeta = meta
+        return this
+    }
+
+    fun <T : Any> data(type: DataComponentType.Valued<T>, value: T): ItemBuilder {
+        itemStack.setData(type, value)
+        return this
+    }
+
+    fun <T : Any> data(type: DataComponentType.Valued<T>, value: DataComponentBuilder<T>): ItemBuilder {
+        itemStack.setData(type, value)
+        return this
+    }
+
+    fun data(type: DataComponentType.NonValued): ItemBuilder {
+        itemStack.setData(type)
+        return this
+    }
+
+    fun unsetData(type: DataComponentType): ItemBuilder {
+        itemStack.unsetData(type)
+        return this
+    }
+
+    fun resetData(type: DataComponentType): ItemBuilder {
+        itemStack.resetData(type)
         return this
     }
 
@@ -213,10 +238,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @return the ItemBuilder instance with the updated custom model data
      */
     fun customModelData(modelData: Int): ItemBuilder {
-        val meta = itemStack.itemMeta
-        meta.setCustomModelData(modelData)
-        itemStack.itemMeta = meta
-        return this
+        return customModelDataComponents(floats = listOf(modelData.toFloat()))
     }
 
     fun customModelDataComponents(
@@ -226,7 +248,12 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
         colors: List<Int> = listOf()
     ): ItemBuilder {
         val meta = itemStack.itemMeta
-        meta.setCustomModelDataComponent(CraftCustomModelDataComponent(CustomModelData(floats, flags, strings, colors)))
+        val component = meta.customModelDataComponent
+        component.floats = floats
+        component.flags = flags
+        component.strings = strings
+        component.colors = colors.map { Color.fromARGB(it) }
+        meta.setCustomModelDataComponent(component)
         itemStack.itemMeta = meta
         return this
     }
@@ -234,7 +261,8 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     fun addCustomString(value: String): ItemBuilder {
         val meta = itemStack.itemMeta
         val previous = meta.customModelDataComponent
-        meta.setCustomModelDataComponent(CraftCustomModelDataComponent(CustomModelData(previous.floats, previous.flags, (previous.strings + value).distinct(), previous.colors.map { it.asARGB() })))
+        previous.strings = (previous.strings + value).distinct()
+        meta.setCustomModelDataComponent(previous)
         itemStack.itemMeta = meta
         return this
     }
@@ -276,7 +304,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
     }
 
     @Deprecated("Use profile(offlinePlayer: OfflinePlayer) instead.", ReplaceWith("profile(offlinePlayer)"))
-    fun skullOwner(player: Player): ItemBuilder = owner(player)
+    fun skullOwner(player: Player): ItemBuilder = profile(player)
 
     /**
      * Sets the owning player of the skull item.
@@ -743,7 +771,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      * @return the ItemBuilder instance
      */
     fun type(material: Material): ItemBuilder {
-        itemStack.type = material
+        itemStack = itemStack.withType(material)
         return this
     }
 
@@ -756,7 +784,7 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
      */
     fun typeIf(material: Material, condition: Boolean = false): ItemBuilder {
         if (condition) {
-            itemStack.type = material
+            itemStack = itemStack.withType(material)
         }
         return this
     }
@@ -779,6 +807,12 @@ class ItemBuilder(material: Material, count: Int = 1, dsl: ItemBuilder.() -> Uni
             val player = event.whoClicked as? Player ?: return@registerItemClickEvent
             handler(player, event)
         }
+        return this
+    }
+
+    fun action(id: String, handler: (InventoryClickEvent) -> Unit): ItemBuilder {
+        ItemActions.register(id, handler)
+        ItemActions.tag(itemStack, id)
         return this
     }
 

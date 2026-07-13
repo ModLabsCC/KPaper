@@ -1,8 +1,10 @@
 package cc.modlabs.kpaper.visuals
 
 import org.bukkit.entity.Player
+import org.bukkit.Bukkit
 import java.util.*
 import kotlin.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
 private class VisualBucket {
     var items = LinkedList<VisualElement>()
@@ -51,7 +53,7 @@ class VisualsStore(var maxSize: Int) {
     )
 
     private fun container() = Container(Array(maxSize) { VisualBucket() })
-    private val playerStorage = HashMap<Player, Container>()
+    private val playerStorage = ConcurrentHashMap<UUID, Container>()
 
     /**
      * Adds a new [visual] for the [player]
@@ -62,29 +64,34 @@ class VisualsStore(var maxSize: Int) {
         if (visual.slot >= maxSize || visual.slot < 0) {
             throw IndexOutOfBoundsException("Slot ${visual.slot} is out of bound [0; $maxSize]")
         }
-        val storage = playerStorage.computeIfAbsent(player) { container() }
-        storage.buckets[visual.slot].push(visual) { storage.hints.remove(it) }
-        storage.hints[visual.id] = visual.slot
+        val storage = playerStorage.computeIfAbsent(player.uniqueId) { container() }
+        synchronized(storage) {
+            storage.hints[visual.id]?.let { oldSlot -> storage.buckets[oldSlot].remove(visual.id) }
+            storage.buckets[visual.slot].push(visual) { storage.hints.remove(it) }
+            storage.hints[visual.id] = visual.slot
+        }
     }
 
     /**
      * Removes every [Visualizable] with the given [id] from [player]
      */
     fun removeVisual(player: Player, id: String) {
-        val storage = playerStorage[player] ?: return
-        val slot = storage.hints.remove(id) ?: return
-        storage.buckets[slot].remove(id)
+        val storage = playerStorage[player.uniqueId] ?: return
+        synchronized(storage) {
+            val slot = storage.hints.remove(id) ?: return
+            storage.buckets[slot].remove(id)
+        }
     }
 
     fun hasVisual(player: Player): Boolean {
-        return playerStorage.containsKey(player)
+        return playerStorage.containsKey(player.uniqueId)
     }
 
     /**
      * Removes the [player] from this store and every visual attached to him
      */
     fun removePlayer(player: Player) {
-        playerStorage.remove(player)
+        playerStorage.remove(player.uniqueId)
     }
 
     /**
@@ -94,13 +101,17 @@ class VisualsStore(var maxSize: Int) {
      * A rendered value of null indicates that no visual was present for the slot.
      */
     fun renderAll(delta: Duration): Sequence<Pair<Player, Sequence<String?>>> {
-        return playerStorage.asSequence().map {
-            val iterator = it.value.buckets.iterator()
-            it.key to Sequence { iterator }.map { v ->
-                v.render(delta) { s ->
-                    it.value.hints.remove(s)
+        playerStorage.entries.removeIf { Bukkit.getPlayer(it.key)?.isOnline != true }
+        return playerStorage.entries.mapNotNull {
+            val player = Bukkit.getPlayer(it.key) ?: return@mapNotNull null
+            val rendered = synchronized(it.value) {
+                it.value.buckets.map { bucket ->
+                    bucket.render(delta) { id ->
+                        it.value.hints.remove(id)
+                    }
                 }
             }
-        }
+            player to rendered.asSequence()
+        }.asSequence()
     }
 }

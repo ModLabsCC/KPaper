@@ -1,0 +1,26 @@
+pipeline {
+    agent { label 'kpaper-jdk25' }
+
+    options {
+        skipDefaultCheckout(true)
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+        stage('Build and analyze') {
+            steps {
+                withSonarQubeEnv('ModLabs SonarQube') {
+                    withCredentials([string(credentialsId: 'kpaper-sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh './gradlew build sonar --info --no-daemon'
+                    }
+                }
+            }
+        }
+    }
+
+    post { cleanup { deleteDir() } }
+}

@@ -44,7 +44,7 @@ class Area(
         val minZ = min(point1.z, point2.z)
         val maxZ = max(point1.z, point2.z)
 
-        return location.world!!.name == point1.world &&
+        return location.world?.name == point1.world &&
                 location.x >= minX && location.x <= maxX &&
                 location.y >= minY && location.y <= maxY &&
                 location.z >= minZ && location.z <= maxZ
@@ -161,13 +161,14 @@ fun StringLocation.getArea(): Area? {
  */
 fun Area.onEnter(player: Player) {
     val event = AreaEnterEvent(this, player)
+    event.callEvent()
+    if (event.isCancelled) return
     entrySound?.let { player.playSound(player, it, SoundCategory.VOICE, entryVolume, entryPitch) }
 
     if (hasFlag(AreaFlags.SURVIVAL) && player.gameMode == GameMode.ADVENTURE) {
         player.gameMode = GameMode.SURVIVAL
     }
 
-    event.callEvent()
 }
 
 /**
@@ -177,11 +178,12 @@ fun Area.onEnter(player: Player) {
  */
 fun Area.onLeave(player: Player) {
     val event = AreaLeaveEvent(this, player)
+    event.callEvent()
+    if (event.isCancelled) return
     exitSound?.let { player.playSound(player, it, SoundCategory.VOICE, exitVolume, exitPitch) }
 
     if (hasFlag(AreaFlags.SURVIVAL) && player.gameMode == GameMode.SURVIVAL) {
         player.gameMode = GameMode.ADVENTURE
     }
 
-    event.callEvent()
 }

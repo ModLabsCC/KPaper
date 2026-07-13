@@ -83,7 +83,7 @@ class NPCImpl(
     private var visibleToPlayers: MutableSet<Player>? = null
 
     init {
-        val npcName = mannequin.customName ?: mannequin.type.name
+        val npcName = mannequin.plainCustomName() ?: mannequin.type.name
         val npcId = mannequin.uniqueId
         
         // Enable AI for the mannequin so it can move
@@ -1000,7 +1000,7 @@ class NPCImpl(
 
         // Check for ground below the new horizontal position
         val world = currentLoc.world
-        val groundY = findGroundLevel(world, newPosition.blockX, newPosition.blockZ, currentLoc.blockY.toInt())
+        val groundY = findGroundLevel(world, newPosition.blockX, newPosition.blockZ, currentLoc.blockY)
 
         // Handle vertical positioning
         if (needsJump) {
@@ -1163,7 +1163,7 @@ class NPCImpl(
 
     override fun setImmovable(immovable: Boolean) {
         val entity = getEntityByUUID() as? Mannequin ?: return
-        val npcName = entity.customName ?: entity.type.name
+        val npcName = entity.plainCustomName() ?: entity.type.name
         val aiBefore = entity.hasAI()
         
         // Set immovable state
@@ -1325,7 +1325,7 @@ class NPCImpl(
 
     override fun setAI(enabled: Boolean) {
         val entity = getMannequin() ?: return
-        val npcName = entity.customName ?: entity.type.name
+        val npcName = entity.plainCustomName() ?: entity.type.name
         val aiBefore = entity.hasAI()
         
         // Set AI state

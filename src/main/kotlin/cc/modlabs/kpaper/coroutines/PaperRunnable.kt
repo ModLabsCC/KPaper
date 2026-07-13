@@ -9,9 +9,9 @@ import org.bukkit.Bukkit
  */
 fun taskRunLater(delay: Long, sync: Boolean = true, runnable: () -> Unit) {
     if (sync)
-        Bukkit.getScheduler().runTaskLater(PluginInstance, runnable, delay)
+        Bukkit.getGlobalRegionScheduler().runDelayed(PluginInstance, { runnable() }, delay)
     else
-        Bukkit.getScheduler().runTaskLaterAsynchronously(PluginInstance, runnable, delay)
+        Bukkit.getAsyncScheduler().runDelayed(PluginInstance, { runnable() }, delay * 50, java.util.concurrent.TimeUnit.MILLISECONDS)
 }
 
 /**
