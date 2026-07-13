@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'kpaper-jdk25' }
+    agent { label 'jdk25' }
 
     parameters {
         string(name: 'TARGET_REPO', defaultValue: '', description: 'KPaperGradle repository to dispatch after publishing; leave empty to skip.')

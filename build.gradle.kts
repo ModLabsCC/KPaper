@@ -41,8 +41,8 @@ configurations.matching { it.name.startsWith("bcv-rt-jvm") }.configureEach {
 }
 
 val minecraftVersion: String by project
-val koTestVersion = "6.0.0.M1"
-val mockkVersion = "1.13.16"
+val mockkVersion = "1.14.7"
+val byteBuddyVersion = "1.18.5"
 
 dependencies {
     paperweight.paperDevBundle(minecraftVersion)
@@ -56,8 +56,12 @@ dependencies {
     // Redis client for Redis-backed PartyAPI implementation (Jedis)
     implementation("redis.clients:jedis:7.1.0")
 
-    testImplementation("io.kotest:kotest-runner-junit5:$koTestVersion")
+    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:${mockkVersion}")
+    testRuntimeOnly("net.bytebuddy:byte-buddy:$byteBuddyVersion")
+    testRuntimeOnly("net.bytebuddy:byte-buddy-agent:$byteBuddyVersion")
     implementation("com.google.code.gson:gson:2.11.0")
 }
 

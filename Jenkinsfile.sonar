@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'kpaper-jdk25' }
+    agent { label 'jdk25' }
 
     options {
         skipDefaultCheckout(true)

@@ -8,7 +8,9 @@ The GitHub Actions workflows currently cover three independent jobs:
 | `Jenkinsfile.publish` | Push to `main` or manual run | CalVer version, Maven publish, GitHub release, optional downstream dispatch |
 | `Jenkinsfile.sonar` | Push to `main` | `build sonar` with a full checkout |
 
-Create a Jenkins agent with label `kpaper-jdk25`. It must provide JDK 25, Git, `curl`, and a POSIX shell. The Gradle wrapper downloads the remaining build dependencies. Do not use a Java 17-only agent: the build compiles for JVM 25.
+Create a Jenkins agent with label `jdk25`. It must provide JDK 25, Git, `curl`, and a POSIX shell. The Gradle wrapper downloads the remaining build dependencies. Do not use a Java 17-only agent: the build compiles for JVM 25.
+
+If a build remains at `Still waiting to schedule task` with `doesn't have label 'jdk25'`, open **Manage Jenkins -> Nodes**, select the Java 25-capable agent, choose **Configure**, add `jdk25` under **Labels**, save, and bring the agent online. The label is deliberately shared by all KPaper pipelines so builds cannot accidentally run on an older JVM.
 
 Configure these Jenkins credentials:
 
