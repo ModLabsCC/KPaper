@@ -3,13 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.*
 
 plugins {
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.4.10"
     `java-library`
     id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.18.1"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
-    kotlin("plugin.serialization") version "2.3.20"
+    id("io.papermc.paperweight.userdev") version "2.0.0-SNAPSHOT"
+    kotlin("plugin.serialization") version "2.4.10"
     id("maven-publish")
-    id("org.sonarqube") version "7.0.1.6134"
+    id("org.sonarqube") version "7.3.1.8318"
 }
 
 group = "cc.modlabs"
@@ -27,42 +27,43 @@ sonar {
 
 repositories {
     mavenCentral()
+    maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
-// BCV pins ASM older than Java 25 class files (major 69); Paper 26 requires JVM 25.
+// BCV pins ASM older than Java 25 class files (major 69); Paper 26.2 requires JVM 25.
 configurations.matching { it.name.startsWith("bcv-rt-jvm") }.configureEach {
     resolutionStrategy {
         force(
-            "org.ow2.asm:asm:9.8",
-            "org.ow2.asm:asm-tree:9.8",
+            "org.ow2.asm:asm:9.10.1",
+            "org.ow2.asm:asm-tree:9.10.1",
         )
     }
 }
 
-val minecraftVersion: String by project
-val mockkVersion = "1.14.7"
-val byteBuddyVersion = "1.18.5"
+val minecraftVersion = project.property("minecraftVersion").toString()
+val mockkVersion = "1.14.11"
+val byteBuddyVersion = "1.18.11"
 
 dependencies {
     paperweight.paperDevBundle(minecraftVersion)
     api("cc.modlabs:KlassicX:2026.3.30.1421")
 
-    api("com.squareup.okhttp3:okhttp:4.12.0")
+    api("com.squareup.okhttp3:okhttp:5.4.0")
 
     // PacketEvents for TextDisplayFactory (display entities)
-    api("com.github.retrooper:packetevents-spigot:2.12.1")
+    api("com.github.retrooper:packetevents-spigot:2.13.0")
 
     // Redis client for Redis-backed PartyAPI implementation (Jedis)
-    implementation("redis.clients:jedis:7.1.0")
+    implementation("redis.clients:jedis:7.5.3")
 
-    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:${mockkVersion}")
     testRuntimeOnly("net.bytebuddy:byte-buddy:$byteBuddyVersion")
     testRuntimeOnly("net.bytebuddy:byte-buddy-agent:$byteBuddyVersion")
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.14.0")
 }
 
 paperweight {
