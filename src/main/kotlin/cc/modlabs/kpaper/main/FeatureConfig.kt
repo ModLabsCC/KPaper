@@ -16,6 +16,12 @@ enum class Feature {
     GAME,
     UTIL,
     AREAS,
+    /**
+     * Initializes PacketEvents and enables packet-based features
+     * (Text/Item/Block displays, per-viewer NPC name/description overrides).
+     * Disabled by default because PacketEvents injects into the Netty pipeline.
+     */
+    PACKET_EVENTS,
 }
 
 /**
@@ -29,7 +35,8 @@ data class FeatureConfig internal constructor(val flags: Map<Feature, Boolean>) 
 
 /**
  * DSL builder to construct a FeatureConfig.
- * We start with all features enabled to ensure backward compatibility.
+ * Most features default to enabled for backward compatibility.
+ * [Feature.PACKET_EVENTS] defaults to disabled (opt-in Netty injection).
  */
 class FeatureConfigBuilder {
     private val flags = mutableMapOf<Feature, Boolean>().apply {
@@ -46,6 +53,8 @@ class FeatureConfigBuilder {
             Feature.GAME to true,
             Feature.UTIL to true,
             Feature.AREAS to true,
+            // Opt-in: PacketEvents Netty injection + packet-based display/NPC APIs
+            Feature.PACKET_EVENTS to false,
         ).forEach { (feature, enabled) -> put(feature, enabled) }
     }
 
@@ -97,6 +106,13 @@ class FeatureConfigBuilder {
     var enableAreaFeatures: Boolean
         get() = flags[Feature.AREAS] == true
         set(value) { flags[Feature.AREAS] = value }
+
+    /**
+     * PacketEvents integration (display entities, packet NPC overrides). Off by default.
+     */
+    var enablePacketEventsFeatures: Boolean
+        get() = flags[Feature.PACKET_EVENTS] == true
+        set(value) { flags[Feature.PACKET_EVENTS] = value }
 
     fun build() = FeatureConfig(flags)
 }

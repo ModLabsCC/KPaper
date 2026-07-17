@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.visuals.display
 
+import cc.modlabs.kpaper.main.PacketEventsSupport
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
@@ -168,10 +169,7 @@ class ItemDisplayManager {
         itemDisplay.itemType = getItemType(newItem.type)
 
         // Send metadata update for all viewers
-        val metadataPacket = createMetadataPacket(itemDisplay)
-        for (viewer in itemDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(itemDisplay.viewers, createMetadataPacket(itemDisplay))
     }
 
     /**
@@ -183,10 +181,7 @@ class ItemDisplayManager {
     fun updateScale(itemDisplay: ItemDisplay, newScale: Vector3f) {
         itemDisplay.scale = newScale
 
-        val metadataPacket = createMetadataPacket(itemDisplay)
-        for (viewer in itemDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(itemDisplay.viewers, createMetadataPacket(itemDisplay))
     }
 
     /**
@@ -198,10 +193,7 @@ class ItemDisplayManager {
     fun updateTransformation(itemDisplay: ItemDisplay, newTransformation: ItemDisplayTransformation) {
         itemDisplay.displayTransformation = newTransformation
 
-        val metadataPacket = createMetadataPacket(itemDisplay)
-        for (viewer in itemDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(itemDisplay.viewers, createMetadataPacket(itemDisplay))
     }
 
     /**
@@ -305,6 +297,8 @@ class ItemDisplayManager {
      */
     private fun spawnItemDisplay(itemDisplay: ItemDisplay, viewer: Player) {
         try {
+            if (!PacketEventsSupport.ensureAvailable("ItemDisplayManager")) return
+
             // 1. Spawn Entity Packet
             val location = itemDisplay.location
             val spawnPacket = WrapperPlayServerSpawnEntity(
@@ -366,8 +360,17 @@ class ItemDisplayManager {
      * @param entityId The entity ID to destroy
      */
     internal fun destroyEntity(player: Player, entityId: Int) {
+        if (!PacketEventsSupport.ensureAvailable("ItemDisplayManager")) return
         val destroyPacket = WrapperPlayServerDestroyEntities(entityId)
         PacketEvents.getAPI().playerManager.sendPacket(player, destroyPacket)
+    }
+
+    private fun sendPacketToViewers(viewers: Collection<Player>, packet: WrapperPlayServerEntityMetadata) {
+        if (!PacketEventsSupport.ensureAvailable("ItemDisplayManager")) return
+        val playerManager = PacketEvents.getAPI().playerManager
+        for (viewer in viewers) {
+            playerManager.sendPacket(viewer, packet)
+        }
     }
 
     /**

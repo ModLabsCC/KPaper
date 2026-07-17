@@ -1,6 +1,7 @@
 package cc.modlabs.kpaper.visuals.display
 
 import cc.modlabs.kpaper.extensions.timer
+import cc.modlabs.kpaper.main.PacketEventsSupport
 import cc.modlabs.kpaper.main.PluginInstance
 import cc.modlabs.kpaper.util.getLogger
 import com.github.retrooper.packetevents.PacketEvents
@@ -222,9 +223,7 @@ class TextDisplayManager {
 
         // Send metadata update for all viewers
         val metadataPacket = createMetadataPacket(textDisplay)
-        for (viewer in textDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(textDisplay.viewers, metadataPacket)
     }
 
     /**
@@ -236,9 +235,7 @@ class TextDisplayManager {
     fun updateTransformation(textDisplay: TextDisplay) {
         // Send metadata update for all viewers
         val metadataPacket = createMetadataPacket(textDisplay)
-        for (viewer in textDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(textDisplay.viewers, metadataPacket)
     }
 
     /**
@@ -401,13 +398,9 @@ class TextDisplayManager {
      */
     private fun spawnTextDisplay(textDisplay: TextDisplay, viewer: Player) {
         try {
-            // Check if PacketEvents is initialized
-            val api = PacketEvents.getAPI()
-            if (api == null) {
-                getLogger().error("[TextDisplayManager] PacketEvents API is not initialized. Make sure PacketEvents is loaded before creating text displays.")
-                return
-            }
+            if (!PacketEventsSupport.ensureAvailable("TextDisplayManager")) return
 
+            val api = PacketEvents.getAPI()
             val playerManager = api.playerManager
             if (playerManager == null) {
                 getLogger().error("[TextDisplayManager] PacketEvents player manager is not available for player ${viewer.name}")
@@ -528,11 +521,20 @@ class TextDisplayManager {
      * @param entityId The entity ID to destroy
      */
     internal fun destroyEntity(player: Player, entityId: Int) {
+        if (!PacketEventsSupport.ensureAvailable("TextDisplayManager")) return
         // Create packet with the entity ID
         val destroyPacket = WrapperPlayServerDestroyEntities(entityId)
 
         // Send packet to player
         PacketEvents.getAPI().playerManager.sendPacket(player, destroyPacket)
+    }
+
+    private fun sendPacketToViewers(viewers: Collection<Player>, packet: WrapperPlayServerEntityMetadata) {
+        if (!PacketEventsSupport.ensureAvailable("TextDisplayManager")) return
+        val playerManager = PacketEvents.getAPI().playerManager
+        for (viewer in viewers) {
+            playerManager.sendPacket(viewer, packet)
+        }
     }
 
     /**

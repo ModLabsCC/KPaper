@@ -4,6 +4,7 @@ import cc.modlabs.klassicx.extensions.getLogger
 import cc.modlabs.kpaper.extensions.timer
 import dev.fruxz.stacked.text
 import net.kyori.adventure.text.Component
+import cc.modlabs.kpaper.main.PacketEventsSupport
 import cc.modlabs.kpaper.main.PluginInstance
 import cc.modlabs.kpaper.util.getLogger
 import com.github.retrooper.packetevents.PacketEvents
@@ -74,9 +75,6 @@ class NPCImpl(
     private var nearbyFollowTask: BukkitTask? = null
     private var nearbyFollowCheckInterval = 10L // Ticks between checking for nearby players (0.5 seconds - more responsive)
     private var aiMonitoringTask: BukkitTask? = null // Task to continuously monitor and re-enable AI
-
-    private val api = PacketEvents.getAPI()
-    private val playerManager = api.playerManager
 
     // Visibility state
     // null = visible to all players, non-null = only visible to players in the set
@@ -1513,6 +1511,8 @@ class NPCImpl(
     }
 
     override fun overrideCustomName(customName: String, viewer: Player) {
+        if (!PacketEventsSupport.ensureAvailable("NPC.overrideCustomName")) return
+
         val metadataList = ArrayList<EntityData<*>>()
 
         val entity = this.getEntity() ?: return
@@ -1523,10 +1523,12 @@ class NPCImpl(
 
         val customNamePacket = WrapperPlayServerEntityMetadata(entity.entityId, metadataList)
 
-        playerManager.sendPacket(viewer, customNamePacket)
+        PacketEvents.getAPI().playerManager.sendPacket(viewer, customNamePacket)
     }
 
     override fun overrideDescription(description: String, viewer: Player) {
+        if (!PacketEventsSupport.ensureAvailable("NPC.overrideDescription")) return
+
         val metadataList = ArrayList<EntityData<*>>()
 
         val entity = this.getEntity() ?: return
@@ -1536,7 +1538,7 @@ class NPCImpl(
         metadataList.add(EntityData(19, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(component)))
 
         val customNamePacket = WrapperPlayServerEntityMetadata(entity.entityId, metadataList)
-        playerManager.sendPacket(viewer, customNamePacket)
+        PacketEvents.getAPI().playerManager.sendPacket(viewer, customNamePacket)
     }
 
     override fun getVisiblePlayers(): Set<Player>? {

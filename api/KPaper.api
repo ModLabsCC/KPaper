@@ -1330,6 +1330,7 @@ public final class cc/modlabs/kpaper/main/Feature : java/lang/Enum {
 	public static final field INVENTORY Lcc/modlabs/kpaper/main/Feature;
 	public static final field ITEM_CLICK Lcc/modlabs/kpaper/main/Feature;
 	public static final field MESSAGE Lcc/modlabs/kpaper/main/Feature;
+	public static final field PACKET_EVENTS Lcc/modlabs/kpaper/main/Feature;
 	public static final field UTIL Lcc/modlabs/kpaper/main/Feature;
 	public static final field VISUALS Lcc/modlabs/kpaper/main/Feature;
 	public static final field WORLD Lcc/modlabs/kpaper/main/Feature;
@@ -1359,6 +1360,7 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public final fun getEnableGameFeatures ()Z
 	public final fun getEnableInventoryFeatures ()Z
 	public final fun getEnableMessageFeatures ()Z
+	public final fun getEnablePacketEventsFeatures ()Z
 	public final fun getEnableUtilFeatures ()Z
 	public final fun getEnableVisualFeatures ()Z
 	public final fun getEnableWorldFeatures ()Z
@@ -1370,6 +1372,7 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public final fun setEnableGameFeatures (Z)V
 	public final fun setEnableInventoryFeatures (Z)V
 	public final fun setEnableMessageFeatures (Z)V
+	public final fun setEnablePacketEventsFeatures (Z)V
 	public final fun setEnableUtilFeatures (Z)V
 	public final fun setEnableVisualFeatures (Z)V
 	public final fun setEnableWorldFeatures (Z)V
@@ -1396,6 +1399,15 @@ public final class cc/modlabs/kpaper/main/KPluginKt {
 	public static final fun getPluginInstance ()Lcc/modlabs/kpaper/main/KPlugin;
 	public static final fun pluginInstance ()Lcc/modlabs/kpaper/main/KPlugin;
 	public static final fun setPluginInstance (Lcc/modlabs/kpaper/main/KPlugin;)V
+}
+
+public final class cc/modlabs/kpaper/main/PacketEventsSupport {
+	public static final field INSTANCE Lcc/modlabs/kpaper/main/PacketEventsSupport;
+	public final fun ensureAvailable (Ljava/lang/String;)Z
+	public final fun isActive ()Z
+	public final fun isFeatureEnabled ()Z
+	public final fun loadAndInit (Lcc/modlabs/kpaper/main/KPlugin;)V
+	public final fun terminate ()V
 }
 
 public final class cc/modlabs/kpaper/messages/AdventureSerializerKt {

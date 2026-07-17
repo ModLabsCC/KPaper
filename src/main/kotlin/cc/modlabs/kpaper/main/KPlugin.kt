@@ -14,8 +14,6 @@ import cc.modlabs.kpaper.npc.NPCEventListener
 import cc.modlabs.kpaper.party.Party
 import cc.modlabs.kpaper.visuals.impl.BossBarVisuals
 import cc.modlabs.kpaper.world.area.AreaSystem
-import com.github.retrooper.packetevents.PacketEvents
-import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -84,10 +82,7 @@ abstract class KPlugin : JavaPlugin() {
             AreaSystem.load(this)
         }
 
-        val packetEvents = SpigotPacketEventsBuilder.build(this)
-        PacketEvents.setAPI(packetEvents)
-        packetEvents.load()
-        packetEvents.init()
+        PacketEventsSupport.loadAndInit(this)
 
         startup()
     }
@@ -108,7 +103,7 @@ abstract class KPlugin : JavaPlugin() {
             Party.close()
             MineSkinFetcher.clearCache()
             shutdownCoroutines()
-            PacketEvents.getAPI().terminate()
+            PacketEventsSupport.terminate()
         }
     }
 }

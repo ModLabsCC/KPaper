@@ -1,5 +1,6 @@
 package cc.modlabs.kpaper.visuals.display
 
+import cc.modlabs.kpaper.main.PacketEventsSupport
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
@@ -162,10 +163,7 @@ class BlockDisplayManager {
         blockDisplay.blockData = newBlockData
 
         // Send metadata update for all viewers
-        val metadataPacket = createMetadataPacket(blockDisplay)
-        for (viewer in blockDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(blockDisplay.viewers, createMetadataPacket(blockDisplay))
     }
 
     /**
@@ -177,10 +175,7 @@ class BlockDisplayManager {
     fun updateScale(blockDisplay: BlockDisplay, newScale: Vector3f) {
         blockDisplay.scale = newScale
 
-        val metadataPacket = createMetadataPacket(blockDisplay)
-        for (viewer in blockDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(blockDisplay.viewers, createMetadataPacket(blockDisplay))
     }
 
     /**
@@ -192,10 +187,7 @@ class BlockDisplayManager {
     fun updateTransformation(blockDisplay: BlockDisplay, newTransformation: BlockDisplayTransformation) {
         blockDisplay.displayTransformation = newTransformation
 
-        val metadataPacket = createMetadataPacket(blockDisplay)
-        for (viewer in blockDisplay.viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadataPacket)
-        }
+        sendPacketToViewers(blockDisplay.viewers, createMetadataPacket(blockDisplay))
     }
 
     /**
@@ -277,6 +269,8 @@ class BlockDisplayManager {
      */
     private fun spawnBlockDisplay(blockDisplay: BlockDisplay, viewer: Player) {
         try {
+            if (!PacketEventsSupport.ensureAvailable("BlockDisplayManager")) return
+
             // 1. Spawn Entity Packet
             val location = blockDisplay.location
             val spawnPacket = WrapperPlayServerSpawnEntity(
@@ -338,8 +332,17 @@ class BlockDisplayManager {
      * @param entityId The entity ID to destroy
      */
     internal fun destroyEntity(player: Player, entityId: Int) {
+        if (!PacketEventsSupport.ensureAvailable("BlockDisplayManager")) return
         val destroyPacket = WrapperPlayServerDestroyEntities(entityId)
         PacketEvents.getAPI().playerManager.sendPacket(player, destroyPacket)
+    }
+
+    private fun sendPacketToViewers(viewers: Collection<Player>, packet: WrapperPlayServerEntityMetadata) {
+        if (!PacketEventsSupport.ensureAvailable("BlockDisplayManager")) return
+        val playerManager = PacketEvents.getAPI().playerManager
+        for (viewer in viewers) {
+            playerManager.sendPacket(viewer, packet)
+        }
     }
 
     /**
