@@ -1,5 +1,9 @@
 pipeline {
-    agent { label 'jdk25' }
+    agent any
+
+    tools {
+        jdk 'jdk25'
+    }
 
     options {
         skipDefaultCheckout(true)
