@@ -47,6 +47,7 @@ object ItemClickListener: EventHandler() {
 
     private val itemClick = listen<InventoryClickEvent> {
         val item = it.currentItem ?: return@listen
+        if (item.type.isAir) return@listen
         if (ItemActions.dispatch(item, it)) return@listen
         val action = itemClickEvents[item] ?: return@listen
         action(it)

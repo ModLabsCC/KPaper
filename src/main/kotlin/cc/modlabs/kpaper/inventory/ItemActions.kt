@@ -22,13 +22,16 @@ object ItemActions {
 
     fun tag(item: ItemStack, id: String) {
         require(handlers.containsKey(id)) { "Item action is not registered: $id" }
-        val meta = item.itemMeta
+        val meta = requireNotNull(item.itemMeta) {
+            "Item ${item.type} does not support item metadata"
+        }
         meta.persistentDataContainer.set(key, PersistentDataType.STRING, id)
         item.itemMeta = meta
     }
 
     internal fun dispatch(item: ItemStack, event: InventoryClickEvent): Boolean {
-        val id = item.itemMeta.persistentDataContainer.get(key, PersistentDataType.STRING) ?: return false
+        val meta = item.itemMeta ?: return false
+        val id = meta.persistentDataContainer.get(key, PersistentDataType.STRING) ?: return false
         val handler = handlers[id] ?: return false
         handler(event)
         return true
