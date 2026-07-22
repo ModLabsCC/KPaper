@@ -4,6 +4,7 @@ import cc.modlabs.kpaper.command.CommandBuilder
 import cc.modlabs.kpaper.extensions.send
 import cc.modlabs.kpaper.extensions.sendSuccessSound
 import cc.modlabs.kpaper.world.area.model.AreaFlags
+import cc.modlabs.kpaper.world.area.model.areas
 import cc.modlabs.kpaper.world.area.model.getArea
 import cc.modlabs.kpaper.world.toStringLocation
 import com.mojang.brigadier.Command
@@ -27,11 +28,16 @@ class AreaCommand : CommandBuilder {
             .executes { ctx ->
                 val sender = ctx.source.sender as Player
 
-                val area = sender.location.getArea()
-                if (area != null) {
-                    sender.send("You are standing in ${area.name}")
-                } else {
+                val standingIn = sender.location.areas()
+                if (standingIn.isEmpty()) {
                     sender.send("No area here")
+                } else if (standingIn.size == 1) {
+                    sender.send("You are standing in ${standingIn.first().name}")
+                } else {
+                    sender.send("You are standing in ${standingIn.size} areas:")
+                    standingIn.forEach { area ->
+                        sender.send("- ${area.name}")
+                    }
                 }
 
                 Command.SINGLE_SUCCESS

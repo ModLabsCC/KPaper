@@ -123,13 +123,9 @@ fun Location.isInArea(): Boolean {
 }
 
 /**
- * Returns the area that contains this location.
+ * Returns the first area that contains this location, or `null` if none match.
  *
- * Uses the static method `getAreas()` of the `AreaCache` class to retrieve a list of all available areas.
- * Iterates over the list of areas and checks if the current location is contained within each area.
- * Returns the first area that contains the location, or `null` if no area contains the location.
- *
- * @return The area that contains this location, or `null` if no area contains the location.
+ * Prefer [areas] when overlapping areas matter (stairs through floors, nested regions, etc.).
  */
 fun Location.getArea(): Area? {
     for (area in AreaCache.getAreas()) {
@@ -141,9 +137,24 @@ fun Location.getArea(): Area? {
 }
 
 /**
- * Gets the area that contains the pixel location.
+ * Returns every loaded area that contains this location.
  *
- * @return the Area object that contains the pixel location, or null if no area contains the location.
+ * Overlapping areas are all included; order matches [AreaCache.getAreas].
+ */
+fun Location.areas(): List<Area> {
+    val matches = ArrayList<Area>()
+    for (area in AreaCache.getAreas()) {
+        if (area.contains(this)) {
+            matches += area
+        }
+    }
+    return matches
+}
+
+/**
+ * Returns the first area that contains this pixel location, or `null` if none match.
+ *
+ * Prefer [areas] when overlapping areas matter.
  */
 fun StringLocation.getArea(): Area? {
     for (area in AreaCache.getAreas()) {
@@ -152,6 +163,19 @@ fun StringLocation.getArea(): Area? {
         }
     }
     return null
+}
+
+/**
+ * Returns every loaded area that contains this pixel location.
+ */
+fun StringLocation.areas(): List<Area> {
+    val matches = ArrayList<Area>()
+    for (area in AreaCache.getAreas()) {
+        if (area.contains(this)) {
+            matches += area
+        }
+    }
+    return matches
 }
 
 /**

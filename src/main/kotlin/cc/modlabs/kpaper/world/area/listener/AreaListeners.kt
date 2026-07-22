@@ -1,7 +1,8 @@
 package cc.modlabs.kpaper.world.area.listener
 
 import cc.modlabs.kpaper.world.area.AreaCache
-import cc.modlabs.kpaper.world.area.model.getArea
+import cc.modlabs.kpaper.world.area.model.Area
+import cc.modlabs.kpaper.world.area.model.areas
 import cc.modlabs.kpaper.world.area.model.onEnter
 import cc.modlabs.kpaper.world.area.model.onLeave
 import org.bukkit.Location
@@ -16,40 +17,48 @@ import org.bukkit.event.world.WorldUnloadEvent
 
 class AreaListeners : Listener {
 
-    private fun handleMovement (from: Location, to:Location, player: Player){
-        val fromArea = from.getArea()
-        val toArea = to.getArea()
+    private fun handleMovement(from: Location, to: Location, player: Player) {
+        val fromAreas = from.areas().toIdentitySet()
+        val toAreas = to.areas().toIdentitySet()
 
-        if (fromArea != null && toArea != null && fromArea !== toArea) {
-            fromArea.onLeave(player)
-            toArea.onEnter(player)
-        } else if (fromArea != null && toArea == null) {
-            fromArea.onLeave(player)
-        } else if (fromArea == null && toArea != null) {
-            toArea.onEnter(player)
+        for (area in fromAreas) {
+            if (area !in toAreas) {
+                area.onLeave(player)
+            }
+        }
+        for (area in toAreas) {
+            if (area !in fromAreas) {
+                area.onEnter(player)
+            }
         }
     }
 
     @EventHandler
-    fun onMove (event: PlayerMoveEvent){
-        val player = event.player
+    fun onMove(event: PlayerMoveEvent) {
         val from = event.from
         val to = event.to
-        handleMovement(from, to, player)
+        // Area membership only changes when the player crosses a block boundary.
+        if (
+            from.world === to.world &&
+            from.blockX == to.blockX &&
+            from.blockY == to.blockY &&
+            from.blockZ == to.blockZ
+        ) {
+            return
+        }
+        handleMovement(from, to, event.player)
     }
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        val area =event.player.location.getArea() ?: return
-        area.onEnter(event.player)
+        for (area in event.player.location.areas()) {
+            area.onEnter(event.player)
+        }
     }
 
     @EventHandler
-    fun onTeleportIntoArea (event: PlayerTeleportEvent){
-        val player = event.player
-        val from = event.from
-        val to = event.to
-        handleMovement(from, to, player)
+    fun onTeleportIntoArea(event: PlayerTeleportEvent) {
+        handleMovement(event.from, event.to, event.player)
     }
 
     /**
@@ -65,5 +74,11 @@ class AreaListeners : Listener {
     @EventHandler
     fun onWorldUnload(event: WorldUnloadEvent) {
         AreaCache.clear(event.world.name)
+    }
+
+    private fun Collection<Area>.toIdentitySet(): MutableSet<Area> {
+        val set = java.util.Collections.newSetFromMap(java.util.IdentityHashMap<Area, Boolean>())
+        set.addAll(this)
+        return set
     }
 }

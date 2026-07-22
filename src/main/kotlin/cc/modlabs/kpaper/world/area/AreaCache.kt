@@ -24,9 +24,20 @@ object AreaCache {
         val loaded = mutableListOf<Area>()
         for (area in areaNames) {
             getLogger().info("Loading area $area")
-            val name = areasConfig.getString("areas.$area.name") ?: continue
-            val point1 = areasConfig.getString("areas.$area.p1") ?: continue
-            val point2 = areasConfig.getString("areas.$area.p2") ?: continue
+            val name = areasConfig.getString("areas.$area.name")
+            if (name.isNullOrBlank()) {
+                getLogger().warn("Skipping area '$area' in world '${world.name}': missing name")
+                continue
+            }
+            val point1 = areasConfig.getString("areas.$area.p1")
+            val point2 = areasConfig.getString("areas.$area.p2")
+            if (point1.isNullOrBlank() || point2.isNullOrBlank()) {
+                getLogger().warn(
+                    "Skipping area '$area' in world '${world.name}': both p1 and p2 are required " +
+                        "(p1=${!point1.isNullOrBlank()}, p2=${!point2.isNullOrBlank()})",
+                )
+                continue
+            }
 
             val entrySoundName = areasConfig.getString("areas.$area.sound.entry.name")
             val entrySoundVolume = areasConfig.getDouble("areas.$area.sound.entry.volume", 1.0).toFloat()
@@ -100,7 +111,10 @@ object AreaCache {
     fun getArea(name: String): Area? {
         cacheLock.readLock().lock()
         try {
-            return areas[name] ?: areas.values.firstOrNull { it.name == name }
+            areas[name]?.let { return it }
+            val normalized = name.trim()
+            return areas.values.firstOrNull { it.name.equals(normalized, ignoreCase = true) }
+                ?: areas.entries.firstOrNull { it.key.equals(normalized, ignoreCase = true) }?.value
         } finally {
             cacheLock.readLock().unlock()
         }
@@ -109,7 +123,11 @@ object AreaCache {
     fun getArea(world: String, name: String): Area? {
         cacheLock.readLock().lock()
         try {
-            return areas["$world:$name"]
+            areas["$world:$name"]?.let { return it }
+            return areas.values.firstOrNull {
+                it.point1.world.equals(world, ignoreCase = true) &&
+                    it.name.equals(name, ignoreCase = true)
+            }
         } finally {
             cacheLock.readLock().unlock()
         }
