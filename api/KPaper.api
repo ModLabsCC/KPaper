@@ -2715,6 +2715,8 @@ public final class cc/modlabs/kpaper/world/area/model/AreaFlags {
 }
 
 public final class cc/modlabs/kpaper/world/area/model/AreaKt {
+	public static final fun areas (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Ljava/util/List;
+	public static final fun areas (Lorg/bukkit/Location;)Ljava/util/List;
 	public static final fun getArea (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Lcc/modlabs/kpaper/world/area/model/Area;
 	public static final fun getArea (Lorg/bukkit/Location;)Lcc/modlabs/kpaper/world/area/model/Area;
 	public static final fun getChatRoomName (Lcc/modlabs/kpaper/world/area/model/Area;)Ljava/lang/String;
