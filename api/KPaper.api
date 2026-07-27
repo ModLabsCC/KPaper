@@ -2595,6 +2595,7 @@ public final class cc/modlabs/kpaper/world/area/AreaCommand : cc/modlabs/kpaper/
 public final class cc/modlabs/kpaper/world/area/AreaConfigService {
 	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaConfigService;
 	public final fun addFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun removeArea (Ljava/lang/String;Ljava/lang/String;)Z
 	public final fun removeFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
 	public final fun savePoint (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;
 	public final fun savePolygonPoint (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
@@ -2612,6 +2613,10 @@ public final class cc/modlabs/kpaper/world/area/AreaVisualizer {
 	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaVisualizer;
 	public final fun show (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;D)I
 	public static synthetic fun show$default (Lcc/modlabs/kpaper/world/area/AreaVisualizer;Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;DILjava/lang/Object;)I
+	public final fun showFor (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;JLorg/bukkit/Color;DJ)Z
+	public static synthetic fun showFor$default (Lcc/modlabs/kpaper/world/area/AreaVisualizer;Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;JLorg/bukkit/Color;DJILjava/lang/Object;)Z
+	public final fun toggle (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;DJ)Z
+	public static synthetic fun toggle$default (Lcc/modlabs/kpaper/world/area/AreaVisualizer;Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;DJILjava/lang/Object;)Z
 }
 
 public final class cc/modlabs/kpaper/world/area/event/AreaEnterEvent : cc/modlabs/kpaper/world/area/event/AreaEvent {

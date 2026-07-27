@@ -32,6 +32,7 @@ object AreaSystem {
     fun unload() {
         listeners?.let { HandlerList.unregisterAll(it) }
         listeners = null
+        AreaVisualizer.clear()
         AreaCache.clear()
         commandHandlerRegistered = false
     }

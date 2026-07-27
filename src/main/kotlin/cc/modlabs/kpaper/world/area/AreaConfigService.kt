@@ -44,6 +44,19 @@ object AreaConfigService {
         return oldValue
     }
 
+    fun removeArea(worldName: String, areaName: String): Boolean {
+        val worldConfig = WorldConfig(worldName)
+        val key = worldConfig.getConfigurationSection("areas")?.getKeys(false)?.firstOrNull {
+            it.equals(areaName, ignoreCase = true) ||
+                worldConfig.getString("areas.$it.name").equals(areaName, ignoreCase = true)
+        } ?: return false
+
+        worldConfig.set("areas.$key", null)
+        worldConfig.saveConfig()
+        AreaCache.reloadAreas()
+        return true
+    }
+
     fun saveSound(
         worldName: String,
         areaName: String,

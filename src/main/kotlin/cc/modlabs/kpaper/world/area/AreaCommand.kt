@@ -72,8 +72,50 @@ class AreaCommand : CommandBuilder {
                         if (area == null) {
                             sender.send("<red>Area $areaName not found in this world")
                         } else {
-                            val particles = AreaVisualizer.show(area, sender)
-                            sender.send("<green>Showing ${area.name} with $particles particles")
+                            AreaVisualizer.showFor(area, sender)
+                            sender.send("<green>Showing ${area.name} for 5 seconds")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+            )
+            .then(Commands.literal("toggle")
+                .then(Commands.argument("area", StringArgumentType.word())
+                    .suggests { _, builder ->
+                        AreaCache.getAreas().forEach { builder.suggest(it.name) }
+                        builder.buildFuture()
+                    }
+                    .executes { ctx ->
+                        val sender = ctx.source.sender as Player
+                        val areaName = StringArgumentType.getString(ctx, "area")
+                        val area = AreaCache.getArea(sender.world.name, areaName)
+                        if (area == null) {
+                            sender.send("<red>Area $areaName not found in this world")
+                        } else if (AreaVisualizer.toggle(area, sender)) {
+                            sender.send("<green>Showing ${area.name} until toggled off")
+                        } else {
+                            sender.send("<green>Hidden ${area.name}")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+            )
+            .then(Commands.literal("remove")
+                .then(Commands.argument("area", StringArgumentType.word())
+                    .suggests { _, builder ->
+                        AreaCache.getAreas().forEach { builder.suggest(it.name) }
+                        builder.buildFuture()
+                    }
+                    .executes { ctx ->
+                        val sender = ctx.source.sender as Player
+                        val areaName = StringArgumentType.getString(ctx, "area")
+                        val area = AreaCache.getArea(sender.world.name, areaName)
+                        if (area == null || !AreaConfigService.removeArea(sender.world.name, areaName)) {
+                            sender.send("<red>Area $areaName not found in this world")
+                        } else {
+                            AreaVisualizer.stop(area)
+                            sender.send("<green>Removed ${area.name}")
+                            sender.sendSuccessSound()
                         }
                         Command.SINGLE_SUCCESS
                     }
