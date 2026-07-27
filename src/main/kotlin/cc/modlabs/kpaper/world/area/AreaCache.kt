@@ -29,12 +29,18 @@ object AreaCache {
                 getLogger().warn("Skipping area '$area' in world '${world.name}': missing name")
                 continue
             }
-            val point1 = areasConfig.getString("areas.$area.p1")
-            val point2 = areasConfig.getString("areas.$area.p2")
-            if (point1.isNullOrBlank() || point2.isNullOrBlank()) {
+            val points = areasConfig.getStringList("areas.$area.points")
+                .filter { it.isNotBlank() }
+                .map { it.toStringLocation() }
+                .ifEmpty {
+                    listOfNotNull(
+                        areasConfig.getString("areas.$area.p1")?.takeIf { it.isNotBlank() }?.toStringLocation(),
+                        areasConfig.getString("areas.$area.p2")?.takeIf { it.isNotBlank() }?.toStringLocation(),
+                    )
+                }
+            if (points.size < 2) {
                 getLogger().warn(
-                    "Skipping area '$area' in world '${world.name}': both p1 and p2 are required " +
-                        "(p1=${!point1.isNullOrBlank()}, p2=${!point2.isNullOrBlank()})",
+                    "Skipping area '$area' in world '${world.name}': at least two points are required",
                 )
                 continue
             }
@@ -50,16 +56,15 @@ object AreaCache {
             val flags = loadFlags(areasConfig, area)
 
             val areaObj = Area(
-                name,
-                point1.toStringLocation(),
-                point2.toStringLocation(),
-                flags,
-                entrySoundName,
-                entrySoundVolume,
-                entrySoundPitch,
-                exitSoundName,
-                exitSoundVolume,
-                exitSoundPitch
+                name = name,
+                points = points,
+                flags = flags,
+                entrySound = entrySoundName,
+                entryVolume = entrySoundVolume,
+                entryPitch = entrySoundPitch,
+                exitSound = exitSoundName,
+                exitVolume = exitSoundVolume,
+                exitPitch = exitSoundPitch,
             )
             loaded += areaObj
             getLogger().info("Loaded area $area")

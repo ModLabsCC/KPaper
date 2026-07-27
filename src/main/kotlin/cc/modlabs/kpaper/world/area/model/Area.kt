@@ -4,7 +4,6 @@ import cc.modlabs.klassicx.tools.minecraft.StringLocation
 import cc.modlabs.kpaper.world.area.AreaCache
 import cc.modlabs.kpaper.world.area.event.AreaEnterEvent
 import cc.modlabs.kpaper.world.area.event.AreaLeaveEvent
-import cc.modlabs.kpaper.world.toBukkitLocation
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.SoundCategory
@@ -13,16 +12,14 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Represents an area defined by two points in pixel coordinates.
+ * Represents a polygonal prism. Two points remain supported as a cuboid.
  *
  * @property name The name of the area.
- * @property point1 The first pixel location defining the area.
- * @property point2 The second pixel location defining the area.
+ * @property points The X/Z polygon corners. Their lowest and highest Y define the vertical bounds.
  */
 class Area(
     val name: String,
-    val point1: StringLocation,
-    val point2: StringLocation,
+    val points: List<StringLocation>,
     val flags: Map<AreaFlag<*>, Any> = emptyMap(),
     val entrySound: String? = null,
     val entryVolume: Float = 1f,
@@ -31,23 +28,64 @@ class Area(
     val exitVolume: Float = 1f,
     val exitPitch: Float = 1f,
 ) {
-
-    fun contains(location: StringLocation): Boolean {
-        return contains(location.toBukkitLocation())
+    init {
+        require(points.size >= 2) { "An area requires at least two points" }
+        require(points.all { it.world == points.first().world }) { "All area points must be in the same world" }
     }
 
-    fun contains(location: Location): Boolean {
-        val minX = min(point1.x, point2.x)
-        val maxX = max(point1.x, point2.x)
-        val minY = min(point1.y, point2.y)
-        val maxY = max(point1.y, point2.y)
-        val minZ = min(point1.z, point2.z)
-        val maxZ = max(point1.z, point2.z)
+    constructor(
+        name: String,
+        point1: StringLocation,
+        point2: StringLocation,
+        flags: Map<AreaFlag<*>, Any> = emptyMap(),
+        entrySound: String? = null,
+        entryVolume: Float = 1f,
+        entryPitch: Float = 1f,
+        exitSound: String? = null,
+        exitVolume: Float = 1f,
+        exitPitch: Float = 1f,
+    ) : this(
+        name,
+        listOf(point1, point2),
+        flags,
+        entrySound,
+        entryVolume,
+        entryPitch,
+        exitSound,
+        exitVolume,
+        exitPitch,
+    )
 
-        return location.world?.name == point1.world &&
-                location.x >= minX && location.x <= maxX &&
-                location.y >= minY && location.y <= maxY &&
-                location.z >= minZ && location.z <= maxZ
+    val point1: StringLocation get() = points.first()
+    val point2: StringLocation get() = points[1]
+    val minY: Double = points.minOf { it.y }
+    val maxY: Double = points.maxOf { it.y }
+
+    fun contains(location: StringLocation): Boolean =
+        contains(location.world, location.x, location.y, location.z)
+
+    fun contains(location: Location): Boolean =
+        contains(location.world?.name, location.x, location.y, location.z)
+
+    fun contains(world: String?, x: Double, y: Double, z: Double): Boolean {
+        if (world != point1.world || y < minY || y > maxY) return false
+        if (points.size == 2) {
+            return x >= min(point1.x, point2.x) && x <= max(point1.x, point2.x) &&
+                z >= min(point1.z, point2.z) && z <= max(point1.z, point2.z)
+        }
+
+        var inside = false
+        for (index in points.indices) {
+            val a = points[index]
+            val b = points[(index + 1) % points.size]
+            if (isOnEdge(x, z, a.x, a.z, b.x, b.z)) return true
+            if ((a.z > z) != (b.z > z) &&
+                x < (b.x - a.x) * (z - a.z) / (b.z - a.z) + a.x
+            ) {
+                inside = !inside
+            }
+        }
+        return inside
     }
 
     fun <T> getFlag(flag: AreaFlag<T>): T? {
@@ -58,6 +96,20 @@ class Area(
 
     fun hasFlag(flag: AreaFlag<Boolean>): Boolean {
         return getFlag(flag) == true
+    }
+
+    private fun isOnEdge(
+        x: Double,
+        z: Double,
+        ax: Double,
+        az: Double,
+        bx: Double,
+        bz: Double,
+    ): Boolean {
+        val cross = (x - ax) * (bz - az) - (z - az) * (bx - ax)
+        return kotlin.math.abs(cross) < 1e-9 &&
+            x >= min(ax, bx) && x <= max(ax, bx) &&
+            z >= min(az, bz) && z <= max(az, bz)
     }
 }
 

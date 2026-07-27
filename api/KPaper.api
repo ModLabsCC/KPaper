@@ -2597,6 +2597,7 @@ public final class cc/modlabs/kpaper/world/area/AreaConfigService {
 	public final fun addFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
 	public final fun removeFlag (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
 	public final fun savePoint (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/Object;
+	public final fun savePolygonPoint (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ljava/lang/String;
 	public final fun saveSound (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;FF)Ljava/lang/Object;
 }
 
@@ -2605,6 +2606,12 @@ public final class cc/modlabs/kpaper/world/area/AreaSystem {
 	public final fun load (Lcc/modlabs/kpaper/main/KPlugin;)V
 	public final fun registerCommands (Lcc/modlabs/kpaper/main/KPlugin;)V
 	public final fun unload ()V
+}
+
+public final class cc/modlabs/kpaper/world/area/AreaVisualizer {
+	public static final field INSTANCE Lcc/modlabs/kpaper/world/area/AreaVisualizer;
+	public final fun show (Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;D)I
+	public static synthetic fun show$default (Lcc/modlabs/kpaper/world/area/AreaVisualizer;Lcc/modlabs/kpaper/world/area/model/Area;Lorg/bukkit/entity/Player;Lorg/bukkit/Color;DILjava/lang/Object;)I
 }
 
 public final class cc/modlabs/kpaper/world/area/event/AreaEnterEvent : cc/modlabs/kpaper/world/area/event/AreaEvent {
@@ -2679,7 +2686,10 @@ public final class cc/modlabs/kpaper/world/area/listener/AreaListeners : org/buk
 public final class cc/modlabs/kpaper/world/area/model/Area {
 	public fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FF)V
 	public synthetic fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FF)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/Map;Ljava/lang/String;FFLjava/lang/String;FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun contains (Lcc/modlabs/klassicx/tools/minecraft/StringLocation;)Z
+	public final fun contains (Ljava/lang/String;DDD)Z
 	public final fun contains (Lorg/bukkit/Location;)Z
 	public final fun getEntryPitch ()F
 	public final fun getEntrySound ()Ljava/lang/String;
@@ -2689,9 +2699,12 @@ public final class cc/modlabs/kpaper/world/area/model/Area {
 	public final fun getExitVolume ()F
 	public final fun getFlag (Lcc/modlabs/kpaper/world/area/model/AreaFlag;)Ljava/lang/Object;
 	public final fun getFlags ()Ljava/util/Map;
+	public final fun getMaxY ()D
+	public final fun getMinY ()D
 	public final fun getName ()Ljava/lang/String;
 	public final fun getPoint1 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
 	public final fun getPoint2 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun getPoints ()Ljava/util/List;
 	public final fun hasFlag (Lcc/modlabs/kpaper/world/area/model/AreaFlag;)Z
 }
 

@@ -29,6 +29,21 @@ object AreaConfigService {
         return oldValue
     }
 
+    fun savePolygonPoint(worldName: String, areaName: String, index: Int, location: String): String? {
+        val worldConfig = WorldConfig(worldName)
+        val path = "areas.$areaName.points"
+        val points = worldConfig.getStringList(path).toMutableList()
+        require(index in 1..points.size + 1) { "Point index must be between 1 and ${points.size + 1}" }
+
+        val oldValue = points.getOrNull(index - 1)
+        if (oldValue == null) points += location else points[index - 1] = location
+        worldConfig.set(path, points)
+        worldConfig.set("areas.$areaName.name", areaName)
+        worldConfig.saveConfig()
+        AreaCache.reloadAreas()
+        return oldValue
+    }
+
     fun saveSound(
         worldName: String,
         areaName: String,

@@ -9,6 +9,7 @@ import cc.modlabs.kpaper.world.area.model.getArea
 import cc.modlabs.kpaper.world.toStringLocation
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.arguments.FloatArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
@@ -58,6 +59,26 @@ class AreaCommand : CommandBuilder {
                     Command.SINGLE_SUCCESS
                 }
             )
+            .then(Commands.literal("show")
+                .then(Commands.argument("area", StringArgumentType.word())
+                    .suggests { _, builder ->
+                        AreaCache.getAreas().forEach { builder.suggest(it.name) }
+                        builder.buildFuture()
+                    }
+                    .executes { ctx ->
+                        val sender = ctx.source.sender as Player
+                        val areaName = StringArgumentType.getString(ctx, "area")
+                        val area = AreaCache.getArea(sender.world.name, areaName)
+                        if (area == null) {
+                            sender.send("<red>Area $areaName not found in this world")
+                        } else {
+                            val particles = AreaVisualizer.show(area, sender)
+                            sender.send("<green>Showing ${area.name} with $particles particles")
+                        }
+                        Command.SINGLE_SUCCESS
+                    }
+                )
+            )
             .then(Commands.literal("set")
                 .then(Commands.argument("area", StringArgumentType.word())
                     .suggests { _, builder ->
@@ -66,6 +87,17 @@ class AreaCommand : CommandBuilder {
                         }
                         builder.buildFuture()
                     }
+                    .then(Commands.literal("point")
+                        .then(Commands.argument("index", IntegerArgumentType.integer(1))
+                            .executes { ctx ->
+                                val sender = ctx.source.sender as Player
+                                val areaName = StringArgumentType.getString(ctx, "area").replace(" ", "_").lowercase(Locale.getDefault())
+                                val index = IntegerArgumentType.getInteger(ctx, "index")
+                                savePolygonPoint(sender, areaName, index)
+                                Command.SINGLE_SUCCESS
+                            }
+                        )
+                    )
                     .then(Commands.literal("p1")
                         .executes { ctx ->
                             val sender = ctx.source.sender as Player
@@ -238,6 +270,25 @@ class AreaCommand : CommandBuilder {
         }
         player.sendSuccessSound()
         player.send("<green>Removed Flag $flag in $areaName")
+    }
+
+    private fun savePolygonPoint(player: Player, areaName: String, index: Int) {
+        val result = runCatching {
+            AreaConfigService.savePolygonPoint(
+                player.world.name,
+                areaName,
+                index,
+                player.location.toStringLocation().toString(),
+            )
+        }
+        result.exceptionOrNull()?.let {
+            player.send("<red>${it.message}")
+            return
+        }
+
+        val oldPoint = result.getOrNull()
+        player.send(if (oldPoint == null) "Set point $index for $areaName" else "Replaced point $index for $areaName")
+        player.sendSuccessSound()
     }
 
     private fun savePoint(player: Player, areaName: String, point: String) {
