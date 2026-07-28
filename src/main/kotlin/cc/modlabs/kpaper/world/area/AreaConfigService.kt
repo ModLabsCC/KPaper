@@ -19,12 +19,27 @@ object AreaConfigService {
 
     fun savePoint(worldName: String, areaName: String, point: String, location: String): Any? {
         val worldConfig = WorldConfig(worldName)
-        val oldValue = worldConfig.get("areas.$areaName.$point")
+        val pointsPath = "areas.$areaName.points"
+        val points = worldConfig.getStringList(pointsPath).toMutableList()
+        val index = when (point) {
+            "p1" -> 0
+            "p2" -> 1
+            else -> throw IllegalArgumentException("Point must be p1 or p2")
+        }
+        val oldValue = points.getOrNull(index) ?: worldConfig.get("areas.$areaName.$point")
 
-        worldConfig.set("areas.$areaName.$point", location)
+        if (points.isEmpty()) {
+            worldConfig.set("areas.$areaName.$point", location)
+        } else if (index < points.size) {
+            points[index] = location
+            worldConfig.set(pointsPath, points)
+        } else {
+            points += location
+            worldConfig.set(pointsPath, points)
+        }
         worldConfig.set("areas.$areaName.name", areaName)
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
 
         return oldValue
     }
@@ -38,9 +53,11 @@ object AreaConfigService {
         val oldValue = points.getOrNull(index - 1)
         if (oldValue == null) points += location else points[index - 1] = location
         worldConfig.set(path, points)
+        worldConfig.set("areas.$areaName.p1", null)
+        worldConfig.set("areas.$areaName.p2", null)
         worldConfig.set("areas.$areaName.name", areaName)
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
         return oldValue
     }
 
@@ -53,7 +70,7 @@ object AreaConfigService {
 
         worldConfig.set("areas.$key", null)
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
         return true
     }
 
@@ -72,7 +89,7 @@ object AreaConfigService {
         worldConfig.set("areas.$areaName.sound.$type.volume", volume)
         worldConfig.set("areas.$areaName.sound.$type.pitch", pitch)
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
 
         return oldValue
     }
@@ -92,7 +109,7 @@ object AreaConfigService {
         }
         AreaFlags.getOrCreateBoolean(normalizedFlag)
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
         return true
     }
 
@@ -109,7 +126,7 @@ object AreaConfigService {
             worldConfig.set("$flagsPath.$existingFlag", true)
         }
         worldConfig.saveConfig()
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(worldName)
         return true
     }
 }

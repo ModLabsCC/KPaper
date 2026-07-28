@@ -152,7 +152,7 @@ fun Location.isInArea(area: Area): Boolean {
  * @return true if the pixel location is within an area, false otherwise.
  */
 fun StringLocation.isInArea(): Boolean {
-    for (area in AreaCache.getAreas()) {
+    for (area in AreaCache.candidates(world, x, z)) {
         if (area.contains(this)) {
             return true
         }
@@ -166,7 +166,8 @@ fun StringLocation.isInArea(): Boolean {
  * @return true if the current location is in any area, false otherwise.
  */
 fun Location.isInArea(): Boolean {
-    for (area in AreaCache.getAreas()) {
+    val worldName = world?.name ?: return false
+    for (area in AreaCache.candidates(worldName, x, z)) {
         if (area.contains(this)) {
             return true
         }
@@ -180,7 +181,8 @@ fun Location.isInArea(): Boolean {
  * Prefer [areas] when overlapping areas matter (stairs through floors, nested regions, etc.).
  */
 fun Location.getArea(): Area? {
-    for (area in AreaCache.getAreas()) {
+    val worldName = world?.name ?: return null
+    for (area in AreaCache.candidates(worldName, x, z)) {
         if (area.contains(this)) {
             return area
         }
@@ -195,7 +197,8 @@ fun Location.getArea(): Area? {
  */
 fun Location.areas(): List<Area> {
     val matches = ArrayList<Area>()
-    for (area in AreaCache.getAreas()) {
+    val worldName = world?.name ?: return matches
+    for (area in AreaCache.candidates(worldName, x, z)) {
         if (area.contains(this)) {
             matches += area
         }
@@ -209,7 +212,7 @@ fun Location.areas(): List<Area> {
  * Prefer [areas] when overlapping areas matter.
  */
 fun StringLocation.getArea(): Area? {
-    for (area in AreaCache.getAreas()) {
+    for (area in AreaCache.candidates(world, x, z)) {
         if (area.contains(this)) {
             return area
         }
@@ -222,7 +225,7 @@ fun StringLocation.getArea(): Area? {
  */
 fun StringLocation.areas(): List<Area> {
     val matches = ArrayList<Area>()
-    for (area in AreaCache.getAreas()) {
+    for (area in AreaCache.candidates(world, x, z)) {
         if (area.contains(this)) {
             matches += area
         }

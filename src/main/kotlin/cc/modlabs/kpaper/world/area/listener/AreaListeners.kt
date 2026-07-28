@@ -68,7 +68,7 @@ class AreaListeners : Listener {
      */
     @EventHandler
     fun onWorldLoad(event: WorldLoadEvent) {
-        AreaCache.reloadAreas()
+        AreaCache.reloadAreas(event.world.name)
     }
 
     @EventHandler
