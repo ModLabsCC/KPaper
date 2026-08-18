@@ -92,6 +92,7 @@ fun Player.injectPacketInterceptor() {
         if (!channel.pipeline().names().contains(name)) return
         channel.pipeline().remove(name)
         injectPacketInterceptor()
+    } catch (_: NoSuchElementException) {
     } catch (_: IllegalAccessException) {
     } catch (_: NoSuchFieldException) {
     }
