@@ -30,6 +30,9 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://repo-api.modlabs.cc/repo/maven/maven-public/") {
+        content { includeGroup("cc.modlabs") }
+    }
     maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
