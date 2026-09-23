@@ -27,11 +27,13 @@ sonar {
 
 repositories {
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://repo.codemc.io/repository/maven-snapshots/")
     maven("https://repo-api.modlabs.cc/repo/maven/maven-mirror/")
 }
 
-// BCV pins ASM older than Java 25 class files (major 69); Paper 26.2 requires JVM 25.
+// BCV pins ASM older than Java 25 class files (major 69); Paper 26.3 requires JVM 25.
 configurations.matching { it.name.startsWith("bcv-rt-jvm") }.configureEach {
     resolutionStrategy {
         force(
@@ -52,7 +54,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:5.4.0")
 
     // PacketEvents for TextDisplayFactory (display entities)
-    api("com.github.retrooper:packetevents-spigot:2.13.0")
+    api("com.github.retrooper:packetevents-spigot:2.14.0-SNAPSHOT")
 
     // Redis client for Redis-backed PartyAPI implementation (Jedis)
     implementation("redis.clients:jedis:7.5.3")
