@@ -16,6 +16,7 @@ Welcome to the comprehensive documentation for KPaper - a Kotlin utility library
 - [Naming Conventions](core/naming-conventions.md) - API and package naming standards
 
 ### API Guides
+- [Managed NPCs & Skin Library](api/npcs.md) - Persistent packet NPCs, skin imports, actions and project adapters
 - [Paper 26.2 APIs](api/paper-26.2.md) - Region scheduling, data components, dialogs, registries, and ticks
 - [Event System](api/events.md) - Event handling and custom events
 - [Command Framework](api/commands.md) - Creating commands with arguments

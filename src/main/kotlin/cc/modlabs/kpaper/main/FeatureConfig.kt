@@ -22,6 +22,10 @@ enum class Feature {
      * Disabled by default because PacketEvents injects into the Netty pipeline.
      */
     PACKET_EVENTS,
+    /** Opt-in central skin store and /skins administration. */
+    SKINS,
+    /** Opt-in managed packet NPCs and /npc; also loads the skin store. Requires PACKET_EVENTS. */
+    NPCS,
 }
 
 /**
@@ -53,6 +57,8 @@ class FeatureConfigBuilder {
             Feature.GAME to true,
             Feature.UTIL to true,
             Feature.AREAS to true,
+            Feature.SKINS to false,
+            Feature.NPCS to false,
             // Opt-in: PacketEvents Netty injection + packet-based display/NPC APIs
             Feature.PACKET_EVENTS to false,
         ).forEach { (feature, enabled) -> put(feature, enabled) }
@@ -113,6 +119,14 @@ class FeatureConfigBuilder {
     var enablePacketEventsFeatures: Boolean
         get() = flags[Feature.PACKET_EVENTS] == true
         set(value) { flags[Feature.PACKET_EVENTS] = value }
+
+    var enableSkinFeatures: Boolean
+        get() = flags[Feature.SKINS] == true
+        set(value) { flags[Feature.SKINS] = value }
+
+    var enableNpcFeatures: Boolean
+        get() = flags[Feature.NPCS] == true
+        set(value) { flags[Feature.NPCS] = value }
 
     fun build() = FeatureConfig(flags)
 }

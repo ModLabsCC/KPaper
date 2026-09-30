@@ -11,6 +11,11 @@ import cc.modlabs.kpaper.ticks.TickService
 import cc.modlabs.kpaper.scheduling.KPaperScheduler
 import cc.modlabs.kpaper.messages.LocalMessageCooldown
 import cc.modlabs.kpaper.npc.NPCEventListener
+import cc.modlabs.kpaper.npc.managed.NpcService
+import cc.modlabs.kpaper.npc.managed.NpcCommand
+import cc.modlabs.kpaper.skins.SkinLibraryService
+import cc.modlabs.kpaper.skins.SkinCommand
+import cc.modlabs.kpaper.command.registerCommand
 import cc.modlabs.kpaper.party.Party
 import cc.modlabs.kpaper.visuals.impl.BossBarVisuals
 import cc.modlabs.kpaper.world.area.AreaSystem
@@ -29,6 +34,10 @@ fun pluginInstance(): KPlugin = PluginInstance
 
 
 abstract class KPlugin : JavaPlugin() {
+    lateinit var skins: SkinLibraryService
+        private set
+    lateinit var npcs: NpcService
+        private set
     /**
      * The feature configuration for this plugin.
      */
@@ -59,6 +68,14 @@ abstract class KPlugin : JavaPlugin() {
             logger.warning("The main instance has been modified, even though it has already been set by another plugin!")
         }
         PluginInstance = this
+        if (isFeatureEnabled(Feature.SKINS) || isFeatureEnabled(Feature.NPCS)) {
+            skins = SkinLibraryService(this)
+            registerCommand(SkinCommand(this) { skins })
+        }
+        if (isFeatureEnabled(Feature.NPCS)) {
+            npcs = NpcService(this, skins)
+            registerCommand(NpcCommand { npcs })
+        }
         if (isFeatureEnabled(Feature.AREAS)) {
             AreaSystem.registerCommands(this)
         }
@@ -83,6 +100,8 @@ abstract class KPlugin : JavaPlugin() {
         }
 
         PacketEventsSupport.loadAndInit(this)
+        if (::skins.isInitialized) skins.start()
+        if (::npcs.isInitialized) npcs.start()
 
         startup()
     }
@@ -91,6 +110,8 @@ abstract class KPlugin : JavaPlugin() {
         try {
             shutdown()
         } finally {
+            if (::npcs.isInitialized) npcs.stop()
+            if (::skins.isInitialized) skins.close()
             if (isFeatureEnabled(Feature.ITEM_CLICK)) ItemClickListener.unload()
             if (isFeatureEnabled(Feature.CUSTOM_EVENTS)) CustomEventListener.unload()
             if (isFeatureEnabled(Feature.AREAS)) AreaSystem.unload()

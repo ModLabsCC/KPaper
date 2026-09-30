@@ -9,12 +9,14 @@ import io.netty.channel.ChannelHandlerContext
 import net.minecraft.network.protocol.Packet
 import org.bukkit.entity.Player
 import org.jetbrains.annotations.ApiStatus
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 object PacketInterceptor {
 
     private val packetCallbacks =
-        mutableMapOf<Int, Pair<Class<out Packet<*>>, (Player, Packet<*>) -> Unit>>()
-    private var counter = 0
+        ConcurrentHashMap<Int, Pair<Class<out Packet<*>>, (Player, Packet<*>) -> Unit>>()
+    private val counter = AtomicInteger()
 
     /**
      * Registers a packet callback.
@@ -29,7 +31,7 @@ object PacketInterceptor {
         packet: Class<T>,
         callback: (Player, T) -> Unit
     ): Int {
-        val id = counter++
+        val id = counter.getAndIncrement()
         packetCallbacks[id] = Pair(packet) { player, pkt -> callback(player, pkt.forceCast()) }
         return id
     }

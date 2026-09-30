@@ -1330,7 +1330,9 @@ public final class cc/modlabs/kpaper/main/Feature : java/lang/Enum {
 	public static final field INVENTORY Lcc/modlabs/kpaper/main/Feature;
 	public static final field ITEM_CLICK Lcc/modlabs/kpaper/main/Feature;
 	public static final field MESSAGE Lcc/modlabs/kpaper/main/Feature;
+	public static final field NPCS Lcc/modlabs/kpaper/main/Feature;
 	public static final field PACKET_EVENTS Lcc/modlabs/kpaper/main/Feature;
+	public static final field SKINS Lcc/modlabs/kpaper/main/Feature;
 	public static final field UTIL Lcc/modlabs/kpaper/main/Feature;
 	public static final field VISUALS Lcc/modlabs/kpaper/main/Feature;
 	public static final field WORLD Lcc/modlabs/kpaper/main/Feature;
@@ -1360,7 +1362,9 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public final fun getEnableGameFeatures ()Z
 	public final fun getEnableInventoryFeatures ()Z
 	public final fun getEnableMessageFeatures ()Z
+	public final fun getEnableNpcFeatures ()Z
 	public final fun getEnablePacketEventsFeatures ()Z
+	public final fun getEnableSkinFeatures ()Z
 	public final fun getEnableUtilFeatures ()Z
 	public final fun getEnableVisualFeatures ()Z
 	public final fun getEnableWorldFeatures ()Z
@@ -1372,7 +1376,9 @@ public final class cc/modlabs/kpaper/main/FeatureConfigBuilder {
 	public final fun setEnableGameFeatures (Z)V
 	public final fun setEnableInventoryFeatures (Z)V
 	public final fun setEnableMessageFeatures (Z)V
+	public final fun setEnableNpcFeatures (Z)V
 	public final fun setEnablePacketEventsFeatures (Z)V
+	public final fun setEnableSkinFeatures (Z)V
 	public final fun setEnableUtilFeatures (Z)V
 	public final fun setEnableVisualFeatures (Z)V
 	public final fun setEnableWorldFeatures (Z)V
@@ -1385,6 +1391,8 @@ public final class cc/modlabs/kpaper/main/FeatureConfigKt {
 public abstract class cc/modlabs/kpaper/main/KPlugin : org/bukkit/plugin/java/JavaPlugin {
 	public fun <init> ()V
 	public fun getFeatureConfig ()Lcc/modlabs/kpaper/main/FeatureConfig;
+	public final fun getNpcs ()Lcc/modlabs/kpaper/npc/managed/NpcService;
+	public final fun getSkins ()Lcc/modlabs/kpaper/skins/SkinLibraryService;
 	public final fun isFeatureEnabled (Lcc/modlabs/kpaper/main/Feature;)Z
 	public fun load ()V
 	public final fun onDisable ()V
@@ -1840,6 +1848,296 @@ public final class cc/modlabs/kpaper/npc/ShopNPC {
 	public final fun getNPC ()Lcc/modlabs/kpaper/npc/NPC;
 }
 
+public final class cc/modlabs/kpaper/npc/managed/NpcAnimation : java/lang/Enum {
+	public static final field ARM_SWING Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcAnimation$Companion;
+	public static final field IDLE_LOOK Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+	public static final field TALKING Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcAnimation$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcAnimation;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcCommand : cc/modlabs/kpaper/command/CommandBuilder {
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcCommand$Companion;
+	public static final field PERMISSION Ljava/lang/String;
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public fun getAliases ()Ljava/util/List;
+	public fun getDescription ()Ljava/lang/String;
+	public fun register ()Lcom/mojang/brigadier/tree/LiteralCommandNode;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcCommand$Companion {
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcDefinition {
+	public fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/lang/String;Ljava/lang/String;ZZDLjava/util/Map;BLcc/modlabs/kpaper/npc/managed/NpcPose;Ljava/util/Set;Ljava/util/List;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;DLjava/lang/String;FFLjava/lang/String;FLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Ljava/util/Map;Ljava/util/Map;Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/lang/String;Ljava/lang/String;ZZDLjava/util/Map;BLcc/modlabs/kpaper/npc/managed/NpcPose;Ljava/util/Set;Ljava/util/List;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;DLjava/lang/String;FFLjava/lang/String;FLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Ljava/util/Map;Ljava/util/Map;Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public final fun component11 ()Ljava/util/Set;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public final fun component14 ()Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+	public final fun component15 ()D
+	public final fun component16 ()Ljava/lang/String;
+	public final fun component17 ()F
+	public final fun component18 ()F
+	public final fun component19 ()Ljava/lang/String;
+	public final fun component2 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun component20 ()F
+	public final fun component21 ()Ljava/lang/String;
+	public final fun component22 ()Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public final fun component23 ()Ljava/util/Map;
+	public final fun component24 ()Ljava/util/Map;
+	public final fun component25 ()Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;
+	public final fun component26 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Z
+	public final fun component6 ()Z
+	public final fun component7 ()D
+	public final fun component8 ()Ljava/util/Map;
+	public final fun component9 ()B
+	public final fun copy (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/lang/String;Ljava/lang/String;ZZDLjava/util/Map;BLcc/modlabs/kpaper/npc/managed/NpcPose;Ljava/util/Set;Ljava/util/List;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;DLjava/lang/String;FFLjava/lang/String;FLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Ljava/util/Map;Ljava/util/Map;Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/npc/managed/NpcDefinition;Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;Ljava/lang/String;Ljava/lang/String;ZZDLjava/util/Map;BLcc/modlabs/kpaper/npc/managed/NpcPose;Ljava/util/Set;Ljava/util/List;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;DLjava/lang/String;FFLjava/lang/String;FLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;Ljava/util/Map;Ljava/util/Map;Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAction ()Ljava/lang/String;
+	public final fun getActionData ()Ljava/util/Map;
+	public final fun getActionTrigger ()Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public final fun getAnimations ()Ljava/util/Set;
+	public final fun getClickSound ()Ljava/lang/String;
+	public final fun getClickSoundPitch ()F
+	public final fun getDialogLines ()Ljava/util/List;
+	public final fun getDialogRange ()D
+	public final fun getDialogSelection ()Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+	public final fun getDialogSound ()Ljava/lang/String;
+	public final fun getDialogSoundPitch ()F
+	public final fun getDialogSoundVolume ()F
+	public final fun getDialogTrigger ()Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public final fun getEquipment ()Ljava/util/Map;
+	public final fun getHologram ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getLookClose ()Z
+	public final fun getLookCloseRange ()D
+	public final fun getMovement ()Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getNameVisible ()Z
+	public final fun getPose ()Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public final fun getPosition ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun getSkin ()Ljava/lang/String;
+	public final fun getSkinLayers ()B
+	public final fun getTraits ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcDialogSelection : java/lang/Enum {
+	public static final field ALL Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection$Companion;
+	public static final field RANDOM Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcDialogSelection$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDialogSelection;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcDialogTrigger : java/lang/Enum {
+	public static final field BOTH Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public static final field CLICK Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger$Companion;
+	public static final field PROXIMITY Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getOnClick ()Z
+	public final fun getOnProximity ()Z
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcDialogTrigger$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDialogTrigger;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcHooks {
+	public fun <init> ()V
+	public final fun getCanSee ()Lkotlin/jvm/functions/Function2;
+	public final fun getMusicPlaying ()Lkotlin/jvm/functions/Function2;
+	public final fun getRegionContains ()Lkotlin/jvm/functions/Function2;
+	public final fun getRegionKeys ()Lkotlin/jvm/functions/Function0;
+	public final fun getSeatLocation ()Lkotlin/jvm/functions/Function1;
+	public final fun isBedrock ()Lkotlin/jvm/functions/Function1;
+	public final fun setBedrock (Lkotlin/jvm/functions/Function1;)V
+	public final fun setCanSee (Lkotlin/jvm/functions/Function2;)V
+	public final fun setMusicPlaying (Lkotlin/jvm/functions/Function2;)V
+	public final fun setRegionContains (Lkotlin/jvm/functions/Function2;)V
+	public final fun setRegionKeys (Lkotlin/jvm/functions/Function0;)V
+	public final fun setSeatLocation (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcMovementMode : java/lang/Enum {
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcMovementMode$Companion;
+	public static final field DANCING Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field OFF Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field PATH_CIRCLE Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field PATH_PINGPONG Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field RANDOM Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field RANDOM_RETURN Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static final field ROAMING Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getUsesWaypoints ()Z
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcMovementMode$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcMovementSettings {
+	public fun <init> ()V
+	public fun <init> (Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;DIDLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcStepMode;ZLjava/lang/Double;Ljava/util/List;)V
+	public synthetic fun <init> (Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;DIDLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcStepMode;ZLjava/lang/Double;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public final fun component2 ()D
+	public final fun component3 ()I
+	public final fun component4 ()D
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public final fun component7 ()Z
+	public final fun component8 ()Ljava/lang/Double;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;DIDLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcStepMode;ZLjava/lang/Double;Ljava/util/List;)Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;DIDLjava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcStepMode;ZLjava/lang/Double;Ljava/util/List;ILjava/lang/Object;)Lcc/modlabs/kpaper/npc/managed/NpcMovementSettings;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDanceToMusicRadius ()Ljava/lang/Double;
+	public final fun getMode ()Lcc/modlabs/kpaper/npc/managed/NpcMovementMode;
+	public final fun getOnlyWhenUnwatched ()Z
+	public final fun getRoamingRadius ()D
+	public final fun getRoamingRegionId ()Ljava/lang/String;
+	public final fun getSpeed ()D
+	public final fun getStepMode ()Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public final fun getWaitTicks ()I
+	public final fun getWaypoints ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcPose : java/lang/Enum {
+	public static final field CRAWLING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field CROUCHING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcPose$Companion;
+	public static final field DYING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field FALL_FLYING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field LYING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field SITTING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static final field STANDING Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public final fun getAliases ()[Ljava/lang/String;
+	public final fun getEntityPose ()Lcom/github/retrooper/packetevents/protocol/entity/pose/EntityPose;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcPose;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcPose;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcPose$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcPose;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcService : org/bukkit/event/Listener {
+	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;)V
+	public synthetic fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun actionKeys ()Ljava/util/List;
+	public final fun addDialogLine (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun addWaypoint (Ljava/lang/String;Ljava/lang/String;Lorg/bukkit/Location;I)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public static synthetic fun addWaypoint$default (Lcc/modlabs/kpaper/npc/managed/NpcService;Ljava/lang/String;Ljava/lang/String;Lorg/bukkit/Location;IILjava/lang/Object;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun all ()Ljava/util/List;
+	public final fun create (Ljava/lang/String;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun delete (Ljava/lang/String;)Z
+	public final fun get (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun getHooks ()Lcc/modlabs/kpaper/npc/managed/NpcHooks;
+	public final fun getSkins ()Lcc/modlabs/kpaper/skins/SkinLibraryService;
+	public final fun ids ()Ljava/util/List;
+	public final fun location (Ljava/lang/String;)Lorg/bukkit/Location;
+	public final fun onQuit (Lorg/bukkit/event/player/PlayerQuitEvent;)V
+	public final fun onWorldLoad (Lorg/bukkit/event/world/WorldLoadEvent;)V
+	public final fun onWorldUnload (Lorg/bukkit/event/world/WorldUnloadEvent;)V
+	public final fun put (Lcc/modlabs/kpaper/npc/managed/NpcDefinition;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun refreshSkins ()V
+	public final fun registerAction (Ljava/lang/String;Lkotlin/jvm/functions/Function3;)V
+	public final fun registerTrait (Ljava/lang/String;)V
+	public final fun registeredTraits ()Ljava/util/List;
+	public final fun reload ()V
+	public final fun setEquipment (Ljava/lang/String;Lorg/bukkit/inventory/EquipmentSlot;Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun setHome (Ljava/lang/String;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun setName (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun setSkin (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun setSkinLayer (Ljava/lang/String;Ljava/lang/String;Z)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun start ()V
+	public final fun stop ()V
+	public final fun unregisterAction (Ljava/lang/String;)V
+	public final fun update (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcStepMode : java/lang/Enum {
+	public static final field Companion Lcc/modlabs/kpaper/npc/managed/NpcStepMode$Companion;
+	public static final field FULL_BLOCKS Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public static final field NONE Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public static final field STAIRS_SLABS Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+	public static fun values ()[Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcStepMode$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcStepMode;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/NpcWaypoint {
+	public fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;I)V
+	public synthetic fun <init> (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun component3 ()I
+	public final fun copy (Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;I)Lcc/modlabs/kpaper/npc/managed/NpcWaypoint;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/npc/managed/NpcWaypoint;Ljava/lang/String;Lcc/modlabs/klassicx/tools/minecraft/StringLocation;IILjava/lang/Object;)Lcc/modlabs/kpaper/npc/managed/NpcWaypoint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLocation ()Lorg/bukkit/Location;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPosition ()Lcc/modlabs/klassicx/tools/minecraft/StringLocation;
+	public final fun getWeight ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/npc/managed/PacketNpcRenderer : org/bukkit/event/Listener {
+	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lcc/modlabs/kpaper/npc/managed/NpcHooks;)V
+	public final fun headLook (Ljava/lang/String;F)V
+	public final fun headPitch (Ljava/lang/String;F)V
+	public final fun location (Ljava/lang/String;)Lorg/bukkit/Location;
+	public final fun move (Ljava/lang/String;Lorg/bukkit/Location;Z)V
+	public final fun onJoin (Lorg/bukkit/event/player/PlayerJoinEvent;)V
+	public final fun onQuit (Lorg/bukkit/event/player/PlayerQuitEvent;)V
+	public final fun onRespawn (Lorg/bukkit/event/player/PlayerRespawnEvent;)V
+	public final fun onWorldChange (Lorg/bukkit/event/player/PlayerChangedWorldEvent;)V
+	public final fun pose (Ljava/lang/String;Lcc/modlabs/kpaper/npc/managed/NpcPose;)V
+	public final fun put (Lcc/modlabs/kpaper/npc/managed/NpcDefinition;Lcc/modlabs/kpaper/skins/SkinEntry;)V
+	public final fun remove (Ljava/lang/String;)V
+	public final fun start ()V
+	public final fun stop ()V
+	public final fun swing (Ljava/lang/String;Z)V
+}
+
 public final class cc/modlabs/kpaper/packets/PacketInterceptor {
 	public static final field INSTANCE Lcc/modlabs/kpaper/packets/PacketInterceptor;
 	public final fun registerPacketCallback (Ljava/lang/Class;Lkotlin/jvm/functions/Function2;)I
@@ -2052,6 +2350,94 @@ public final class cc/modlabs/kpaper/scoreboard/SimpleScoreboard {
 	public final fun build ()V
 	public final fun reset ()V
 	public final fun send ([Lorg/bukkit/entity/Player;)V
+}
+
+public final class cc/modlabs/kpaper/skins/SkinCommand : cc/modlabs/kpaper/command/CommandBuilder {
+	public static final field Companion Lcc/modlabs/kpaper/skins/SkinCommand$Companion;
+	public static final field PERMISSION Ljava/lang/String;
+	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lkotlin/jvm/functions/Function0;)V
+	public fun getAliases ()Ljava/util/List;
+	public fun getDescription ()Ljava/lang/String;
+	public fun register ()Lcom/mojang/brigadier/tree/LiteralCommandNode;
+}
+
+public final class cc/modlabs/kpaper/skins/SkinCommand$Companion {
+}
+
+public final class cc/modlabs/kpaper/skins/SkinEntry {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/skins/SkinSource;Ljava/lang/String;Ljava/lang/String;J)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/skins/SkinSource;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Lcc/modlabs/kpaper/skins/SkinSource;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/skins/SkinSource;Ljava/lang/String;Ljava/lang/String;J)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public static synthetic fun copy$default (Lcc/modlabs/kpaper/skins/SkinEntry;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcc/modlabs/kpaper/skins/SkinSource;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCreatedAt ()J
+	public final fun getDisplayName ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getMineSkinId ()Ljava/lang/String;
+	public final fun getPlayerName ()Ljava/lang/String;
+	public final fun getSignature ()Ljava/lang/String;
+	public final fun getSource ()Lcc/modlabs/kpaper/skins/SkinSource;
+	public final fun getTexture ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class cc/modlabs/kpaper/skins/SkinLibraryService {
+	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;)V
+	public final fun all ()Ljava/util/List;
+	public final fun close ()V
+	public final fun findMineSkin (Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun get (Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun getOrImportMineSkin (Ljava/lang/String;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public static synthetic fun getOrImportMineSkin$default (Lcc/modlabs/kpaper/skins/SkinLibraryService;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/concurrent/CompletableFuture;
+	public final fun importMineSkin (Ljava/lang/String;Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public final fun importMineSkinData (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun importPlayerSkin (Ljava/lang/String;)Ljava/util/concurrent/CompletableFuture;
+	public final fun keys ()Ljava/util/List;
+	public final fun put (Lcc/modlabs/kpaper/skins/SkinEntry;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun reload ()V
+	public final fun rememberPlayerProfile (Ljava/lang/String;Lcom/destroystokyo/paper/profile/PlayerProfile;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun rememberTexture (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public static synthetic fun rememberTexture$default (Lcc/modlabs/kpaper/skins/SkinLibraryService;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun rename (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun renameId (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun resolve (Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinEntry;
+	public final fun start ()V
+}
+
+public final class cc/modlabs/kpaper/skins/SkinProfiles {
+	public static final field INSTANCE Lcc/modlabs/kpaper/skins/SkinProfiles;
+	public final fun apply (Lcom/destroystokyo/paper/profile/PlayerProfile;Lcc/modlabs/kpaper/skins/SkinEntry;)Lcom/destroystokyo/paper/profile/PlayerProfile;
+	public final fun apply (Lcom/destroystokyo/paper/profile/PlayerProfile;Ljava/lang/String;Ljava/lang/String;)Lcom/destroystokyo/paper/profile/PlayerProfile;
+	public final fun create (Lcc/modlabs/kpaper/skins/SkinEntry;Ljava/lang/String;)Lcom/destroystokyo/paper/profile/PlayerProfile;
+	public static synthetic fun create$default (Lcc/modlabs/kpaper/skins/SkinProfiles;Lcc/modlabs/kpaper/skins/SkinEntry;Ljava/lang/String;ILjava/lang/Object;)Lcom/destroystokyo/paper/profile/PlayerProfile;
+	public final fun fromProfile (Ljava/lang/String;Ljava/lang/String;Lcom/destroystokyo/paper/profile/PlayerProfile;)Lcc/modlabs/kpaper/skins/SkinEntry;
+}
+
+public final class cc/modlabs/kpaper/skins/SkinSource : java/lang/Enum {
+	public static final field BUNDLED Lcc/modlabs/kpaper/skins/SkinSource;
+	public static final field Companion Lcc/modlabs/kpaper/skins/SkinSource$Companion;
+	public static final field LEGACY Lcc/modlabs/kpaper/skins/SkinSource;
+	public static final field LIBRARY Lcc/modlabs/kpaper/skins/SkinSource;
+	public static final field MINESKIN Lcc/modlabs/kpaper/skins/SkinSource;
+	public static final field PLAYER Lcc/modlabs/kpaper/skins/SkinSource;
+	public static final field TEXTURE Lcc/modlabs/kpaper/skins/SkinSource;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinSource;
+	public static fun values ()[Lcc/modlabs/kpaper/skins/SkinSource;
+}
+
+public final class cc/modlabs/kpaper/skins/SkinSource$Companion {
+	public final fun from (Ljava/lang/String;)Lcc/modlabs/kpaper/skins/SkinSource;
 }
 
 public final class cc/modlabs/kpaper/ticks/TickService : org/bukkit/event/Listener {
