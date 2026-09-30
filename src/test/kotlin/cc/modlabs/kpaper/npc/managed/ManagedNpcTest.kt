@@ -105,6 +105,99 @@ class ManagedNpcTest {
         assertTrue(service.ids().isEmpty())
     }
 
+    @Test fun `externally persisted NPCs never read or overwrite the project file`() {
+        mockkStatic(Bukkit::class)
+        mockkObject(PacketEventsSupport)
+        mockkConstructor(PacketNpcRenderer::class, NpcMovementController::class)
+        every { Bukkit.isPrimaryThread() } returns true
+        every { Bukkit.getWorld(any<String>()) } returns null
+        every { Bukkit.getPluginManager() } returns mockk(relaxed = true)
+        every { PacketEventsSupport.isActive() } returns true
+        every { anyConstructed<PacketNpcRenderer>().start() } just Runs
+        every { anyConstructed<PacketNpcRenderer>().stop() } just Runs
+        every { anyConstructed<PacketNpcRenderer>().remove(any()) } just Runs
+        every { anyConstructed<PacketNpcRenderer>().location(any()) } returns null
+        every { anyConstructed<NpcMovementController>().start(any()) } just Runs
+        every { anyConstructed<NpcMovementController>().stop() } just Runs
+        every { anyConstructed<NpcMovementController>().remove(any()) } just Runs
+        val file = directory.resolve("npcs.yml").toFile().apply { writeText("project-owned: [\n") }
+        val service = NpcService(plugin(), mockk(relaxed = true), persistDefinitions = false)
+        service.start()
+        val guide = NpcDefinition("guide", point(), action = "project:guide")
+        service.registerAction("project:guide") { _, _, _ -> true }
+        service.replaceAll(listOf(guide))
+        assertThrows(IllegalArgumentException::class.java) { service.replaceAll(listOf(guide, guide)) }
+        assertEquals(guide, service.get("guide"))
+        assertEquals(listOf("project:guide"), service.actionKeys())
+        service.put(guide.copy(name = "Changed"))
+        assertTrue(service.delete("guide"))
+        assertThrows(IllegalStateException::class.java) { service.reload() }
+        assertEquals("project-owned: [\n", file.readText())
+        service.stop()
+    }
+
+    @Test fun `holograms preserve long names and multiline project labels`() {
+        val npc = NpcDefinition("guide", point(), name = "A long VoidRooms guard name",
+            hologram = "A long VoidRooms guard name\nM.E.G. Guard")
+        assertEquals("A long VoidRooms guard name", npc.name)
+        NpcStorage(plugin()).save(listOf(npc))
+        assertEquals(npc, NpcStorage(plugin()).load().single())
+        assertThrows(IllegalArgumentException::class.java) { npc.copy(hologram = "bad\u0000label") }
+        assertThrows(IllegalArgumentException::class.java) { npc.copy(hologram = "x".repeat(4097)) }
+        assertThrows(IllegalArgumentException::class.java) { npc.copy(hologram = null) }
+    }
+
+    @Test fun `seated body keeps its authored chair rotation independently of head look`() {
+        val authored = NpcRotation(90f, 0f)
+        val looking = NpcRotation(-45f, 20f)
+        assertEquals(authored, npcBodyRotation(NpcPose.SITTING, authored, looking))
+        assertEquals(looking, npcBodyRotation(NpcPose.STANDING, authored, looking))
+    }
+
+    @Test fun `moving an NPC to its unchanged home resets its current walking position`() {
+        mockkStatic(Bukkit::class)
+        mockkObject(PacketEventsSupport)
+        mockkConstructor(PacketNpcRenderer::class, NpcMovementController::class)
+        val world = mockk<World>()
+        every { world.name } returns "missing_world"
+        every { world.uid } returns UUID(0, 1)
+        every { Bukkit.getWorld(any<String>()) } returns world
+        every { Bukkit.isPrimaryThread() } returns true
+        every { Bukkit.getPluginManager() } returns mockk(relaxed = true)
+        every { PacketEventsSupport.isActive() } returns true
+        val packet = PacketNpc(1, UUID(0, 2), npcProfile("guide", "Guide", null, "test"), world.uid,
+            0.0, 64.0, 0.0, 0f, 0f, false, 25.0, emptyMap(), false, 16.0, 127,
+            NpcPose.STANDING, true, null, null)
+        val prepared = mutableListOf<NpcDefinition>()
+        every { anyConstructed<PacketNpcRenderer>().prepare(capture(prepared), any()) } returns packet
+        every { anyConstructed<PacketNpcRenderer>().start() } just Runs
+        every { anyConstructed<PacketNpcRenderer>().stop() } just Runs
+        every { anyConstructed<PacketNpcRenderer>().put(any<String>(), any<PacketNpc>()) } just Runs
+        every { anyConstructed<PacketNpcRenderer>().location(any()) } returns Location(world, 99.0, 64.0, 0.0)
+        every { anyConstructed<NpcMovementController>().start(any()) } just Runs
+        every { anyConstructed<NpcMovementController>().stop() } just Runs
+        every { anyConstructed<NpcMovementController>().update(any(), any()) } just Runs
+        val service = NpcService(plugin(), mockk(relaxed = true), persistDefinitions = false)
+        service.start()
+        val original = NpcDefinition("guide", point())
+        service.put(original)
+        service.put(original.copy(name = "Changed"))
+        assertEquals(99.0, prepared.last().position.x)
+        service.setHome("guide", Location(world, original.position.x, original.position.y, original.position.z,
+            original.position.yaw, original.position.pitch))
+        assertEquals(original.position.x, prepared.last().position.x)
+        verify(exactly = 2) { anyConstructed<NpcMovementController>().update(any(), true) }
+        service.stop()
+    }
+
+    @Test fun `late furniture seat position and orientation trigger a single refresh`() {
+        val furniture = Location(null, 0.5, 64.5, 0.5, 90f, 0f)
+        assertTrue(needsNpcSeatRefresh(furniture, 0.5, 64.05, 0.5, 0f))
+        assertFalse(needsNpcSeatRefresh(furniture, 0.5, 64.5, 0.5, 90f))
+        assertTrue(needsNpcSeatRefresh(furniture, 0.5, 64.5, 0.5, 0f))
+        assertTrue(needsNpcSeatRefresh(furniture, 1.5, 64.5, 0.5, 90f))
+    }
+
     @Test fun `skin aliases imports and failed saves keep existing references intact`() {
         mockkStatic(Bukkit::class)
         every { Bukkit.isPrimaryThread() } returns true
@@ -141,6 +234,20 @@ class ManagedNpcTest {
         directory.resolve("skins.yml").toFile().writeText("skins: [\n")
         assertThrows(Exception::class.java) { library.reload() }
         assertEquals("signature", library.get("guard")?.signature)
+    }
+
+    @Test fun `multiple imported NPC textures retain distinct names and signatures`() {
+        mockkStatic(Bukkit::class)
+        every { Bukkit.isPrimaryThread() } returns true
+        val library = SkinLibraryService(plugin()).apply { start() }
+        val first = library.rememberTexture("texture-a", signature = "signed-a")
+        val second = library.rememberTexture("texture-b", signature = "signed-b")
+        val signedAgain = library.rememberTexture("texture-a", signature = "signed-new")
+        assertEquals(3, library.all().size)
+        assertEquals(3, library.all().map { it.displayName }.distinct().size)
+        assertEquals(first, library.rememberTexture("texture-a", signature = "signed-a"))
+        assertEquals("signed-b", second.signature)
+        assertEquals("signed-new", signedAgain.signature)
     }
 
     @Test fun `packet profiles are stable and isolated across plugins and skins`() {

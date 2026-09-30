@@ -74,6 +74,12 @@ internal fun npcLookRotation(
 internal fun npcTalkingRotation(rotation: NpcRotation, pitchOffset: Float) =
     rotation.copy(pitch = (rotation.pitch + pitchOffset).coerceIn(-90f, 90f))
 
+internal fun npcBodyRotation(pose: NpcPose, authored: NpcRotation, looking: NpcRotation) =
+    if (pose == NpcPose.SITTING) authored else looking
+
+internal fun needsNpcSeatRefresh(position: Location, x: Double, y: Double, z: Double, yaw: Float) =
+    position.x != x || position.y != y || position.z != z || position.yaw != yaw
+
 internal fun samePacketRotation(first: NpcRotation?, second: NpcRotation) =
     first != null && angleByte(first.yaw) == angleByte(second.yaw) && angleByte(first.pitch) == angleByte(second.pitch)
 

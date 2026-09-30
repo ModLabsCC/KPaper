@@ -118,8 +118,12 @@ class SkinLibraryService(private val plugin: JavaPlugin) {
     @Synchronized
     fun rememberTexture(texture: String, displayName: String = "Custom Head", signature: String? = null): SkinEntry {
         entries.values.firstOrNull { it.texture == texture && it.signature == signature }?.let { return it }
+        val baseName = validatedSkinDisplayName(displayName)
+        var name = baseName
+        var suffix = 2
+        while (entries.values.any { it.displayName.equals(name, true) }) name = "${baseName.take(80)} ${suffix++}"
         return put(SkinEntry(uniqueId("texture_${sha256(texture).take(16)}"), texture, signature,
-            validatedSkinDisplayName(displayName), SkinSource.TEXTURE))
+            name, SkinSource.TEXTURE))
     }
 
     private fun uniqueId(name: String): String {

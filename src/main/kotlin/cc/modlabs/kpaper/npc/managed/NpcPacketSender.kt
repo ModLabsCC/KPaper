@@ -97,10 +97,11 @@ internal class NpcPacketSender(private val plugin: JavaPlugin, private val hooks
 
     fun teleport(player: Player, npc: PacketNpc, rotation: NpcRotation) {
         val manager = PacketEvents.getAPI().playerManager
+        val body = npcBodyRotation(npc.pose, NpcRotation(npc.yaw, npc.pitch), rotation)
         manager.sendPacket(
             player,
             WrapperPlayServerEntityTeleport(
-                npc.entityId, Vector3d(npc.x, npc.y, npc.z), rotation.yaw, rotation.pitch, true,
+                npc.entityId, Vector3d(npc.x, npc.y, npc.z), body.yaw, body.pitch, true,
             ),
         )
         npc.seat?.let {
@@ -131,14 +132,15 @@ internal class NpcPacketSender(private val plugin: JavaPlugin, private val hooks
 
     fun rotation(player: Player, npc: PacketNpc, rotation: NpcRotation, pitchOffset: Float) {
         val displayed = npcTalkingRotation(rotation, pitchOffset)
+        val body = npcBodyRotation(npc.pose, NpcRotation(npc.yaw, npc.pitch), displayed)
         val manager = PacketEvents.getAPI().playerManager
-        manager.sendPacket(player, WrapperPlayServerEntityRotation(npc.entityId, displayed.yaw, displayed.pitch, true))
+        manager.sendPacket(player, WrapperPlayServerEntityRotation(npc.entityId, body.yaw, body.pitch, true))
         manager.sendPacket(player, WrapperPlayServerEntityHeadLook(npc.entityId, displayed.yaw))
     }
 
     fun moveLabel(player: Player, npc: PacketNpc) {
         npc.hologram?.let { display ->
-            display.setPos(npc.x, npc.y + npcLabelHeight(npc.pose), npc.z)
+            display.setPos(npc.seat?.x ?: npc.x, (npc.seat?.y ?: npc.y) + hooks.hologramHeight(npc.pose), npc.seat?.z ?: npc.z)
             PacketEvents.getAPI().playerManager.sendPacket(player,
                 WrapperPlayServerEntityTeleport(display.id, Vector3d(display.x, display.y, display.z), 0f, 0f, true))
         }

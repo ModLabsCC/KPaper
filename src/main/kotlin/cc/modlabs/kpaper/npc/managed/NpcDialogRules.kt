@@ -60,6 +60,14 @@ internal fun validatedNpcDialogLine(value: String): String {
 
 internal fun appendedNpcDialogLines(lines: List<String>, value: String) = lines + validatedNpcDialogLine(value)
 
+internal fun validatedNpcLabel(value: String): String = value.also {
+    require(it.length <= 4096 && it.none { character -> character.isISOControl() && character != '\n' }) {
+        "Invalid NPC label"
+    }
+    val plain = PlainTextComponentSerializer.plainText().serialize(npcDialogComponent(it))
+    require(plain.isNotBlank() && plain.length <= 2048) { "NPC labels contain 1-2048 visible characters" }
+}
+
 internal fun validatedNpcDialogSound(value: String): String =
     NamespacedKey.fromString(value.trim())?.asString() ?: error("Ungültiger Sound-Key '$value'.")
 

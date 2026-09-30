@@ -8,11 +8,11 @@ import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 
 /** Unlike loadConfiguration, malformed input throws instead of becoming an empty file. */
-internal fun readYaml(file: File) = YamlConfiguration().apply {
+fun readYaml(file: File) = YamlConfiguration().apply {
     if (file.exists()) load(file)
 }
 
-internal fun YamlConfiguration.saveAtomically(file: File) {
+fun YamlConfiguration.saveAtomically(file: File) {
     val target = file.toPath().toAbsolutePath()
     Files.createDirectories(target.parent)
     val temporary = Files.createTempFile(target.parent, target.fileName.toString(), ".tmp")

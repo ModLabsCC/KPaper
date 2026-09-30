@@ -93,6 +93,16 @@ internal class NpcVisibilityRuntime(
     }
 
     fun sync() {
+        // A furniture seat may become available after its chunk loads.
+        rendered.forEach { (id, npc) ->
+            val seat = npc.seat ?: return@forEach
+            val authored = location(id) ?: return@forEach
+            if (!authored.world.isChunkLoaded(authored.blockX shr 4, authored.blockZ shr 4)) return@forEach
+            val position = npcSeatPosition(authored, hooks.seatLocation(authored))
+            if (needsNpcSeatRefresh(position, seat.x, seat.y, seat.z, seat.yRot)) {
+                move(id, npc, authored)
+            }
+        }
         // ponytail: O(players * NPCs) culling; use a chunk index when profiling warrants it.
         Bukkit.getOnlinePlayers().forEach { player ->
             val playerVisible = visible.getOrPut(player.uniqueId, ::hashSetOf)

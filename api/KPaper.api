@@ -454,6 +454,11 @@ public final class cc/modlabs/kpaper/extensions/WorldExtensionsKt {
 	public static final fun setSpawnLocation (Lorg/bukkit/World;Lorg/bukkit/block/Block;)Z
 }
 
+public final class cc/modlabs/kpaper/file/AtomicYamlKt {
+	public static final fun readYaml (Ljava/io/File;)Lorg/bukkit/configuration/file/YamlConfiguration;
+	public static final fun saveAtomically (Lorg/bukkit/configuration/file/YamlConfiguration;Ljava/io/File;)V
+}
+
 public class cc/modlabs/kpaper/file/BaseTempStorage {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
@@ -1970,6 +1975,8 @@ public final class cc/modlabs/kpaper/npc/managed/NpcDialogTrigger$Companion {
 public final class cc/modlabs/kpaper/npc/managed/NpcHooks {
 	public fun <init> ()V
 	public final fun getCanSee ()Lkotlin/jvm/functions/Function2;
+	public final fun getConfigureHologram ()Lkotlin/jvm/functions/Function1;
+	public final fun getHologramHeight ()Lkotlin/jvm/functions/Function1;
 	public final fun getMusicPlaying ()Lkotlin/jvm/functions/Function2;
 	public final fun getRegionContains ()Lkotlin/jvm/functions/Function2;
 	public final fun getRegionKeys ()Lkotlin/jvm/functions/Function0;
@@ -1977,6 +1984,8 @@ public final class cc/modlabs/kpaper/npc/managed/NpcHooks {
 	public final fun isBedrock ()Lkotlin/jvm/functions/Function1;
 	public final fun setBedrock (Lkotlin/jvm/functions/Function1;)V
 	public final fun setCanSee (Lkotlin/jvm/functions/Function2;)V
+	public final fun setConfigureHologram (Lkotlin/jvm/functions/Function1;)V
+	public final fun setHologramHeight (Lkotlin/jvm/functions/Function1;)V
 	public final fun setMusicPlaying (Lkotlin/jvm/functions/Function2;)V
 	public final fun setRegionContains (Lkotlin/jvm/functions/Function2;)V
 	public final fun setRegionKeys (Lkotlin/jvm/functions/Function0;)V
@@ -2056,6 +2065,8 @@ public final class cc/modlabs/kpaper/npc/managed/NpcPose$Companion {
 public final class cc/modlabs/kpaper/npc/managed/NpcService : org/bukkit/event/Listener {
 	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;)V
 	public synthetic fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;Z)V
+	public synthetic fun <init> (Lorg/bukkit/plugin/java/JavaPlugin;Lcc/modlabs/kpaper/skins/SkinLibraryService;Lcc/modlabs/kpaper/npc/managed/NpcHooks;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun actionKeys ()Ljava/util/List;
 	public final fun addDialogLine (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
 	public final fun addWaypoint (Ljava/lang/String;Ljava/lang/String;Lorg/bukkit/Location;I)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
@@ -2072,11 +2083,13 @@ public final class cc/modlabs/kpaper/npc/managed/NpcService : org/bukkit/event/L
 	public final fun onWorldLoad (Lorg/bukkit/event/world/WorldLoadEvent;)V
 	public final fun onWorldUnload (Lorg/bukkit/event/world/WorldUnloadEvent;)V
 	public final fun put (Lcc/modlabs/kpaper/npc/managed/NpcDefinition;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
+	public final fun put (Lcc/modlabs/kpaper/npc/managed/NpcDefinition;Z)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
 	public final fun refreshSkins ()V
 	public final fun registerAction (Ljava/lang/String;Lkotlin/jvm/functions/Function3;)V
 	public final fun registerTrait (Ljava/lang/String;)V
 	public final fun registeredTraits ()Ljava/util/List;
 	public final fun reload ()V
+	public final fun replaceAll (Ljava/util/Collection;)V
 	public final fun setEquipment (Ljava/lang/String;Lorg/bukkit/inventory/EquipmentSlot;Lorg/bukkit/inventory/ItemStack;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
 	public final fun setHome (Ljava/lang/String;Lorg/bukkit/Location;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;
 	public final fun setName (Ljava/lang/String;Ljava/lang/String;)Lcc/modlabs/kpaper/npc/managed/NpcDefinition;

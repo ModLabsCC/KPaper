@@ -22,7 +22,12 @@ class NpcService(
     private val plugin: JavaPlugin,
     val skins: SkinLibraryService,
     val hooks: NpcHooks = NpcHooks(),
+    /** False when the consuming plugin owns persistence (for example a database). */
+    private val persistDefinitions: Boolean,
 ) : Listener {
+    constructor(plugin: JavaPlugin, skins: SkinLibraryService, hooks: NpcHooks = NpcHooks()) :
+        this(plugin, skins, hooks, true)
+
     private val storage = NpcStorage(plugin)
     private var definitions = linkedMapOf<String, NpcDefinition>()
     private val actions = linkedMapOf<String, NpcAction>()
@@ -64,8 +69,18 @@ class NpcService(
 
     fun reload() {
         active()
-        val loaded = loadDefinitions()
+        check(persistDefinitions) { "Replace definitions from the consuming plugin's storage" }
+        replaceAll(loadDefinitions().values)
+    }
+
+    /** Validate and prepare the entire replacement before changing the active registry. */
+    fun replaceAll(npcs: Collection<NpcDefinition>) {
+        active()
+        val loaded = LinkedHashMap(npcs.map { it.snapshot() }.associateBy { it.id })
+        require(loaded.size == npcs.size) { "Duplicate NPC IDs" }
+        loaded.values.forEach { require(it.skin == null || skins.resolve(it.skin) != null) { "Unknown skin '${it.skin}'" } }
         val prepared = prepare(loaded.values)
+        save(loaded.values)
         interactions.clear()
         movement.stop()
         renderer.stop()
@@ -88,18 +103,20 @@ class NpcService(
     }
 
     /** Import/upsert a generic definition; no project schema is interpreted automatically. */
-    fun put(definition: NpcDefinition): NpcDefinition {
+    fun put(definition: NpcDefinition): NpcDefinition = put(definition, false)
+
+    fun put(definition: NpcDefinition, resetMovementPosition: Boolean): NpcDefinition {
         active()
         val next = definition.snapshot()
         require(next.skin == null || skins.resolve(next.skin) != null) { "Unknown skin '${next.skin}'" }
         val previous = definitions[next.id]
-        val resetPosition = previous?.position != next.position
+        val resetPosition = resetMovementPosition || previous?.position != next.position || previous?.movement?.roamingRegionId != next.movement.roamingRegionId
         val renderedDefinition = if (resetPosition) next else renderer.location(next.id)?.let {
             next.copy(position = it.toStringLocation())
         } ?: next
         val packetNpc = prepare(listOf(renderedDefinition))[next.id]
         val updated = LinkedHashMap(definitions + (next.id to next))
-        storage.save(updated.values)
+        save(updated.values)
         definitions = updated
         interactions.remove(next.id)
         if (packetNpc == null) { renderer.remove(next.id); movement.remove(next.id) }
@@ -122,7 +139,7 @@ class NpcService(
         val key = normalizedNpcId(id)
         if (key !in definitions) return false
         val updated = LinkedHashMap(definitions - key)
-        storage.save(updated.values)
+        save(updated.values)
         definitions = updated
         interactions.remove(key)
         movement.remove(key)
@@ -141,7 +158,8 @@ class NpcService(
         it.copy(skinLayers = updatedNpcSkinLayers(it.skinLayers, layer, enabled))
     }
     fun addDialogLine(id: String, line: String) = update(id) { it.copy(dialogLines = appendedNpcDialogLines(it.dialogLines, line)) }
-    fun setHome(id: String, location: Location) = update(id) { it.copy(position = location.toStringLocation()) }
+    fun setHome(id: String, location: Location) =
+        put(requireNotNull(get(id)) { "NPC '$id' not found" }.copy(position = location.toStringLocation()), true)
     fun addWaypoint(id: String, name: String, location: Location, weight: Int = 1) = update(id) {
         val point = NpcWaypoint(validatedNpcWaypointName(name), location.toStringLocation(), weight)
         it.copy(movement = it.movement.copy(waypoints = it.movement.waypoints.filterNot { old -> old.name == point.name } + point))
@@ -186,9 +204,13 @@ class NpcService(
     fun onQuit(event: PlayerQuitEvent) = interactions.quit(event.player.uniqueId)
 
     private fun loadDefinitions(): LinkedHashMap<String, NpcDefinition> {
-        val loaded = storage.load()
+        val loaded = if (persistDefinitions) storage.load() else emptyList()
         require(loaded.map { it.id }.distinct().size == loaded.size) { "Duplicate NPC IDs" }
         return LinkedHashMap(loaded.associateBy { it.id })
+    }
+
+    private fun save(npcs: Collection<NpcDefinition>) {
+        if (persistDefinitions) storage.save(npcs)
     }
 
     private fun prepare(npcs: Collection<NpcDefinition>): Map<String, PacketNpc> = npcs.mapNotNull { npc ->

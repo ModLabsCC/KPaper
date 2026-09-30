@@ -26,6 +26,14 @@ skin library, #18 action API, #13 proximity dialogue, #16 commands, #19 adapters
 Migration of live Bedrockia/VoidRooms storage and renderer ownership is a separate,
 explicit consumer change: never run both renderers for the same imported NPCs.
 
+Consumers with their own YAML schema or database can construct
+`NpcService(plugin, skins, hooks, persistDefinitions = false)`. This runtime never
+reads or writes `npcs.yml`; start it, then use `replaceAll(definitions)` to install
+the consumer's validated projection. `replaceAll` validates and prepares the
+replacement before changing the registry, and preserves registered actions.
+Reload records through the consumer's storage, rather than calling `reload()`.
+Stop this manually owned runtime before closing its skin library.
+
 ## Enable and use
 
 ```kotlin
@@ -107,6 +115,11 @@ optional `hologram` for a longer label. Dialogue/labels accept formatting tags
 without clickable command tags. Sitting uses a virtual mount; labels have
 pose-specific heights. Java profile entries are removed after skin loading;
 Bedrock viewers keep their entries when the `isBedrock` hook identifies them.
+
+Holograms accept bounded multiline text (up to 2048 visible characters) and allow
+longer display names; their hidden packet profile uses the NPC ID. The
+`configureHologram` hook can set a project's label scale, width and background;
+`hologramHeight` provides its pose-specific height above the display position.
 
 ## Administration
 

@@ -11,6 +11,9 @@ class NpcHooks {
     var regionContains: (String, Location) -> Boolean = { _, _ -> false }
     var regionKeys: () -> Collection<String> = { emptyList() }
     var canSee: (Player, String) -> Boolean = { _, _ -> true }
+    /** Customize project label scale, width and other display properties before spawning. */
+    var configureHologram: (org.bukkit.entity.TextDisplay) -> Unit = {}
+    var hologramHeight: (NpcPose) -> Double = ::npcLabelHeight
 }
 
 /** Return false to suppress the generic dialogue after handling a project interaction. */

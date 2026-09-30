@@ -9,7 +9,7 @@ import java.util.UUID
 
 internal class PacketNpcFactory(private val plugin: JavaPlugin, private val hooks: NpcHooks) {
     fun create(definition: NpcDefinition, skin: SkinEntry?): PacketNpc {
-        val profile = npcProfile(definition.id, definition.name, skin, plugin.name)
+        val profile = npcProfile(definition.id, if (definition.hologram == null) definition.name else definition.id.take(16), skin, plugin.name)
         val level = (definition.location.world as CraftWorld).handle
         val seatPosition = if (definition.pose == NpcPose.SITTING) {
             npcSeatPosition(definition.location, hooks.seatLocation(definition.location))
@@ -32,12 +32,14 @@ internal class PacketNpcFactory(private val plugin: JavaPlugin, private val hook
             net.minecraft.world.entity.Display.TextDisplay(EntityTypes.TEXT_DISPLAY, level).apply {
                 id = level.nextEntityId
                 uuid = UUID.randomUUID()
-                setPos(definition.location.x, definition.location.y + npcLabelHeight(definition.pose), definition.location.z)
+                val origin = seatPosition ?: definition.location
+                setPos(origin.x, origin.y + hooks.hologramHeight(definition.pose), origin.z)
                 (bukkitEntity as org.bukkit.entity.TextDisplay).apply {
                     text(npcDialogComponent(label))
                     billboard = org.bukkit.entity.Display.Billboard.CENTER
                     isShadowed = true
                     teleportDuration = 2
+                    hooks.configureHologram(this)
                 }
             }
         }

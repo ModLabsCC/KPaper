@@ -40,8 +40,11 @@ data class NpcDefinition(
 
     init {
         require(id == normalizedNpcId(id)) { "NPC ID must be normalized" }
-        validatedNpcName(name)
-        hologram?.let(::validatedNpcDialogLine)
+        if (hologram == null) validatedNpcName(name) else {
+            require(name.none(Char::isISOControl))
+            validatedNpcLabel(name)
+            validatedNpcLabel(hologram)
+        }
         validateNpcPosition(position)
         require(lookCloseRange in 1.0..32.0 && dialogRange in 1.0..16.0)
         require(equipment.keys.all { it in NPC_EQUIPMENT_SLOTS }) { "Unsupported equipment slot" }
